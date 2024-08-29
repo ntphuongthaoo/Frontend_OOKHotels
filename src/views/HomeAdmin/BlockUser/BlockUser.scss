@@ -1,0 +1,34 @@
+.containPage {
+    padding: 20px 30px;
+
+    .name-page {
+        margin-bottom: 30px;
+    }
+    
+    .user_active_list{
+        display: flex;
+	    flex-wrap: wrap;
+    }
+    .user-info {
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        padding: 10px;
+        margin: 10px;
+        width: 300px;
+    }
+
+    .blockbutton {
+        margin-right: 20px;
+        background-color: #ff4d4f; 
+        border-color: #b71c1c; 
+        border-radius: 10px;
+        color: #fff; 
+        &:hover {
+            background-color: #ff7875;
+            border-color: #ff7875;
+        }
+    }
+  
+   
+  }
+  

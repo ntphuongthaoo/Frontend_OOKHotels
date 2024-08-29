@@ -1,0 +1,184 @@
+.containPage {
+    padding: 20px 30px;
+  }
+  
+  .loginForm {
+    background-image: url(https://png.pngtree.com/thumb_back/fw800/background/20230516/pngtree-eight-beautiful-holy-book-images-of-the-bible-image_2572084.jpg);
+    margin-top: 40px;
+    border: none;
+    box-shadow: 0px 20px 20px rgba(0, 0, 0, 0.69);
+    border-radius: 10px;
+  }
+  
+  .logo {
+    margin-bottom: 1rem;
+  
+    img {
+        width: 50px;
+    }
+  
+    .titleWeb {
+        transition: opacity 0.3s ease-in-out;
+        position: absolute;
+        font-size: 34px;
+        transform: translateY(2px);
+        font-weight: bold;
+    }
+  }
+  
+  .desLogin {
+    font-weight: bold;
+    color: #e6e6e6;
+  }
+  
+  .group {
+    display: grid;
+    grid-template-columns: 30px auto;
+    background-color: #333333;
+    border-radius: 10px;
+    color: #ffffff;
+    margin: 20px 0;
+  
+    label {
+        height: 100%;
+        position: relative;
+  
+        .iconForm {
+            display: flex;
+            padding: 5px 10px;
+            position: absolute;
+            transform: translateY(5px);
+        }
+    }
+  
+    .groupInput {
+        border: none;
+        outline: none;
+        padding: 5px;
+        background-color: transparent;
+        color: #ffffff;
+  
+        &::placeholder {
+            color: #ffffffad;
+        }
+    }
+  }
+  
+  .group2 {
+    display: grid;
+    grid-template-columns: 30px auto 30px;
+    background-color: #333333;
+    border-radius: 10px;
+    color: #ffffff;
+    margin: 20px 0;
+  
+    label {
+        height: 100%;
+        position: relative;
+  
+        .iconForm {
+            display: flex;
+            padding: 5px 10px;
+            position: absolute;
+            transform: translateY(5px);
+        }
+    }
+  
+    .groupInput {
+        border: none;
+        outline: none;
+        padding: 5px;
+        background-color: transparent;
+        color: #ffffff;
+  
+        &::placeholder {
+            color: #ffffffad;
+        }
+    }
+  
+    .iconPassword {
+        margin-top: 5px;
+        &:hover {
+            cursor: pointer;
+        }
+    }
+  }
+  
+  .btnPay {
+    background-image: linear-gradient(to right, #380036, #0CBABA);
+    margin: 10px 0px;
+    padding: 8px;
+    text-align: center;
+    transition: 0.5s;
+    background-size: 200% auto;
+    color: white;
+    box-shadow: 0 0 20px #000000;
+    border-radius: 10px;
+    display: block;
+    font-size: 18px;
+    width: 100%;
+  
+    &:hover {
+        background-position: right center;
+        color: #ffffff;
+        text-decoration: none;
+    }
+  }
+  
+  .imageLogin {
+    max-width: 350px;
+    height: auto;
+    width: 100%;
+    display: flex;
+    margin: auto;
+  }
+  
+  .wrapper {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    justify-content: center;
+    // background-color: #5050b2;
+    border-radius: 100% 0 100% 0;
+    // background: linear-gradient(to left, #96c93d, #00b09b);
+    color: #fff;
+    padding: 0 30px;
+    text-align: center;
+  
+    .title {
+        font-size: 1.5rem;
+        font-weight: 700;
+    }
+  
+    p {
+        margin-top: 12px;
+        font-size: 1rem;
+        font-weight: 500;
+    }
+  
+    .btn-login {
+        margin-top: 4px;
+        padding: 8px 28px;
+        border: 1px solid #fff;
+        background-image: linear-gradient(to right, #380036, #0CBABA);
+        text-transform: uppercase;
+        border-radius: 8px;
+        font-weight: 600;
+  
+        &:hover {
+          background-position: right center;
+          color: #ffffff;
+          text-decoration: none;
+        }
+    }
+  }
+  .selectGroup {
+    background-color: transparent;
+    padding: 7px;
+    border: none;
+    outline: none;
+    option{
+      background-color: #000;
+    }
+  }

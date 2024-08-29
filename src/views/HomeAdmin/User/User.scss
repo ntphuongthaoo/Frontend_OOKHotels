@@ -1,0 +1,138 @@
+.containPage {
+  padding: 20px 40px;
+  background-color: #f0f2f5;
+  text-align: center;
+}
+
+.containPage h2 {
+  text-align: center;
+  font-size: 24px;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 20px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border-bottom: 2px solid #2e3a59;
+  padding-bottom: 5px;
+}
+
+.containPage .header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.containPage .search-bar {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  max-width: 400px;
+  margin-bottom: 18px;
+}
+
+.container-1{
+  width: 300px;
+  vertical-align: middle;
+  white-space: nowrap;
+  position: relative;
+  margin-left: 20px;
+}
+
+.container-1 input#search{
+  width: 350px;
+  height: 40px;
+  background: #08947db8;
+  border: none;
+  font-size: 11pt;
+  float: left;
+  color: #63717f;
+  padding-left: 45px;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+
+  -webkit-transition: background .55s ease;
+  -moz-transition: background .55s ease;
+  -ms-transition: background .55s ease;
+  -o-transition: background .55s ease;
+  transition: background .55s ease;
+}
+
+// .containPage .inputSearch {
+//   padding: 7px 13px;
+//   margin-left: 20px;
+//   background-color: #ccc;
+//   border: none;
+//   outline: none;
+//   flex: 1;
+// }
+
+.container-1 input#search::-webkit-input-placeholder {
+  color: #65737e;
+}
+.container-1 input#search:-moz-placeholder { /* Firefox 18- */
+  color: #65737e;  
+}
+.container-1 input#search::-moz-placeholder {  /* Firefox 19+ */
+  color: #65737e;  
+}
+.container-1 input#search:-ms-input-placeholder {  
+  color: #65737e;  
+}
+
+.container-1 input#search:hover, .container-1 input#search:focus, .container-1 input#search:active{
+  outline:none;
+  background: #70c2b4b8;
+}
+
+.containPage .iconSearch {
+  position: absolute;
+  bottom: 7px;
+  left: 0px;
+  margin-left: 17px;
+  margin-top: 17px;
+  z-index: 1;
+  color: #4f5b66;
+  flex: 1;
+}
+
+.containPage .blockbutton {
+  margin-right: 20px;
+  background-color: #ff4d4f; 
+  border-color: #b71c1c; 
+  border-radius: 10px;
+  color: #fff; 
+}
+
+.containPage .blockbutton:hover {
+  background-color: #ff7875;
+  border-color: #ff7875;
+}
+
+.containPage .contentPage {
+  padding: 0px 20px 20px 20px;
+  border-radius: 10px;
+  background-color: #eae2e24a;
+}
+
+.containPage .no-results {
+  margin-top: 20px;
+  text-align: center;
+  color: #999;
+}
+
+
+:deep(.unblock-button) {
+  background-color: green !important; // Màu nền
+  color: white !important; // Màu chữ
+  border: none !important; // Bỏ viền
+  border-radius: 4px !important; // Bo góc
+  padding: 6px 12px !important; // Khoảng cách trong
+  font-size: 14px !important; // Kích thước chữ
+  cursor: pointer !important; // Con trỏ chuột
+  transition: background-color 0.3s !important; // Hiệu ứng chuyển màu
+
+  &:hover {
+    background-color: darkgreen !important; // Màu khi hover
+  }
+}

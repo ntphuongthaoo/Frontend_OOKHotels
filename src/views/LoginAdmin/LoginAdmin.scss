@@ -1,0 +1,131 @@
+.containPage {
+  padding: 20px 30px;
+}
+
+.loginForm {
+  background-image: linear-gradient(to right, #0CBABA, #380036);
+  margin-top: 40px;
+  border: none;
+  box-shadow: 0px 20px 20px #000000af;
+  border-radius: 10px;
+}
+
+.logo {
+  margin-bottom: 1rem;
+}
+.logo img {
+  width: 50px;
+}
+
+.titleWeb {
+  transition: opacity 0.3s ease-in-out;
+  position: absolute;
+  font-size: 34px;
+  transform: translateY(2px);
+  color: #00ffcc;
+  font-weight: bold;
+}
+
+.desLogin {
+  font-weight: bold;
+  color: #e6e6e6;
+}
+
+.group {
+  display: grid;
+  grid-template-columns: 30px auto;
+  background-color: #333333;
+  border-radius: 10px;
+  color: #ffffff;
+  margin: 20px 0;
+}
+
+.group label {
+  height: 100%;
+  position: relative;
+}
+
+.group .iconForm {
+  display: flex;
+  padding: 5px 10px;
+  position: absolute;
+  transform: translateY(5px);
+}
+
+.group .groupInput {
+  border: none;
+  outline: none;
+  padding: 5px;
+  background-color: transparent;
+  color: #ffffff;
+}
+
+.group .groupInput::placeholder {
+  color: #ffffffad;
+}
+
+.group2 {
+  display: grid;
+  grid-template-columns: 30px auto 30px;
+  background-color: #333333;
+  border-radius: 10px;
+  color: #ffffff;
+  margin: 20px 0;
+}
+
+.group2 .iconForm {
+  display: flex;
+  padding: 5px 10px;
+  position: absolute;
+  transform: translateY(5px);
+}
+
+.group2 .groupInput {
+  border: none;
+  outline: none;
+  padding: 5px;
+  background-color: transparent;
+  color: #ffffff;
+}
+
+.group2 .groupInput::placeholder {
+  color: #ffffffad;
+}
+
+.iconPassword {
+  margin-top: 5px;
+  &:hover {
+    cursor: pointer;
+  }
+}
+
+.btnPay {
+  background-color: #30b49a;
+  margin: 10px 0px;
+  padding: 8px;
+  text-align: center;
+  transition: 0.5s;
+  background-size: 200% auto;
+  color: white;
+  box-shadow: 0 0 20px #000000;
+  border-radius: 10px;
+  display: block;
+  font-size: 18px;
+  width: 100%;
+}
+
+.btnPay:hover {
+  background-position: right center;
+  color: #ffffff;
+  text-decoration: none;
+  background-color: #07f4c4;
+  
+}
+
+.imageLogin {
+  max-width: 350px;
+  height: auto;
+  width: 100%;
+  display: flex;
+  margin: auto;
+}

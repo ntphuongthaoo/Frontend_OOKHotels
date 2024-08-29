@@ -1,0 +1,206 @@
+aside {
+    display: flex;
+    flex-direction: column;
+    width: var(--sidebar-width);
+    overflow: hidden;
+    min-height: 100vh;
+    transition: 0.2s ease-in-out;
+    max-width: 270px;
+    width: 250px;
+    background-color: #2e3a59;
+  }
+  .sidebar {
+    position: fixed;
+    top: 65px;
+    bottom: 0;
+    left: 0;
+    width: var(--sidebar-width);
+    overflow: hidden;
+    transition: 0.2s ease-in-out;
+    max-width: 270px;
+    width: 250px;
+    background-color: #2e3a59;
+  }
+  
+  .menu {
+    background-color: #2e3a59;
+    margin-top: 0px;
+    list-style: none;
+    padding: 0;
+  }
+  
+  .menu-item {
+    display: flex;
+    flex-direction: column;
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    background-color: #37445c;
+    margin: 5px 10px;
+  }
+  
+  .menu-item > div {
+    display: flex;
+    align-items: center;
+  }
+  
+  .menu-item > div .material-icons {
+    font-size: 22px;
+    color: rgb(255, 255, 255);
+    transition: color 0.2s ease-in-out;
+    margin-right: 10px;
+  }
+  
+  .menu-item > div .text {
+    font-weight: bold;
+    font-size: 15px;
+    color: white;
+    margin-left: 10px;
+  }
+  
+  .text {
+    font-weight: bold;
+    font-size: 15px;
+    color: white;
+    margin-left: 10px;
+  }
+  
+  .menu-item:hover,
+  .menu-item.selected {
+    background-color: #43536e;
+    transform: scale(1.05);
+    color: #07f4c4;
+  }
+  
+  .menu-item:hover .material-icons,
+  .menu-item:hover .text {
+    color: #07f4c4;
+  }
+  .menu-item.selected .material-icons,
+  .menu-item.selected .text {
+    color: #07f4c4;
+  }
+  
+  .menu-item.router-link-exact-active,
+  .menu-item.ant-menu-submenu-selected,
+  .menu-item.ant-menu-item-selected {
+    background-color: #07f4c4;
+    border-right: 5px solid #2e3a59;
+  }
+  
+  .menu-item.router-link-exact-active .material-icons,
+  .menu-item.router-link-exact-active .text,
+  .menu-item.ant-menu-submenu-selected .material-icons,
+  .menu-item.ant-menu-submenu-selected .text,
+  .menu-item.ant-menu-item-selected .material-icons,
+  .menu-item.ant-menu-item-selected .text {
+    color: #2e3a59;
+  }
+  
+  .button {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    background-color: #37445c;
+    margin: 5px 10px;
+  }
+  
+  .button:hover {
+    background-color: #43536e;
+    transform: scale(1.05);
+  }
+  
+  .button:hover .material-icons,
+  .button:hover .text {
+    color: #07f4c4;
+  }
+  
+  .button .material-icons {
+    color: rgb(255, 255, 255);
+  }
+  
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .modal {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .modal h3 {
+    margin-top: 0;
+  }
+  
+  .modal button {
+    margin-right: 10px;
+    padding: 5px 10px;
+  }
+  
+  .slide-enter-active,
+  .slide-leave-active {
+    transition: all 0.3s ease;
+  }
+  
+  .slide-enter,
+  .slide-leave-to {
+    transform: translateY(-10px);
+    opacity: 0;
+  }
+  
+  .submenu-item {
+    padding-left: 20px;
+    color: white;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+  }
+  
+  .submenu-link {
+    display: block;
+    padding: 0.5rem 1rem;
+    text-decoration: none;
+    color: inherit;
+    border: 2px solid transparent;
+    background: none;
+    width: 100%;
+    text-align: left;
+    transition: background-color 0.3s ease, color 0.3s ease,
+      border-color 0.3s ease;
+  }
+  
+  .submenu-link:hover,
+  .submenu-item:hover .submenu-link {
+    background-color: #43536e;
+    color: #07f4c4;
+    border-color: #07f4c4;
+    transform: scale(1.05);
+  }
+  
+  .submenu-link.selected,
+  .submenu-item .submenu-link.selected {
+    background-color: #43536e;
+    color: #07f4c4;
+    border-color: #07f4c4;
+    transform: scale(1.05);
+  }
+  
+  .bottom-menu {
+    position: absolute;
+    bottom: 100px;
+    width: 100%;
+  }
