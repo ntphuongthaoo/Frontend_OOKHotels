@@ -32,11 +32,26 @@
     
     <div class="search-bar">
       <div class="search-fields">
-        <input type="text" placeholder="Nhập Khách sạn / Điểm đến" v-model="destination" />
-        <input type="date" v-model="checkInDate" />
-        <input type="date" v-model="checkOutDate" />
-        <input type="number" placeholder="Phòng" v-model="rooms" min="1" />
-        <input type="text" placeholder="Nhập mã khuyến mại/mã Voucher" v-model="voucherCode" />
+        <div class="search-field">
+          <label for="destination">Địa điểm bạn muốn đến là gì?</label>
+          <input id="destination" type="text" placeholder="Nhập Khách sạn / Điểm đến" v-model="destination" />
+        </div>
+        <div class="search-field">
+          <label for="checkInDate">Ngày nhận phòng</label>
+          <input id="checkInDate" type="date" v-model="checkInDate" />
+        </div>
+        <div class="search-field">
+          <label for="checkOutDate">Ngày trả phòng</label>
+          <input id="checkOutDate" type="date" v-model="checkOutDate" />
+        </div>
+        <div class="search-field">
+          <label for="rooms">Số phòng</label>
+          <input id="rooms" type="number" placeholder="Phòng" v-model="rooms" min="1" />
+        </div>
+        <div class="search-field">
+          <label for="voucherCode">Mã khuyến mãi</label>
+          <input id="voucherCode" type="text" placeholder="Nhập mã khuyến mại/mã Voucher" v-model="voucherCode" />
+        </div>
         <button class="search-btn" @click="searchRooms">Tìm kiếm</button>
       </div>
     </div>
@@ -139,9 +154,22 @@ export default {
 
 .search-fields {
   display: flex;
+  flex-wrap: wrap; /* Cho phép các trường nhập liệu xuống dòng nếu không đủ không gian */
   justify-content: space-between;
   align-items: center;
   gap: 10px;
+}
+
+.search-field {
+  flex: 1;
+  min-width: 150px; /* Đảm bảo các trường không quá nhỏ */
+}
+
+.search-field label {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 14px;
+  color: #333;
 }
 
 .search-fields input {
@@ -149,11 +177,19 @@ export default {
   border: 1px solid #ddd;
   border-radius: 5px;
   font-size: 16px;
-  width: 100%;
+  box-sizing: border-box; /* Đảm bảo padding không ảnh hưởng đến chiều rộng */
+}
+
+.search-fields input[type="text"] {
+  width: 200px;
 }
 
 .search-fields input[type="date"] {
-  width: auto;
+  width: 150px; /* Chiều rộng cho trường chọn ngày */
+}
+
+.search-fields input[type="number"] {
+  width: 100px; /* Chiều rộng cho trường nhập số phòng */
 }
 
 .search-btn {

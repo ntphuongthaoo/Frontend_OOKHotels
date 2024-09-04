@@ -34,7 +34,7 @@
       <nav class="navbar navbar-expand-lg navbar-light">
         <div class="container">
           <a class="navbar-brand logo" href="/trangchu">
-            <img src="../../assets/LogoOOK.png" alt="OOK Logo" />
+            <img src="../../assets/logo_ôk.png" alt="OOK Logo" />
           </a>
           <button class="navbar-toggler" type="button" aria-controls="navbarSupportedContent" aria-expanded="false"
           aria-label="Toggle navigation" @click="toggleNavbar">
@@ -42,7 +42,7 @@
           </button>
           <div :class="['collapse', 'navbar-collapse', { show: isNavbarOpen }]" id="navbarSupportedContent">
             <ul class="navbar-nav ml-auto">
-              <li class="nav-item active"><a class="nav-link" href="index.html">Home</a></li>
+              <li class="nav-item active"><a class="nav-link" href="/trangchu">Home</a></li>
               <li class="nav-item"><a class="nav-link" href="about-us.html">About</a></li>
               <li class="nav-item"><a class="nav-link" href="gallery.html">Gallery</a></li>
               <li class="nav-item dropdown">
@@ -61,6 +61,10 @@
               </li>
               <li class="nav-item"><a class="nav-link" href="contact.html">Contact</a></li>
             </ul>
+            <div class="auth-links">
+              <a class="btn auth-btn login-btn" href="/dangnhap">Đăng nhập</a>
+              <a class="btn auth-btn register-btn" href="/dangky">Đăng ký</a>
+            </div>
           </div>
         </div>
       </nav>
@@ -80,13 +84,14 @@ export default {
     toggleNavbar() {
       this.isNavbarOpen = !this.isNavbarOpen;
     }
+    
   }
 };
-</script>
+</script>ss
 
 <style lang="scss">
 header {
-  background-color: #ffffff;
+  background-color: #f8f1e7; // Nâu nhạt cho nền header
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   position: sticky;
   top: 0;
@@ -95,8 +100,14 @@ header {
   z-index: 1000;
   transition: background 0.4s ease-in-out;
 
+  .top-header.hidden {
+    opacity: 0;
+    transform: translateY(-100%);
+  }
+
   .top-header {
-    background-color: #f8f9fa;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    background-color: #BFAF9F; // Nâu trung bình cho phần top-header
     padding: 10px 20px;
     .container {
       display: flex;
@@ -115,7 +126,7 @@ header {
         padding: 0;
         li {
           a {
-            color: #777777;
+            color: #6d4c41; // Màu nâu đậm hơn cho text
             text-decoration: none;
           }
         }
@@ -131,11 +142,12 @@ header {
   }
 
   .separator {
-    border-top: 1px solid #dee2e6;
+    border-top: 1px solid #d9c7b8; // Nâu trung bình cho đường phân cách
+    margin-bottom: 0;
   }
 
   .main-menu {
-    background-color: #ffffff;
+    background-color: #d9c7b8; // Nâu đậm cho nền navbar
     .navbar {
       .container {
         display: flex;
@@ -153,7 +165,7 @@ header {
             display: block;
             width: 30px;
             height: 3px;
-            background-color: #333;
+            background-color: #ffffff; // Màu trắng cho biểu tượng hamburger
             position: relative;
             &:before,
             &:after {
@@ -161,7 +173,7 @@ header {
               display: block;
               width: 30px;
               height: 3px;
-              background-color: #333;
+              background-color: #ffffff; // Màu trắng cho biểu tượng hamburger
               position: absolute;
               left: 0;
               transition: transform 0.3s ease;
@@ -187,27 +199,68 @@ header {
             gap: 15px;
 
             .nav-link {
-              color: #333;
+              color: #ffffff; // Màu trắng cho text link
               transition: color 0.3s;
 
               &:hover {
-                color: #007bff;
+                color: #6d4c41; // Màu nâu đậm khi hover
               }
             }
 
             .dropdown-menu {
-              background-color: #ffffff;
-              border: 1px solid #e3e3e3;
+              background-color: #6d4c41; // Nâu đậm cho nền dropdown
+              border: 1px solid #d9c7b8; // Nâu trung bình cho viền dropdown
               box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
               .dropdown-item {
-                color: #333;
+                color: #ffffff; // Màu trắng cho text dropdown
                 transition: background-color 0.3s;
 
                 &:hover {
-                  background-color: #007bff;
+                  background-color: #d9c7b8; // Màu nâu trung bình khi hover
                 }
               }
             }
+          }
+        }
+
+        .auth-links {
+          display: flex;
+          align-items: center;
+          gap: 10px; /* Khoảng cách giữa các nút */
+          margin-left: auto; /* Đưa auth-links sang bên phải */
+
+          .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 4px;
+            text-align: center;
+            transition: background-color 0.3s, border-color 0.3s, color 0.3s;
+            border: 2px solid; // Màu viền thay đổi tùy theo loại nút
+            color: #ffffff; // Màu trắng cho text nút
+
+            &:hover {
+              background-color: #6d4c41; // Màu nâu đậm cho nền khi hover
+              color: #ffffff; // Màu trắng cho text khi hover
+              border-color: #6d4c41; // Màu nâu đậm cho viền khi hover
+            }
+          }
+
+          .login-btn {
+            border-color: #ffffff; // Màu trắng cho viền nút đăng nhập
+            background-color: transparent; // Nền trong suốt cho nút đăng nhập
+          }
+
+          .register-btn {
+            border-color: #d9c7b8; // Màu nâu trung bình cho viền nút đăng ký
+            background-color: #d9c7b8; // Màu nâu trung bình cho nền nút đăng ký
+            color: #3F0E00; // Màu nâu tối cho text nút đăng ký
+          }
+
+          .register-btn:hover {
+            background-color: #6d4c41; // Màu nâu đậm cho nền nút đăng ký khi hover
+            border-color: #6d4c41; // Màu nâu đậm cho viền nút đăng ký khi hover
           }
         }
       }
@@ -226,4 +279,7 @@ header {
   }
 }
 </style>
+
+
+
 

@@ -11,5 +11,10 @@ export default defineConfig({
       "@": fileURLToPath(new URL("./src", import.meta.url)),
     },
   },
+  server: {
+    watch: {
+      usePolling: true, // Bật polling nếu bạn đang gặp vấn đề với HMR
+    },
+  },
 })
 

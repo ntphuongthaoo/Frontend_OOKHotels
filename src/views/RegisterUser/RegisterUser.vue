@@ -1,209 +1,263 @@
 <template>
-  <section class="text-center">
-    <!-- Background image -->
-    <div class="p-5 bg-image" style="background-image: url('https://mdbootstrap.com/img/new/textures/full/171.jpg'); height: 300px;"></div>
-    <!-- Background image -->
+  <div class="signup-page">
+    <main>
+      <div class="container">
+        <div class="left-content">
+          <!-- Nội dung bên trái -->
+        </div>
+        <div class="right-content">
+          <form
+            @submit.prevent="handleSubmit"
+            v-if="!showOtpForm"
+            class="signup-form"
+          >
+            <h2>Đăng ký</h2>
 
-    <div class="card mx-4 mx-md-5 shadow-5-strong bg-body-tertiary" style="margin-top: -100px; backdrop-filter: blur(30px);">
-      <div class="card-body px-md-5">
-        <div class="row d-flex justify-content-center">
-          <div class="col-lg-8 col-md-10">
-            <h2 class="fw-bold mb-5">Đăng ký</h2>
-            <form @submit.prevent="handleSubmit">
+            <!-- Họ và tên -->
+            <div class="form-group">
+              <label for="FULLNAME">Họ và tên</label>
+              <input
+                type="text"
+                id="FULLNAME"
+                v-model="FULLNAME"
+                placeholder="Enter fullname"
+                required
+              />
+              <span v-if="errors.FULLNAME" class="error">{{
+                errors.FULLNAME
+              }}</span>
+            </div>
 
-              <!-- Họ và tên input -->
-              <div class="form-outline mb-4">
-                <input v-model="form.fullName" type="text" id="formFullName" class="form-control" />
-                <label class="form-label" for="formFullName">Họ và tên</label>
+            <!-- Email -->
+            <div class="form-group">
+              <label for="EMAIL">Email</label>
+              <input
+                type="email"
+                id="EMAIL"
+                v-model="EMAIL"
+                placeholder="Enter email address"
+                required
+              />
+              <span v-if="errors.EMAIL" class="error">{{ errors.EMAIL }}</span>
+            </div>
+
+            <!-- Số điện thoại -->
+            <div class="form-group">
+              <label for="PHONE_NUMBER">Số điện thoại</label>
+              <input
+                type="text"
+                id="PHONE_NUMBER"
+                v-model="PHONE_NUMBER"
+                placeholder="Enter phone number"
+                required
+              />
+              <span v-if="errors.PHONE_NUMBER" class="error">{{
+                errors.PHONE_NUMBER
+              }}</span>
+            </div>
+
+            <!-- Mật khẩu -->
+            <div class="form-group password-group">
+              <label for="PASSWORD">Mật khẩu</label>
+              <div class="password-container">
+                <input
+                  :type="showPassword ? 'text' : 'PASSWORD'"
+                  v-model="PASSWORD"
+                  id="PASSWORD"
+                  class="groupInput"
+                  placeholder="Nhập mật khẩu"
+                  required
+                />
+                <i
+                  :class="{
+                    'fas fa-eye': !showPassword,
+                    'fas fa-eye-slash': showPassword,
+                  }"
+                  @click="togglePasswordVisibility('PASSWORD')"
+                  class="password-toggle"
+                ></i>
               </div>
+              <span v-if="errors.PASSWORD" class="error">{{
+                errors.PASSWORD
+              }}</span>
+            </div>
 
-              <!-- Email input -->
-              <div class="form-outline mb-4">
-                <input v-model="form.email" type="email" id="formEmail" class="form-control" />
-                <label class="form-label" for="formEmail">Email</label>
+            <!-- Xác nhận mật khẩu -->
+            <div class="form-group password-group">
+              <label for="confirm-password">Xác nhận mật khẩu</label>
+              <div class="password-container">
+                <input
+                  :type="showConfirmPassword ? 'text' : 'PASSWORD'"
+                  id="confirm-password"
+                  v-model="confirmPassword"
+                  placeholder="Confirm your password"
+                  required
+                />
+                <i
+                  :class="{
+                    'fas fa-eye': !showConfirmPassword,
+                    'fas fa-eye-slash': showConfirmPassword,
+                  }"
+                  @click="togglePasswordVisibility('confirmPassword')"
+                  class="password-toggle"
+                ></i>
               </div>
+              <span v-if="errors.confirmPassword" class="error">{{
+                errors.confirmPassword
+              }}</span>
+            </div>
 
-              <!-- Số điện thoại input -->
-              <div class="form-outline mb-4">
-                <input v-model="form.phoneNumber" type="tel" id="formPhoneNumber" class="form-control" />
-                <label class="form-label" for="formPhoneNumber">Số điện thoại</label>
-              </div>
+            <!-- Điều khoản -->
+            <div class="form-group voucher">
+              <input type="checkbox" id="terms" v-model="agreedToTerms" />
+              <label for="terms">Nhận thông tin khuyến mãi</label>
+            </div>
 
-              <!-- Password input -->
-              <div class="form-outline mb-4">
-                <input v-model="form.password" type="password" id="formPassword" class="form-control" />
-                <label class="form-label" for="formPassword">Mật khẩu</label>
-              </div>
-              <div class="form-outline mb-4">
-                <input v-model="form.password" type="password" id="formPassword" class="form-control" />
-                <label class="form-label" for="formPassword">Xác nhận mật khẩu</label>
-              </div>
+            <button type="submit" class="signup-button" :disabled="loading">
+              <span v-if="!loading">Đăng ký</span>
+              <span v-else class="loading-spinner"></span>
+            </button>
+            <p class="login-link">
+              BẠN ĐÃ CÓ TÀI KHOẢN? <a href="/dangnhap">ĐĂNG NHẬP</a>
+            </p>
 
-              <!-- Giới tính input -->
-              <!-- <div class="ml-2 text-lg-start mb-4">
-                <label class="form-label">Giới tính</label>
-                <div class="d-flex justify-content-center">
-                  <div class="form-check me-3">
-                    <input v-model="form.gender" class="form-check-input" type="radio" value="Nam" id="genderMale" />
-                    <label class="form-check-label" for="genderMale">Nam</label>
-                  </div>
-                  <div class="form-check">
-                    <input v-model="form.gender" class="form-check-input" type="radio" value="Nữ" id="genderFemale" />
-                    <label class="form-check-label" for="genderFemale">Nữ</label>
-                  </div>
-                </div>
-              </div> -->
-
-              <div class="text-center mt-4 pt-2">
-                <button type="submit" class="btn btn-primary btn-block mb-4">
-                    Đăng ký
+            <div class="social-login">
+              <p>Hoặc đăng nhập với:</p>
+              <div class="social-buttons">
+                <button type="button" class="social-button facebook">
+                  <i class="fab fa-facebook-f"></i>
                 </button>
-                <p class="small fw-bold mt-2 pt-1 mb-0">Bạn đã có tài khoản? <a href="/dangnhap"
-                    class="link-danger">Đăng nhập</a></p>
+                <button type="button" class="social-button google">
+                  <i class="fab fa-google"></i>
+                </button>
+                <button type="button" class="social-button twitter">
+                  <i class="fab fa-twitter"></i>
+                </button>
+                <button type="button" class="social-button github">
+                  <i class="fab fa-github"></i>
+                </button>
               </div>
-            </form>
+            </div>
+          </form>
+          <div v-if="showOtpForm" class="otp-form">
+            <h2>Đăng ký thành công</h2>
+            <p>
+              Mã OTP đã được gửi đến địa chỉ email {{ EMAIL }}. Vui lòng kiểm
+              tra email để xác thực.
+            </p>
+            <div class="form-group">
+              <label for="otp">Nhập mã OTP</label>
+              <input
+                type="text"
+                id="otp"
+                v-model="otp"
+                placeholder="Nhập mã OTP"
+                required
+              />
+              <span v-if="otpErrors.otp" class="error">{{
+                otpErrors.otp
+              }}</span>
+            </div>
+            <button @click.prevent="verifyOtp" class="otp-button">
+              Xác thực
+            </button>
           </div>
         </div>
       </div>
-    </div>
-  </section>
+    </main>
+  </div>
 </template>
 
 <script>
+import axiosClient from "../../api/axiosClient"; // Import file cấu hình Axios
+
 export default {
   data() {
     return {
-      form: {
-        firstName: '',
-        lastName: '',
-        email: '',
-        password: '',
-        subscribe: false,
-      }
+      FULLNAME: "",
+      EMAIL: "",
+      PHONE_NUMBER: "",
+      PASSWORD: "",
+      confirmPassword: "",
+      agreedToTerms: false,
+      errors: {}, // Đối tượng lưu lỗi
+      showPassword: false, // Hiển thị mật khẩu
+      showConfirmPassword: false, // Hiển thị xác nhận mật khẩu
+      showOtpForm: false, // Hiển thị form nhập OTP sau khi đăng ký thành công
+      otp: "", // Biến lưu mã OTP nhập từ người dùng
+      otpErrors: {}, // Đối tượng lưu lỗi cho OTP
     };
   },
   methods: {
-    handleSubmit() {
-      // Handle form submission logic here
-      console.log('Form submitted:', this.form);
-      // You might want to make an API call here
-    }
-  }
+    async handleSubmit() {
+      this.errors = {}; // Reset lỗi trước khi gửi yêu cầu
+
+      // Kiểm tra mật khẩu và xác nhận mật khẩu
+      if (this.PASSWORD !== this.confirmPassword) {
+        this.errors.confirmPassword = "Mật khẩu không khớp!";
+        return;
+      }
+
+      try {
+        const response = await axiosClient.post("/users/registerUser", {
+          FULLNAME: this.FULLNAME,
+          EMAIL: this.EMAIL,
+          PHONE_NUMBER: this.PHONE_NUMBER,
+          PASSWORD: this.PASSWORD,
+        });
+
+        if (response.data.success) {
+          alert("Đăng ký người dùng thành công!")
+          this.showOtpForm = true; // Hiển thị form nhập OTP
+        } else if (response.data.errors) {
+          this.errors = response.data.errors; // Gán lỗi từ backend vào đối tượng errors
+        }
+      } catch (error) {
+        if (error.response && error.response.data.errors) {
+          this.errors = error.response.data.errors; // Cập nhật lỗi cho từng trường
+        } else {
+          console.error("Error registering user:", error);
+          alert("Đã xảy ra lỗi khi đăng ký!");
+        }
+      }
+    },
+
+    async verifyOtp() {
+      this.otpErrors = {}; // Reset lỗi trước khi gửi yêu cầu
+
+      try {
+        const response = await axiosClient.post("/users/verifyOTPAndActivateUser", {
+          email: this.EMAIL,
+          otp: this.otp,
+        });
+
+        if (response.data.success) {
+          alert("Xác thực thành công!");
+          this.$router.push('/dangnhap');
+        } else if (response.data.errors) {
+          this.otpErrors = response.data.errors; // Gán lỗi từ backend vào đối tượng otpErrors
+        }
+      } catch (error) {
+        if (error.response && error.response.data.errors) {
+          this.otpErrors = error.response.data.errors; // Cập nhật lỗi cho từng trường
+        } else {
+          console.error("Error verifying OTP:", error);
+          alert("Đã xảy ra lỗi khi xác thực mã OTP!");
+        }
+      }
+    },
+
+    togglePasswordVisibility(field) {
+      if (field === "PASSWORD") {
+        this.showPassword = !this.showPassword;
+      } else if (field === "confirmPassword") {
+        this.showConfirmPassword = !this.showConfirmPassword;
+      }
+    },
+  },
 };
 </script>
 
-<style scoped>
-.form-outline.email-label {
-  margin-bottom: 20px; /* Điều chỉnh giá trị để có khoảng cách lớn hơn */
-}
-.text-center {
-  max-width: 1000px;
-  margin: 0 auto; /* Căn giữa nội dung */
-  margin-bottom: 20px;
-}
-
-.bg-image {
-  background-size: cover;
-  background-position: center;
-  height: 500px;
-  margin-top: 5px;
-  background-color: #4e342e; /* Màu nâu đậm cho background */
-}
-
-.card-body {
-    flex: 1 1 auto;
-    padding: var(--bs-card-spacer-y) var(--bs-card-spacer-x);
-    color: var(--bs-card-color);
-    background-color: #d7ccc8;
-}
-
-.card {
-  border-radius: 15px;
-  background-color: #d7ccc8; /* Màu be nhẹ cho thẻ */
-  color: #3e2723; /* Màu nâu đậm cho chữ */
-}
-
-.form-outline {
-  position: relative;
-  margin-bottom: 3rem;
-  border: 1px solid #6d4c41;
-  border-radius: 0.375rem;
-  background-color: #efebe9; /* Nền của form-outline */
-  color: #3e2723;
-}
-
-.form-outline + .form-outline {
-  margin-top: 2rem; /* Khoảng cách giữa các form-outline */
-}
-
-.form-outline input.form-control {
-  background-color: transparent; /* Nền trong suốt cho input */
-  color: #3e2723; /* Màu chữ input */
-  padding: 1rem; /* Khoảng cách nội dung bên trong input */
-  border: none; /* Xóa bỏ viền của input */
-  border-radius: 0.375rem; /* Góc bo tròn cho input */
-  height: 3rem; /* Chiều cao cố định để căn giữa chữ */
-  line-height: 1.5rem; /* Đảm bảo line-height phù hợp với chiều cao */
-  display: flex;
-  align-items: center; /* Căn giữa chữ theo chiều dọc */
-  font-size: 1rem; /* Kích thước chữ */
-  position: relative; /* Để label di chuyển theo */
-}
-
-.form-outline label.form-label {
-  position: absolute;
-  top: 50%; /* Đặt label vào giữa ô input */
-  left: 1rem;
-  /* transform: translateY(-50%);  */
-  padding: 0 0.25rem; /* Khoảng cách giữa label và input */
-  pointer-events: none;
-  /* transition: all 0.2s ease; */
-  /* font-size: 0.875rem; */
-  color: #5d4037; /* Màu nâu cho chữ label */
-  background-color: #d7ccc8; 
-}
-
-.form-outline input.form-control:focus ~ .form-label,
-.form-outline input.form-control:not(:placeholder-shown) ~ .form-label {
-  top: -0.75rem; /* Di chuyển label lên trên ô input */
-  left: 1rem; /* Đặt label ở vị trí chính xác */
-  font-size: 1rem; /* Kích thước chữ khi focus */
-  color: #3e2723; /* Màu nâu đậm cho label khi focus */
-  /* background-color: #d7ccc8;  */
-}
-
-.form-check {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 1.5rem;
-  color: #3e2723; /* Màu nâu cho checkbox */
-}
-
-.form-check-input {
-  margin-right: 0.5rem;
-}
-
-.form-check-label {
-  margin-bottom: 0;
-}
-
-.btn {
-  border-radius: 0.375rem;
-  background-color: #6d4c41; /* Màu nâu cho nút */
-  color: #ffffff; /* Màu trắng cho chữ trên nút */
-}
-
-.btn:hover {
-  background-color: #5d4037; /* Màu nâu đậm hơn khi hover */
-}
-
-a {
-  color: #8d6e63; /* Màu nâu nhẹ cho liên kết */
-}
-
-a:hover {
-  color: #5d4037; /* Màu nâu đậm khi hover */
-}
-
+<style lang="scss" scoped>
+@import "./RegisterUser.scss";
 </style>
