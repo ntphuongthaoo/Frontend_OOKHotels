@@ -9,19 +9,15 @@ const axiosClient = axios.create({
     }
 });
 
-axiosClient.interceptors.request.use(function (config) {
-    const organizationId = localStorage.getItem('ORGANIZATION_ID');
-    if (organizationId) {
-        config.headers['ORGANIZATION_ID'] = organizationId;
-    }
-    const token = localStorage.getItem('token');
+axiosClient.interceptors.request.use(config => {
+    const token = localStorage.getItem('accessToken');
     if (token) {
-        config.headers['Authorization'] = `Bearer ${token}`;
+      config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
-}, function (error) {
+  }, error => {
     return Promise.reject(error);
-});
+  });
 
 axiosClient.interceptors.response.use(function (response) {
     return response;

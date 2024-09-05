@@ -98,7 +98,7 @@
                     'fas fa-eye': !showConfirmPassword,
                     'fas fa-eye-slash': showConfirmPassword,
                   }"
-                  @click="togglePasswordVisibility('confirmPassword')"
+                  @click="togglePasswordVisibility('showConfirmPassword')"
                   class="password-toggle"
                 ></i>
               </div>
@@ -250,7 +250,7 @@ export default {
     togglePasswordVisibility(field) {
       if (field === "PASSWORD") {
         this.showPassword = !this.showPassword;
-      } else if (field === "confirmPassword") {
+      } else if (field === "showConfirmPassword") {
         this.showConfirmPassword = !this.showConfirmPassword;
       }
     },

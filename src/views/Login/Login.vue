@@ -10,14 +10,28 @@
             <h2>Đăng nhập</h2>
             <div class="form-group">
               <label for="login-identifier">Email/Số điện thoại</label>
-              <input type="text" id="login-identifier" v-model="identifier" placeholder="Enter email or phone number" required>
+              <input
+                type="text"
+                id="login-identifier"
+                v-model="identifier"
+                placeholder="Nhập email hoặc số điện thoại"
+                required
+              />
             </div>
             <div class="form-group">
               <label for="login-password">Mật khẩu</label>
-              <input type="password" id="login-password" v-model="password" placeholder="Enter password" required>
+              <input
+                type="password"
+                id="login-password"
+                v-model="password"
+                placeholder="Nhập mật khẩu"
+                required
+              />
             </div>
             <button type="submit" class="login-button">Đăng nhập</button>
-            <p class="signup-link">CHƯA CÓ TÀI KHOẢN? <a href="#">ĐĂNG KÝ</a></p>
+            <p class="signup-link">
+              CHƯA CÓ TÀI KHOẢN? <a href="#">ĐĂNG KÝ</a>
+            </p>
             <div class="social-login">
               <p>Hoặc đăng nhập với:</p>
               <div class="social-buttons">
@@ -43,22 +57,39 @@
 </template>
 
 <script>
+import { mapActions } from "vuex";
 export default {
   data() {
     return {
-      identifier: '', // Email/Số điện thoại
-      password: '',
+      identifier: "",
+      password: "",
     };
   },
   methods: {
-    handleSubmit() {
-      // Xử lý logic khi gửi form
-      alert('Form submitted successfully!');
+    ...mapActions(['login']),
+
+    async handleSubmit() {
+      // Kiểm tra giá trị đầu vào để xác định là email hay số điện thoại
+      const isEmail = this.identifier.includes('@');
+      const payload = {
+        [isEmail ? 'EMAIL' : 'PHONE_NUMBER']: this.identifier,
+        PASSWORD: this.password,
+      };
+
+      try {
+        // const result = await this.$store.dispatch('login', payload);
+        await this.login(payload);
+        
+      } catch (error) {
+        this.$message.error(
+          error.response?.data?.message || "Đăng nhập thất bại!"
+        );
+      }
     },
   },
 };
 </script>
 
-<style lang="scss" scoped>
+<style scoped>
 @import "./Login.scss";
 </style>
