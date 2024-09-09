@@ -7,9 +7,9 @@
             <li><a href="#">Contact Us +44 (012) 5689 3264</a></li>
           </ul>
         </div>
-        <div class="float-right">
+        <!-- <div class="float-right">
           <div class="nice-select-wrapper">
-            <select class="currency-selector" style="display: none;">
+            <select class="currency-selector" style="display: none">
               <option value="1">USD</option>
             </select>
             <div class="nice-select currency-select" tabindex="0">
@@ -17,7 +17,7 @@
             </div>
           </div>
           <div class="nice-select-wrapper">
-            <select class="language-selector" style="display: none;">
+            <select class="language-selector" style="display: none">
               <option value="1">ENG</option>
               <option value="1">FRA</option>
               <option value="1">BAN</option>
@@ -25,6 +25,15 @@
             <div class="nice-select language-select" tabindex="0">
               <span class="current">ENG</span>
             </div>
+          </div>
+        </div> -->
+        <div class="float-right">
+          <div v-if="!isLoggedIn" class="welcome-message">
+            CHÀO MỪNG BẠN ĐÉN VỚI OOK_CHỐN DỪNG CHÂN TUYỆT VỜI !!
+          </div>
+          <div v-else class="user-info">
+            <i class="fa fa-user-circle-o user-icon"></i>
+            <span class="user-name">{{ userInfo?.FULLNAME || 'User' }}</span>
           </div>
         </div>
       </div>
@@ -36,34 +45,74 @@
           <a class="navbar-brand logo" href="/trangchu">
             <img src="../../assets/logo_ôk.png" alt="OOK Logo" />
           </a>
-          <button class="navbar-toggler" type="button" aria-controls="navbarSupportedContent" aria-expanded="false"
-          aria-label="Toggle navigation" @click="toggleNavbar">
-          <span class="navbar-toggler-icon"></span>
+          <button
+            class="navbar-toggler"
+            type="button"
+            aria-controls="navbarSupportedContent"
+            aria-expanded="false"
+            aria-label="Toggle navigation"
+            @click="toggleNavbar"
+          >
+            <span class="navbar-toggler-icon"></span>
           </button>
-          <div :class="['collapse', 'navbar-collapse', { show: isNavbarOpen }]" id="navbarSupportedContent">
+          <div
+            :class="['collapse', 'navbar-collapse', { show: isNavbarOpen }]"
+            id="navbarSupportedContent"
+          >
             <ul class="navbar-nav ml-auto">
-              <li class="nav-item active"><a class="nav-link" href="/trangchu">Home</a></li>
-              <li class="nav-item"><a class="nav-link" href="about-us.html">About</a></li>
-              <li class="nav-item"><a class="nav-link" href="gallery.html">Gallery</a></li>
+              <li class="nav-item active">
+                <a class="nav-link" href="/trangchu">Home</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="about-us.html">About</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="gallery.html">Gallery</a>
+              </li>
               <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Pages</a>
+                <a
+                  class="nav-link dropdown-toggle"
+                  href="#"
+                  role="button"
+                  data-toggle="dropdown"
+                  aria-haspopup="true"
+                  aria-expanded="false"
+                  >Pages</a
+                >
                 <div class="dropdown-menu">
                   <a class="dropdown-item" href="elements.html">Elements</a>
                   <a class="dropdown-item" href="rooms.html">Rooms</a>
                 </div>
               </li>
               <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Blog</a>
+                <a
+                  class="nav-link dropdown-toggle"
+                  href="#"
+                  role="button"
+                  data-toggle="dropdown"
+                  aria-haspopup="true"
+                  aria-expanded="false"
+                  >Blog</a
+                >
                 <div class="dropdown-menu">
                   <a class="dropdown-item" href="blog.html">Blog</a>
-                  <a class="dropdown-item" href="single-blog.html">Blog Details</a>
+                  <a class="dropdown-item" href="single-blog.html"
+                    >Blog Details</a
+                  >
                 </div>
               </li>
-              <li class="nav-item"><a class="nav-link" href="contact.html">Contact</a></li>
+              <li class="nav-item">
+                <a class="nav-link" href="contact.html">Contact</a>
+              </li>
             </ul>
             <div class="auth-links">
-              <a class="btn auth-btn login-btn" href="/dangnhap">Đăng nhập</a>
-              <a class="btn auth-btn register-btn" href="/dangky">Đăng ký</a>
+              <template v-if="isLoggedIn">
+                <a class="btn auth-btn logout-btn" @click="logout">Đăng xuất</a>
+              </template>
+              <template v-else>
+                <a class="btn auth-btn login-btn" href="/dangnhap">Đăng nhập</a>
+                <a class="btn auth-btn register-btn" href="/dangky">Đăng ký</a>
+              </template>
             </div>
           </div>
         </div>
@@ -73,21 +122,29 @@
 </template>
 
 <script>
+import { mapGetters, mapActions } from "vuex";
+
 export default {
-  name: 'HeaderComponent',
+  name: "HeaderComponent",
   data() {
     return {
-      isNavbarOpen: false
+      isNavbarOpen: false,
     };
   },
+  computed: {
+    ...mapGetters(["isLoggedIn", "userInfo"]),
+  },
   methods: {
+    ...mapActions(["logout"]),
     toggleNavbar() {
       this.isNavbarOpen = !this.isNavbarOpen;
-    }
-    
-  }
+    },
+  },
+  mounted() {
+    this.$store.dispatch("checkToken"); // Kiểm tra trạng thái đăng nhập khi component được mount
+  },
 };
-</script>ss
+</script>
 
 <style lang="scss">
 header {
@@ -107,7 +164,7 @@ header {
 
   .top-header {
     transition: opacity 0.3s ease, transform 0.3s ease;
-    background-color: #BFAF9F; // Nâu trung bình cho phần top-header
+    background-color: #bfaf9f; // Nâu trung bình cho phần top-header
     padding: 10px 20px;
     .container {
       display: flex;
@@ -139,6 +196,26 @@ header {
         margin-left: 20px;
       }
     }
+    .welcome-message {
+      font-size: 16px;
+      color: #333;
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+    }
+
+    .user-icon {
+      font-size: 30px; /* Cài đặt kích thước icon */
+      color: #333; /* Cài đặt màu sắc cho icon */
+      margin-right: 10px;
+    }
+
+    .user-name {
+      font-size: 16px;
+      color: #333;
+    }
   }
 
   .separator {
@@ -169,7 +246,7 @@ header {
             position: relative;
             &:before,
             &:after {
-              content: '';
+              content: "";
               display: block;
               width: 30px;
               height: 3px;
@@ -255,12 +332,22 @@ header {
           .register-btn {
             border-color: #d9c7b8; // Màu nâu trung bình cho viền nút đăng ký
             background-color: #d9c7b8; // Màu nâu trung bình cho nền nút đăng ký
-            color: #3F0E00; // Màu nâu tối cho text nút đăng ký
+            color: #3f0e00; // Màu nâu tối cho text nút đăng ký
           }
 
           .register-btn:hover {
             background-color: #6d4c41; // Màu nâu đậm cho nền nút đăng ký khi hover
             border-color: #6d4c41; // Màu nâu đậm cho viền nút đăng ký khi hover
+          }
+          .logout-btn {
+            border-color: #3f0e00;
+            background-color: #d9c7b8;
+            color: #3f0e00;
+          }
+
+          .logout-btn:hover {
+            background-color: #6d4c41;
+            border-color: #6d4c41;
           }
         }
       }
@@ -279,7 +366,3 @@ header {
   }
 }
 </style>
-
-
-
-

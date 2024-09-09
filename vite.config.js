@@ -15,9 +15,7 @@ export default defineConfig({
     },
   },
   server: {
-    watch: {
-      usePolling: true, // Bật polling nếu bạn đang gặp vấn đề với HMR
-    },
-  },
+    hmr: true // Đảm bảo rằng HMR được bật
+  }
 })
 

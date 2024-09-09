@@ -30,7 +30,7 @@
             </div>
             <button type="submit" class="login-button">Đăng nhập</button>
             <p class="signup-link">
-              CHƯA CÓ TÀI KHOẢN? <a href="#">ĐĂNG KÝ</a>
+              CHƯA CÓ TÀI KHOẢN? <a href="dangky">ĐĂNG KÝ</a>
             </p>
             <div class="social-login">
               <p>Hoặc đăng nhập với:</p>

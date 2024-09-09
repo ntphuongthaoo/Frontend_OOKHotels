@@ -1,6 +1,11 @@
 <template>
   <div>
-    <div id="carouselExampleIndicators" class="carousel slide" data-bs-ride="carousel">
+    <!-- Carousel với hình ảnh khách sạn -->
+    <div
+      id="carouselExampleIndicators"
+      class="carousel slide"
+      data-bs-ride="carousel"
+    >
       <div class="carousel-indicators">
         <button
           v-for="(image, index) in images"
@@ -12,29 +17,49 @@
         ></button>
       </div>
       <div class="carousel-inner">
-        <div v-for="(image, index) in images" :key="index" :class="['carousel-item', { active: index === 0 }]">
-          <img :src="image.src" class="d-block w-100" :alt="image.alt">
+        <div
+          v-for="(image, index) in images"
+          :key="index"
+          :class="['carousel-item', { active: index === 0 }]"
+        >
+          <img :src="image.src" class="d-block w-100" :alt="image.alt" />
           <div class="carousel-caption d-none d-md-block">
             <h5>{{ image.title }}</h5>
             <p>{{ image.description }}</p>
           </div>
         </div>
       </div>
-      <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
+      <button
+        class="carousel-control-prev"
+        type="button"
+        data-bs-target="#carouselExampleIndicators"
+        data-bs-slide="prev"
+      >
         <span class="carousel-control-prev-icon" aria-hidden="true"></span>
         <span class="visually-hidden">Previous</span>
       </button>
-      <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
+      <button
+        class="carousel-control-next"
+        type="button"
+        data-bs-target="#carouselExampleIndicators"
+        data-bs-slide="next"
+      >
         <span class="carousel-control-next-icon" aria-hidden="true"></span>
         <span class="visually-hidden">Next</span>
       </button>
     </div>
-    
+
+    <!-- Thanh tìm kiếm -->
     <div class="search-bar">
       <div class="search-fields">
         <div class="search-field">
           <label for="destination">Địa điểm bạn muốn đến là gì?</label>
-          <input id="destination" type="text" placeholder="Nhập Khách sạn / Điểm đến" v-model="destination" />
+          <input
+            id="destination"
+            type="text"
+            placeholder="Nhập Khách sạn / Điểm đến"
+            v-model="destination"
+          />
         </div>
         <div class="search-field">
           <label for="checkInDate">Ngày nhận phòng</label>
@@ -46,55 +71,147 @@
         </div>
         <div class="search-field">
           <label for="rooms">Số phòng</label>
-          <input id="rooms" type="number" placeholder="Phòng" v-model="rooms" min="1" />
+          <input
+            id="rooms"
+            type="number"
+            placeholder="Phòng"
+            v-model="rooms"
+            min="1"
+          />
         </div>
         <div class="search-field">
           <label for="voucherCode">Mã khuyến mãi</label>
-          <input id="voucherCode" type="text" placeholder="Nhập mã khuyến mại/mã Voucher" v-model="voucherCode" />
+          <input
+            id="voucherCode"
+            type="text"
+            placeholder="Nhập mã khuyến mại/mã Voucher"
+            v-model="voucherCode"
+          />
         </div>
         <button class="search-btn" @click="searchRooms">Tìm kiếm</button>
       </div>
     </div>
+
+    <!-- Khách sạn nổi bật -->
+    <div class="container featured-hotels">
+  <h2 class="text-center">KHÁCH SẠN NỔI BẬT</h2>
+  <div id="featuredCarousel" class="carousel slide" data-bs-ride="carousel">
+    <div class="carousel-inner">
+      <div
+        class="carousel-item"
+        :class="{ active: index === 0 }"
+        v-for="(chunk, index) in chunkedHotels"
+        :key="index"
+      >
+        <div class="row gx-0">
+          <!-- Hai tấm bên trái -->
+          <div class="col-md-4 d-flex flex-column">
+            <div class="small-card flex-fill" v-for="hotel in chunk.left" :key="hotel._id">
+              <img :src="hotel.IMAGE[0]" class="card-img" :alt="hotel.NAME" />
+              <h5 class="card-title">{{ hotel.NAME }}</h5>
+            </div>
+          </div>
+
+          <!-- Tấm lớn ở giữa -->
+          <div class="col-md-4">
+            <div class="big-card h-100">
+              <img :src="chunk.middle.IMAGE[0]" class="card-img big-img h-100" :alt="chunk.middle.NAME" />
+              <h5 class="card-title">{{ chunk.middle.NAME }}</h5>
+            </div>
+          </div>
+
+          <!-- Hai tấm bên phải -->
+          <div class="col-md-4 d-flex flex-column">
+            <div class="small-card flex-fill" v-for="hotel in chunk.right" :key="hotel._id">
+              <img :src="hotel.IMAGE[0]" class="card-img" :alt="hotel.NAME" />
+              <h5 class="card-title">{{ hotel.NAME }}</h5>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Điều khiển carousel -->
+    <button
+      class="carousel-control-prev"
+      type="button"
+      data-bs-target="#featuredCarousel"
+      data-bs-slide="prev"
+    >
+      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Previous</span>
+    </button>
+    <button
+      class="carousel-control-next"
+      type="button"
+      data-bs-target="#featuredCarousel"
+      data-bs-slide="next"
+    >
+      <span class="carousel-control-next-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Next</span>
+    </button>
+  </div>
+</div>
+
+
   </div>
 </template>
 
 <script>
-import bg1 from '@/assets/bg_1.jpg';
-import bg2 from '@/assets/bg_2.jpg';
-import bg3 from '@/assets/bg_3.jpg';
+import bg1 from "@/assets/bg_1.jpg";
+import bg2 from "@/assets/bg_2.jpg";
+import bg3 from "@/assets/bg_3.jpg";
+import axiosClient from "../../../api/axiosClient"
 
 export default {
   name: "BannerComponent",
   data() {
     return {
-      destination: '',
-      checkInDate: '',
-      checkOutDate: '',
+      featuredHotels: [],
+      destination: "",
+      checkInDate: "",
+      checkOutDate: "",
       rooms: 1,
-      voucherCode: '',
+      voucherCode: "",
       images: [
         {
           src: bg1,
-          alt: 'Hotel Image 1',
-          title: 'Hotel Luxury 1',
-          description: 'Experience the luxury stay at our first hotel.'
+          alt: "Hotel Image 1",
+          title: "Hotel Luxury 1",
+          description:
+            "Trải nghiệm kỳ nghỉ sang trọng tại khách sạn của chúng tôi.",
         },
         {
           src: bg2,
-          alt: 'Hotel Image 2',
-          title: 'Hotel Luxury 2',
-          description: 'Enjoy the comfort and beauty at our second hotel.'
+          alt: "Hotel Image 2",
+          title: "Hotel Luxury 2",
+          description:
+            "Tận hưởng không gian thoải mái và đẹp mắt tại khách sạn của chúng tôi.",
         },
         {
           src: bg3,
-          alt: 'Hotel Image 3',
-          title: 'Hotel Luxury 3',
-          description: 'Relax and unwind at our stunning third hotel.'
-        }
-      ]
+          alt: "Hotel Image 3",
+          title: "Hotel Luxury 3",
+          description:
+            "Thư giãn và tận hưởng phong cảnh đẹp tại khách sạn của chúng tôi.",
+        },
+      ],
+
     };
   },
+  mounted() {
+    this.fetchFeaturedHotels();
+  },
   methods: {
+    async fetchFeaturedHotels() {
+    try {
+      const response = await axiosClient.get('/hotels/getAllHotels');
+      console.log('Dữ liệu khách sạn:', response.data); // Kiểm tra dữ liệu
+      this.featuredHotels = response.data.data; // Cập nhật dữ liệu đúng cách
+    } catch (error) {
+      console.error('Lỗi khi lấy dữ liệu khách sạn:', error);
+    }
+  },
     searchRooms() {
       console.log({
         destination: this.destination,
@@ -105,105 +222,26 @@ export default {
       });
     },
   },
+  computed: {
+    chunkedHotels() {
+    if (!Array.isArray(this.featuredHotels)) {
+      return []; // Trả về mảng rỗng nếu không phải là mảng
+    }
+    
+    const chunks = [];
+    for (let i = 0; i < this.featuredHotels.length; i += 5) {
+      chunks.push({
+        left: this.featuredHotels.slice(i, i + 2),
+        middle: this.featuredHotels[i + 2] || {},
+        right: this.featuredHotels.slice(i + 3, i + 5),
+      });
+    }
+    return chunks;
+  },
+  },
 };
 </script>
 
 <style scoped>
-.carousel-item {
-  height: 80vh;
-  background-size: cover;
-  background-position: center;
-  position: relative; /* Đảm bảo các phần tử con có thể căn chỉnh chính xác */
-  /* display: flex;  */
-  align-items: center; /* Căn giữa theo chiều dọc */
-  /* justify-content: center; */
-}
-
-.carousel-item img {
-  width: 100%;
-  height: auto; /* Đảm bảo hình ảnh không bị biến dạng */
-}
-
-.carousel-caption {
-  position: absolute; /* Đảm bảo caption nằm trên ảnh */
-  top: 50%; /* Đặt cách từ đỉnh carousel item */
-  left: 50%;
-  transform: translate(-50%, -50%); /* Căn giữa cả chiều ngang và dọc */
-  background-color: rgba(0, 0, 0, 0.5); /* Nền bán trong suốt */
-  padding: 10px;
-  border-radius: 5px;
-  color: white;
-  text-align: center; /* Căn giữa nội dung text */
-  width: 80%; /* Đặt chiều rộng để caption chiếm 80% chiều rộng của carousel-item */
-  height: 150px;
-  box-sizing: border-box; /* Đảm bảo padding không ảnh hưởng đến chiều rộng */
-}
-
-
-.search-bar {
-  position: absolute;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 80%;
-  background: rgba(255, 255, 255, 0.9);
-  padding: 15px;
-  border-radius: 10px;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
-}
-
-.search-fields {
-  display: flex;
-  flex-wrap: wrap; /* Cho phép các trường nhập liệu xuống dòng nếu không đủ không gian */
-  justify-content: space-between;
-  align-items: center;
-  gap: 10px;
-}
-
-.search-field {
-  flex: 1;
-  min-width: 150px; /* Đảm bảo các trường không quá nhỏ */
-}
-
-.search-field label {
-  display: block;
-  margin-bottom: 5px;
-  font-size: 14px;
-  color: #333;
-}
-
-.search-fields input {
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  font-size: 16px;
-  box-sizing: border-box; /* Đảm bảo padding không ảnh hưởng đến chiều rộng */
-}
-
-.search-fields input[type="text"] {
-  width: 200px;
-}
-
-.search-fields input[type="date"] {
-  width: 150px; /* Chiều rộng cho trường chọn ngày */
-}
-
-.search-fields input[type="number"] {
-  width: 100px; /* Chiều rộng cho trường nhập số phòng */
-}
-
-.search-btn {
-  background-color: #fda000;
-  color: white;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 5px;
-  font-size: 16px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.search-btn:hover {
-  background-color: #e89500;
-}
+@import "./HomeUser.scss";
 </style>

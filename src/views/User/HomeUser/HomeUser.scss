@@ -1,0 +1,184 @@
+.carousel-inner {
+  max-height: 700px;
+}
+
+.carousel-item {
+  height: 80vh;
+  background-size: cover;
+  background-position: center;
+  position: relative; /* Đảm bảo các phần tử con có thể căn chỉnh chính xác */
+  /* display: flex;  */
+  align-items: center; /* Căn giữa theo chiều dọc */
+  /* justify-content: center; */
+}
+
+.carousel-item img {
+  width: 100%;
+  height: 100%; /* Đảm bảo hình ảnh lấp đầy phần chứa */
+  object-fit: cover; /* Đảm bảo hình ảnh không bị biến dạng */
+}
+
+.carousel-caption {
+  position: absolute; /* Đảm bảo caption nằm trên ảnh */
+  top: 50%; /* Đặt cách từ đỉnh carousel item */
+  left: 50%;
+  transform: translate(-50%, -50%); /* Căn giữa cả chiều ngang và dọc */
+  background-color: rgba(0, 0, 0, 0.5); /* Nền bán trong suốt */
+  padding: 10px;
+  border-radius: 5px;
+  color: white;
+  text-align: center; /* Căn giữa nội dung text */
+  width: 80%; /* Đặt chiều rộng để caption chiếm 80% chiều rộng của carousel-item */
+  height: 150px;
+  box-sizing: border-box; /* Đảm bảo padding không ảnh hưởng đến chiều rộng */
+}
+
+.search-bar {
+    display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80%;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 15px;
+  border-radius: 10px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.search-fields {
+  display: flex;
+  flex-wrap: wrap; /* Cho phép các trường nhập liệu xuống dòng nếu không đủ không gian */
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.search-field {
+  flex: 1;
+  min-width: 200px; /* Đảm bảo các trường không quá nhỏ */
+}
+
+.search-field label {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 14px;
+  color: #333;
+}
+
+.search-fields input {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 16px;
+  box-sizing: border-box; /* Đảm bảo padding không ảnh hưởng đến chiều rộng */
+}
+
+.search-fields input[type="text"] {
+  width: 200px;
+}
+
+.search-fields input[type="date"] {
+  width: 150px; /* Chiều rộng cho trường chọn ngày */
+}
+
+.search-fields input[type="number"] {
+  width: 100px; /* Chiều rộng cho trường nhập số phòng */
+}
+
+.search-btn {
+  background-color: #fda000;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  flex: 1;
+  min-width: 200px; 
+}
+
+.search-btn:hover {
+  background-color: #e89500;
+}
+
+@media (max-width: 768px) {
+    .search-field, .search-btn {
+      flex: 1 1 100%;
+    }
+  }
+
+/* CSS cho khách sạn nổi bật */
+.featured-hotels {
+    margin-top: 50px;
+  }
+  
+  .small-card,
+  .big-card {
+    margin: 0; /* Loại bỏ khoảng cách mặc định giữa các thẻ */
+    background-color: #f9f9f9;
+    text-align: center;
+    position: relative;
+  }
+  
+  .small-card {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .card-img {
+    width: 100%;
+    object-fit: cover;
+    height: 100%;
+  }
+  
+  .big-card {
+    height: 100%; /* Đảm bảo chiều cao ảnh lớn ở giữa bằng với cột bên */
+    margin: 0 10px;
+  }
+  
+  .big-img {
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .row.gx-0 {
+    row-gap: 0; /* Loại bỏ khoảng cách giữa các hàng */
+  }
+  
+  .col-md-4.d-flex {
+    display: flex;
+    flex-direction: column;
+    gap: 15px; /* Khoảng cách giữa các thẻ */
+  }
+  
+  /* Style cho phần tiêu đề đè lên ảnh */
+  .card-title {
+    font-size: 18px;
+    font-weight: bold;
+    color: white;
+    position: absolute;
+    bottom: 10px; /* Căn dưới một chút */
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.5); /* Nền bán trong suốt để nổi bật text */
+    padding: 5px 10px;
+    border-radius: 5px;
+    margin: 0;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7); /* Thêm bóng cho text */
+  }
+  
+  .big-card .card-title {
+    font-size: 22px; /* Kích thước chữ lớn hơn cho thẻ lớn */
+  }
+  
+  h2.text-center {
+    margin-bottom: 30px;
+    margin-top: 100px;
+  }

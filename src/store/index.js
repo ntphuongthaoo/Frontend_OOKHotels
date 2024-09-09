@@ -54,6 +54,7 @@ const store = createStore({
       localStorage.removeItem("accessToken");
       commit("LOGOUT");
       message.success("Đã đăng xuất thành công!");
+      router.push('/dangnhap');
     },
     async checkToken({ commit }) {
       const token = localStorage.getItem("accessToken");
