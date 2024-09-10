@@ -61,15 +61,15 @@
           >
             <ul class="navbar-nav ml-auto">
               <li class="nav-item active">
-                <a class="nav-link" href="/trangchu">Home</a>
+                <a class="nav-link" href="/trangchu">Trang chủ</a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="about-us.html">About</a>
+                <a class="nav-link" href="/danh-sach-khach-san">Khách sạn</a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="gallery.html">Gallery</a>
+                <a class="nav-link" href="gallery.html">Vị Trí</a>
               </li>
-              <li class="nav-item dropdown">
+              <!-- <li class="nav-item dropdown">
                 <a
                   class="nav-link dropdown-toggle"
                   href="#"
@@ -100,9 +100,9 @@
                     >Blog Details</a
                   >
                 </div>
-              </li>
+              </li> -->
               <li class="nav-item">
-                <a class="nav-link" href="contact.html">Contact</a>
+                <a class="nav-link" href="contact.html">Liên hệ</a>
               </li>
             </ul>
             <div class="auth-links">

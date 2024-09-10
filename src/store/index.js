@@ -69,12 +69,6 @@ const store = createStore({
             const userInfo = response.data;
             commit("SET_USER_INFO", userInfo);
 
-            // Redirect based on user role
-            if (userInfo.ROLE.ADMIN || userInfo.ROLE.BRANCH_MANAGER || userInfo.ROLE.STAFF) {
-              router.push('/dashboard');
-            } else {
-              router.push('/trangchu');
-            }
           } else {
             console.error("Unexpected response status:", response.status);
             commit("LOGOUT");
