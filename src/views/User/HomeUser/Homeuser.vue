@@ -23,10 +23,10 @@
           :class="['carousel-item', { active: index === 0 }]"
         >
           <img :src="image.src" class="d-block w-100" :alt="image.alt" />
-          <div class="carousel-caption d-none d-md-block">
+          <!-- <div class="carousel-caption d-none d-md-block">
             <h5>{{ image.title }}</h5>
             <p>{{ image.description }}</p>
-          </div>
+          </div> -->
         </div>
       </div>
       <button
@@ -63,11 +63,11 @@
         </div>
         <div class="search-field">
           <label for="checkInDate">Ngày nhận phòng</label>
-          <input id="checkInDate" type="date" v-model="checkInDate" />
+          <input id="checkInDate" type="date" v-model="checkInDate" :min="minDate" />
         </div>
         <div class="search-field">
           <label for="checkOutDate">Ngày trả phòng</label>
-          <input id="checkOutDate" type="date" v-model="checkOutDate" />
+          <input id="checkOutDate" type="date" v-model="checkOutDate" :min="checkInDate || minDate" />
         </div>
         <div class="search-field">
           <label for="rooms">Số phòng</label>
@@ -88,13 +88,15 @@
             v-model="voucherCode"
           />
         </div>
-        <button class="search-btn" @click="searchRooms">Tìm kiếm</button>
+        <div>
+          <button class="search-btn" @click="searchRooms">Tìm kiếm</button>
+        </div>
       </div>
     </div>
 
     <!-- Khách sạn nổi bật -->
     <div class="container featured-hotels">
-      <h2 class="text-center">KHÁCH SẠN NỔI BẬT</h2>
+      <h2 class="text-center">KHÁCH SẠN CỦA CHÚNG TÔI</h2>
       <div id="featuredCarousel" class="carousel slide" data-bs-ride="carousel">
         <div class="carousel-inner">
           <div
@@ -112,11 +114,7 @@
                   :key="hotel._id"
                   @click="goToHotel(hotel._id)"
                 >
-                  <img
-                    :src="hotel.IMAGE"
-                    class="card-img"
-                    :alt="hotel.NAME"
-                  />
+                  <img :src="hotel.IMAGE" class="card-img" :alt="hotel.NAME" />
                   <h5 class="card-title">{{ hotel.NAME }}</h5>
                 </div>
               </div>
@@ -144,11 +142,7 @@
                   :key="hotel._id"
                   @click="goToHotel(hotel._id)"
                 >
-                  <img
-                    :src="hotel.IMAGE"
-                    class="card-img"
-                    :alt="hotel.NAME"
-                  />
+                  <img :src="hotel.IMAGE" class="card-img" :alt="hotel.NAME" />
                   <h5 class="card-title">{{ hotel.NAME }}</h5>
                 </div>
               </div>
@@ -196,6 +190,7 @@ export default {
       checkOutDate: "",
       rooms: 1,
       voucherCode: "",
+      minDate: new Date().toISOString().split("T")[0],
       images: [
         {
           src: bg1,
@@ -229,13 +224,13 @@ export default {
       try {
         const response = await axiosClient.get("/hotels/getAllHotels");
         console.log("Dữ liệu khách sạn:", response.data);
-        this.featuredHotels = response.data.data; 
+        this.featuredHotels = response.data.data;
       } catch (error) {
         console.error("Lỗi khi lấy dữ liệu khách sạn:", error);
       }
     },
     goToHotel(hotelId) {
-      this.$router.push({ name: 'HotelDetail', params: { id: hotelId } })
+      this.$router.push({ name: "HotelDetail", params: { id: hotelId } });
     },
     searchRooms() {
       console.log({

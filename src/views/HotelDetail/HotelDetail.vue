@@ -58,11 +58,11 @@
         </div>
         <div class="search-field">
           <label for="checkInDate">Ngày nhận phòng</label>
-          <input id="checkInDate" type="date" v-model="checkInDate" />
+          <input id="checkInDate" type="date" v-model="checkInDate" :min="minDate"/>
         </div>
         <div class="search-field">
           <label for="checkOutDate">Ngày trả phòng</label>
-          <input id="checkOutDate" type="date" v-model="checkOutDate" />
+          <input id="checkOutDate" type="date" v-model="checkOutDate" :min="checkInDate || minDate"/>
         </div>
         <div class="search-field">
           <label for="rooms">Số phòng</label>
@@ -83,7 +83,9 @@
             v-model="voucherCode"
           />
         </div>
-        <button class="search-btn" @click="searchRooms">Tìm kiếm</button>
+        <div>
+          <button class="search-btn" @click="searchRooms">Tìm kiếm</button>
+        </div>
       </div>
     </div>
 
@@ -91,15 +93,16 @@
     <div class="container hotel-details">
       <h1>{{ hotel.NAME }}</h1>
       <p class="address">
-        <i class="fa fa-location-arrow" aria-hidden="true"></i>
+        <i class="fa fa-compass" aria-hidden="true"></i>
         {{ hotel.ADDRESS.ADDRESS_LINE }}, {{ hotel.ADDRESS.WARD }},
         {{ hotel.ADDRESS.DISTRICT }}, {{ hotel.ADDRESS.CITY }},
         {{ hotel.ADDRESS.COUNTRY }}
       </p>
       <p><i class="fa fa-phone" aria-hidden="true"></i>
-        <strong class="name">Phone:</strong> {{ hotel.PHONE }}</p>
+        <strong class="phone">Phone:</strong> {{ hotel.PHONE }}</p>
       <p>
-        <strong>Email: </strong>
+        <i class="fa fa-envelope" aria-hidden="true"></i>
+        <strong class="email">Email: </strong>
         <a :href="'mailto:' + hotel.EMAIL">{{ hotel.EMAIL }}</a>
       </p>
       <div class="description" v-html="hotel.DESCRIPTION"></div>
@@ -115,6 +118,7 @@ export default {
   name: "HotelDetail",
   data() {
     return {
+      minDate: new Date().toISOString().split("T")[0],
       hotel: {
         ADDRESS: {},
         IMAGE: []
@@ -178,18 +182,18 @@ export default {
 }
 
 .search-bar {
-    display: flex;
+  display: flex;
   flex-wrap: wrap;
   gap: 10px;
   position: absolute;
   bottom: 20px;
   left: 50%;
   transform: translateX(-50%);
-  width: 80%;
+  width: 85%;
   background: rgba(255, 255, 255, 0.9);
   padding: 15px;
   border-radius: 10px;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .search-fields {
@@ -211,6 +215,7 @@ export default {
   margin-bottom: 5px;
   font-size: 14px;
   color: #333;
+  font-weight: bold;
 }
 
 .search-fields input {
@@ -221,21 +226,10 @@ export default {
   box-sizing: border-box; /* Đảm bảo padding không ảnh hưởng đến chiều rộng */
 }
 
-.search-fields input[type="text"] {
-  width: 200px;
-}
-
-.search-fields input[type="date"] {
-  width: 150px; /* Chiều rộng cho trường chọn ngày */
-}
-
-.search-fields input[type="number"] {
-  width: 100px; /* Chiều rộng cho trường nhập số phòng */
-}
 
 .search-btn {
-  background-color: #fda000;
-  color: white;
+  background-color: #dfaa7f;
+  color: #6d4c41;
   padding: 10px 20px;
   border: none;
   border-radius: 5px;
@@ -244,10 +238,16 @@ export default {
   transition: background-color 0.3s;
   flex: 1;
   min-width: 200px; 
+  margin-top: 24px;
 }
 
 .search-btn:hover {
-  background-color: #e89500;
+  background-color: #d9c7b8;
+}
+
+.input-group-text {
+  background-color: #f8f9fa;
+  border: none;
 }
 
 @media (max-width: 768px) {
@@ -255,7 +255,6 @@ export default {
       flex: 1 1 100%;
     }
   }
-
 
 .hotel-details {
   padding: 20px;
@@ -268,6 +267,12 @@ export default {
 
 .hotel-details .description {
   margin-top: 20px;
+}
+
+
+.email,
+.phone {
+  margin-left: 5px;
 }
 
 </style>

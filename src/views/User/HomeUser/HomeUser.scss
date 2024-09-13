@@ -1,5 +1,6 @@
 .carousel-inner {
   max-height: 700px;
+  position: relative;
 }
 
 .carousel-item {
@@ -34,18 +35,18 @@
 }
 
 .search-bar {
-    display: flex;
+  display: flex;
   flex-wrap: wrap;
   gap: 10px;
   position: absolute;
   bottom: 20px;
   left: 50%;
   transform: translateX(-50%);
-  width: 80%;
+  width: 90%;
   background: rgba(255, 255, 255, 0.9);
   padding: 15px;
   border-radius: 10px;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .search-fields {
@@ -67,6 +68,7 @@
   margin-bottom: 5px;
   font-size: 14px;
   color: #333;
+  font-weight: bold;
 }
 
 .search-fields input {
@@ -77,21 +79,10 @@
   box-sizing: border-box; /* Đảm bảo padding không ảnh hưởng đến chiều rộng */
 }
 
-.search-fields input[type="text"] {
-  width: 200px;
-}
-
-.search-fields input[type="date"] {
-  width: 150px; /* Chiều rộng cho trường chọn ngày */
-}
-
-.search-fields input[type="number"] {
-  width: 100px; /* Chiều rộng cho trường nhập số phòng */
-}
 
 .search-btn {
-  background-color: #fda000;
-  color: white;
+  background-color: #6d4c41;
+  color: #d9c7b8;
   padding: 10px 20px;
   border: none;
   border-radius: 5px;
@@ -100,10 +91,16 @@
   transition: background-color 0.3s;
   flex: 1;
   min-width: 200px; 
+  margin-top: 24px;
 }
 
 .search-btn:hover {
-  background-color: #e89500;
+  background-color: #d9c7b8;
+}
+
+.input-group-text {
+  background-color: #f8f9fa;
+  border: none;
 }
 
 @media (max-width: 768px) {
@@ -182,3 +179,5 @@
     margin-bottom: 30px;
     margin-top: 100px;
   }
+
+  

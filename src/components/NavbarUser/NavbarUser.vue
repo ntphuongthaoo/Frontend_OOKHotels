@@ -29,7 +29,7 @@
         </div> -->
         <div class="float-right">
           <div v-if="!isLoggedIn" class="welcome-message">
-            CHÀO MỪNG BẠN ĐÉN VỚI OOK_CHỐN DỪNG CHÂN TUYỆT VỜI !!
+            CHÀO MỪNG BẠN ĐÉN VỚI OOK !!
           </div>
           <div v-else class="user-info">
             <i class="fa fa-user-circle-o user-icon"></i>
