@@ -207,7 +207,11 @@ export default {
         });
 
         if (response.data.success) {
-          alert("Đăng ký người dùng thành công!")
+          this.$toast.success("Đăng ký người dùng thành công!", {
+            position: "top-right", // Vị trí của thông báo
+            duration: 5000, // Thời gian hiển thị (ms)
+            dismissible: true, // Cho phép đóng thông báo bằng tay
+          });
           this.showOtpForm = true; // Hiển thị form nhập OTP
         } else if (response.data.errors) {
           this.errors = response.data.errors; // Gán lỗi từ backend vào đối tượng errors
@@ -217,7 +221,7 @@ export default {
           this.errors = error.response.data.errors; // Cập nhật lỗi cho từng trường
         } else {
           console.error("Error registering user:", error);
-          alert("Đã xảy ra lỗi khi đăng ký!");
+          this.$toast.error("Đã xảy ra lỗi khi đăng ký!");
         }
       }
     },
@@ -226,14 +230,21 @@ export default {
       this.otpErrors = {}; // Reset lỗi trước khi gửi yêu cầu
 
       try {
-        const response = await axiosClient.post("/users/verifyOTPAndActivateUser", {
-          email: this.EMAIL,
-          otp: this.otp,
-        });
+        const response = await axiosClient.post(
+          "/users/verifyOTPAndActivateUser",
+          {
+            email: this.EMAIL,
+            otp: this.otp,
+          }
+        );
 
         if (response.data.success) {
-          alert("Xác thực thành công!");
-          this.$router.push('/dangnhap');
+          this.$toast.success("Kích hoạt người dùng thành công!", {
+            position: "top-right", // Vị trí của thông báo
+            duration: 5000, // Thời gian hiển thị (ms)
+            dismissible: true, // Cho phép đóng thông báo bằng tay
+          });
+          this.$router.push("/dangnhap");
         } else if (response.data.errors) {
           this.otpErrors = response.data.errors; // Gán lỗi từ backend vào đối tượng otpErrors
         }

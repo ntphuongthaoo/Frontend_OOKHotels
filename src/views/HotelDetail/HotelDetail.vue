@@ -5,86 +5,14 @@
       class="carousel slide"
       data-bs-ride="carousel"
     >
-      <div class="carousel-indicators">
-        <button
-          v-for="(image, index) in hotel.IMAGE"
-          :key="index"
-          :data-bs-target="'#carouselExampleIndicators'"
-          :data-bs-slide-to="index"
-          :class="{ active: index === 0 }"
-        ></button>
-      </div>
       <div class="carousel-inner">
         <div
-          v-for="(image, index) in hotel.IMAGE"
+          v-for="(image, index) in hotel.IMAGES"
           :key="index"
           :class="['carousel-item', { active: index === 0 }]"
         >
           <!-- Hiển thị chỉ hình ảnh -->
           <img :src="image" class="d-block w-100" />
-        </div>
-      </div>
-      <button
-        class="carousel-control-prev"
-        type="button"
-        data-bs-target="#carouselExampleIndicators"
-        data-bs-slide="prev"
-      >
-        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-        <span class="visually-hidden">Previous</span>
-      </button>
-      <button
-        class="carousel-control-next"
-        type="button"
-        data-bs-target="#carouselExampleIndicators"
-        data-bs-slide="next"
-      >
-        <span class="carousel-control-next-icon" aria-hidden="true"></span>
-        <span class="visually-hidden">Next</span>
-      </button>
-    </div>
-
-    <!-- Thanh tìm kiếm -->
-    <div class="search-bar">
-      <div class="search-fields">
-        <div class="search-field">
-          <label for="destination">Địa điểm bạn muốn đến là gì?</label>
-          <input
-            id="destination"
-            type="text"
-            placeholder="Nhập Khách sạn / Điểm đến"
-            v-model="destination"
-          />
-        </div>
-        <div class="search-field">
-          <label for="checkInDate">Ngày nhận phòng</label>
-          <input id="checkInDate" type="date" v-model="checkInDate" :min="minDate"/>
-        </div>
-        <div class="search-field">
-          <label for="checkOutDate">Ngày trả phòng</label>
-          <input id="checkOutDate" type="date" v-model="checkOutDate" :min="checkInDate || minDate"/>
-        </div>
-        <div class="search-field">
-          <label for="rooms">Số phòng</label>
-          <input
-            id="rooms"
-            type="number"
-            placeholder="Phòng"
-            v-model="rooms"
-            min="1"
-          />
-        </div>
-        <div class="search-field">
-          <label for="voucherCode">Mã khuyến mãi</label>
-          <input
-            id="voucherCode"
-            type="text"
-            placeholder="Nhập mã khuyến mại/mã Voucher"
-            v-model="voucherCode"
-          />
-        </div>
-        <div>
-          <button class="search-btn" @click="searchRooms">Tìm kiếm</button>
         </div>
       </div>
     </div>
@@ -98,8 +26,10 @@
         {{ hotel.ADDRESS.DISTRICT }}, {{ hotel.ADDRESS.CITY }},
         {{ hotel.ADDRESS.COUNTRY }}
       </p>
-      <p><i class="fa fa-phone" aria-hidden="true"></i>
-        <strong class="phone">Phone:</strong> {{ hotel.PHONE }}</p>
+      <p>
+        <i class="fa fa-phone" aria-hidden="true"></i>
+        <strong class="phone">Phone:</strong> {{ hotel.PHONE }}
+      </p>
       <p>
         <i class="fa fa-envelope" aria-hidden="true"></i>
         <strong class="email">Email: </strong>
@@ -107,172 +37,742 @@
       </p>
       <div class="description" v-html="hotel.DESCRIPTION"></div>
     </div>
+
+    <!-- Hiển thị các hạng phòng -->
+    <div class="container room-types">
+      <h2>CÁC HẠNG PHÒNG</h2>
+      <div
+        v-for="(roomGroup, type) in groupedRooms"
+        :key="type"
+        class="room-type"
+      >
+        <!-- Hiển thị loại phòng và số phòng -->
+        <h3>
+          <i class="fa fa-bed" aria-hidden="true"></i>
+          Loại phòng: {{ type }}
+        </h3>
+        <p>
+          <!-- Hiển thị các số phòng, áp dụng lớp highlight nếu bedType và type đang được hover -->
+          <span
+            v-for="roomNumber in roomGroup.roomNumbers"
+            :key="roomNumber"
+            :class="{ highlighted: isHighlighted(roomNumber, type) }"
+            @click="showRoomInfo(roomNumber, type)"
+          >
+            {{ roomNumber }}
+          </span>
+        </p>
+
+        <!-- Hiển thị các phòng đại diện theo loại giường, tối đa 3 phòng trên một hàng -->
+        <div class="rooms" style="display: flex; gap: 20px; flex-wrap: wrap">
+          <div
+            v-for="(rooms, bedType) in roomGroup.bedTypeGroups"
+            :key="bedType"
+            class="room"
+            style="flex: 0 0 33%; max-width: 33%"
+            @mouseover="hoverBedType(type, bedType)"
+            @mouseleave="hoverBedType(null, null)"
+          >
+            <img
+              :src="rooms[0].IMAGES[0]"
+              class="room-image"
+              alt="Room Image"
+            />
+            <h4>
+              {{ rooms[0].TYPE }} {{ rooms[0].CUSTOM_ATTRIBUTES.bedType }}
+            </h4>
+            <p>Diện tích: {{ rooms[0].CUSTOM_ATTRIBUTES.area }}m²</p>
+            <p>Giá: {{ rooms[0].PRICE_PERNIGHT }} VND/đêm</p>
+            <div class="room-actions">
+              <button
+                class="book-now"
+                @click="openBookingModal(roomGroup, 'book')"
+              >
+                Đặt ngay
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Modal hiển thị thông tin phòng -->
+      <div v-if="selectedRoom" class="room-modal">
+        <div class="room-modal-content">
+          <span class="close" @click="closeRoomInfo">&times;</span>
+          <div class="room-details">
+            <!-- Phần hình ảnh phòng chiếm 3/4 chiều rộng -->
+            <div class="room-images">
+              <img
+                :src="selectedRoom.IMAGES[mainImageIndex]"
+                alt="Room Image"
+                class="main-image"
+              />
+              <div class="thumbnail-images">
+                <img
+                  v-for="(image, index) in selectedRoom.IMAGES"
+                  :src="image"
+                  :key="index"
+                  @click="changeMainImage(index)"
+                  :class="{ 'selected-thumbnail': mainImageIndex === index }"
+                  class="thumbnail-image"
+                />
+              </div>
+            </div>
+
+            <!-- Phần thông tin phòng chiếm 1/4 chiều rộng -->
+            <div class="room-info">
+              <h3>
+                Phòng {{ selectedRoom.TYPE }} -
+                {{ selectedRoom.CUSTOM_ATTRIBUTES.bedType }}
+              </h3>
+              <hr />
+              <p>{{ selectedRoom.DESCRIPTION }}</p>
+              <h4>Tiện nghi của phòng</h4>
+              <ul class="amenities-list">
+                <li
+                  v-for="(amenity, index) in amenitiesList(
+                    selectedRoom.CUSTOM_ATTRIBUTES.amenities
+                  )"
+                  :key="index"
+                >
+                  <i :class="getAmenityIcon(amenity)" aria-hidden="true"></i>
+                  {{ amenity }}
+                </li>
+              </ul>
+              <hr />
+              <h4>Thông tin chi tiết</h4>
+              <p><strong>Số phòng:</strong> {{ selectedRoom.ROOM_NUMBER }}</p>
+              <p>
+                <strong>Diện tích:</strong>
+                {{ selectedRoom.CUSTOM_ATTRIBUTES.area }} m²
+              </p>
+              <p>
+                <strong>Giá:</strong> {{ selectedRoom.PRICE_PERNIGHT }} VND/đêm
+              </p>
+              <div class="action">
+                <button
+                  @click="openCalendarModalForRoom(selectedRoom)"
+                  class="cart"
+                >
+                  <i class="fa fa-cart-plus" aria-hidden="true"></i>
+                </button>
+                <button
+                  @click="openCalendarModalForRoom(selectedRoom, 'bookNow')"
+                >
+                  Đặt ngay
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Modal chọn ngày -->
+    <div v-if="isCalendarModalVisible" class="calendar-modal">
+      <div class="calendar-modal-content">
+        <span class="close" @click="closeCalendarModal">&times;</span>
+        <h2>Chọn ngày đặt phòng</h2>
+        <!-- Nút chuyển tháng -->
+        <div class="month-navigation">
+          <button @click="prevMonth" :disabled="isPrevMonthDisabled">
+            &lt; Tháng trước
+          </button>
+          <span>{{ formattedCurrentMonth }}</span>
+          <button @click="nextMonth">&gt; Tháng sau</button>
+        </div>
+        <!-- Hiển thị lịch ở đây -->
+        <div class="calendar-container">
+          <table class="calendar-table">
+            <!-- Hiển thị tiêu đề ngày trong tuần -->
+            <thead>
+              <tr>
+                <th>CN</th>
+                <th>T2</th>
+                <th>T3</th>
+                <th>T4</th>
+                <th>T5</th>
+                <th>T6</th>
+                <th>T7</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(week, index) in calendar" :key="index">
+                <td
+                  v-for="day in week"
+                  :key="day.date"
+                  :class="{
+                    disabled: day.isPast,
+                    selected: isSelectedDate(day.date),
+                  }"
+                  @click="selectDate(day)"
+                >
+                  {{ day.label }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="selected-dates">
+          <div class="date-range">
+            <label>Ngày nhận - trả phòng:</label>
+            <div class="date-display">
+              {{ formatDate(selectedStartDate) }} -
+              {{ formatDate(selectedEndDate) }}
+            </div>
+          </div>
+
+          <!-- Trường số phòng -->
+          <div class="room-count">
+            <label>Số phòng:</label>
+            <input
+              type="number"
+              v-model.number="roomCount"
+              min="1"
+              @input="validateRoomCount"
+            />
+          </div>
+        </div>
+
+        <!-- Nút xác nhận -->
+        <button class="confirm-button" @click="confirmDates">Xác nhận</button>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
 import axiosClient from "../../api/axiosClient";
+import DatePicker from "vue-datepicker-next"; // Import vue-datepicker-next
+import "vue-datepicker-next/index.css";
 
 export default {
-  props: ['id'],
+  props: ["id"],
   name: "HotelDetail",
+  components: {
+    "vue-datepicker-next": DatePicker, // Đăng ký component
+  },
   data() {
     return {
       minDate: new Date().toISOString().split("T")[0],
       hotel: {
         ADDRESS: {},
-        IMAGE: []
+        IMAGES: [],
       },
+      roomList: [],
+      hotelName: "", // Tên khách sạn
+      hoveredRoomGroup: null,
+      selectedRoom: null,
+      mainImageIndex: 0,
+      availableRooms: [],
+      isCalendarModalVisible: false, // Trạng thái hiển thị modal lịch
+      selectedStartDate: "", // Ngày bắt đầu được chọn
+      selectedEndDate: "",
+      currentDate: new Date(),
+      currentAction: "",
+      roomCount: 1,
     };
   },
   mounted() {
     console.log(this.id);
     this.fetchHotelDetails();
+    this.fetchHotelNames();
+    this.fetchRooms();
+    this.destination = this.hotel.NAME;
   },
   methods: {
+    formatDateRange(startDate, endDate) {
+      if (!startDate || !endDate) return "";
+      const start = startDate.toLocaleDateString("vi-VN");
+      const end = endDate.toLocaleDateString("vi-VN");
+      return `${start} - ${end}`;
+    },
+    prevMonth() {
+      if (this.isPrevMonthDisabled) {
+        return; // Nếu nút bị vô hiệu hóa, không làm gì cả
+      }
+      const prevMonthDate = new Date(this.currentDate);
+      prevMonthDate.setMonth(this.currentDate.getMonth() - 1);
+      this.currentDate = prevMonthDate;
+    },
+
+    // Chuyển sang tháng sau
+    nextMonth() {
+      const nextMonthDate = new Date(this.currentDate);
+      nextMonthDate.setMonth(this.currentDate.getMonth() + 1);
+      this.currentDate = nextMonthDate;
+    },
+
+    openCalendarModalForRoom(room, action) {
+      if (!this.isLoggedIn) {
+        this.$toast.warning("Vui lòng đăng nhập để thêm phòng vào giỏ hàng hoặc đặt phòng.", {
+          position: "top-right",
+          duration: 3000,
+        });
+        return;
+      }
+      this.selectedRoom = room; // Lưu phòng được chọn
+      this.currentAction = action; // Lưu hành động hiện tại
+      this.openCalendarModal(); // Mở modal lịch
+    },
+    hoverBedType(type, bedType) {
+      if (type && bedType) {
+        // Cập nhật loại phòng và bedType đang được hover
+        this.hoveredRoomGroup = { type, bedType };
+      } else {
+        this.hoveredRoomGroup = null; // Reset khi không hover
+      }
+    },
+    getBedType(roomNumber, type) {
+      // Tìm và trả về bedType của phòng dựa trên roomNumber và type
+      const room = this.roomList.find(
+        (room) => room.ROOM_NUMBER === roomNumber && room.TYPE === type
+      );
+      return room ? room.CUSTOM_ATTRIBUTES.bedType : null;
+    },
+    isHighlighted(roomNumber, type) {
+      // Kiểm tra nếu phòng có số phòng và loại phòng tương ứng với trạng thái hover
+      const bedType = this.getBedType(roomNumber, type);
+      return (
+        this.hoveredRoomGroup &&
+        this.hoveredRoomGroup.type === type &&
+        this.hoveredRoomGroup.bedType === bedType
+      );
+    },
+    showRoomInfo(roomNumber, type) {
+      this.selectedRoom = this.roomList.find(
+        (room) => room.ROOM_NUMBER === roomNumber && room.TYPE === type
+      );
+      this.mainImageIndex = 0; // Đặt lại hình ảnh chính khi mở modal
+    },
+    closeRoomInfo() {
+      this.selectedRoom = null; // Đóng modal
+    },
+    changeMainImage(index) {
+      this.mainImageIndex = index; // Thay đổi hình ảnh chính khi click vào hình nhỏ
+    },
+
+    openBookingModal(roomGroup, action) {
+      if (action === "book") {
+        // Lấy danh sách các phòng thuộc phòng đại diện
+        const roomNumbers = roomGroup.roomNumbers.join(","); // Ví dụ: "101,102,103"
+
+        // Điều hướng đến trang booking và truyền các thông tin cần thiết
+        this.$router.push({
+          name: "BookingPage",
+          query: {
+            hotelId: this.hotel._id,
+            roomType: roomGroup.type,
+            roomNumbers: roomNumbers, // Truyền danh sách các phòng thuộc phòng đại diện
+          },
+        });
+      }
+    },
+
+    async addToCart(room, startDate, endDate, roomCount) {
+      // Kiểm tra trạng thái đăng nhập
+      if (!this.isLoggedIn) {
+        this.$toast.warning("Vui lòng đăng nhập để thêm phòng vào giỏ hàng.", {
+          position: "top-right",
+          duration: 3000,
+        });
+        return;
+      }
+
+      try {
+        // Gửi yêu cầu thêm phòng vào giỏ hàng, bao gồm số phòng
+        const response = await axiosClient.post("/carts/addRoomToCart", {
+          roomId: room._id,
+          startDate: startDate,
+          endDate: endDate,
+          roomCount: roomCount,
+        });
+
+        if (response.status === 200) {
+          this.$toast.success("Đã thêm phòng vào giỏ hàng.", {
+            position: "top-right",
+            duration: 3000,
+          });
+        }
+      } catch (error) {
+        // Xử lý lỗi
+        if (error.response && error.response.data.message) {
+          this.$toast.error(error.response.data.message, {
+            position: "top-right",
+            duration: 3000,
+          });
+        } else {
+          this.$toast.error("Có lỗi xảy ra khi thêm phòng vào giỏ hàng.", {
+            position: "top-right",
+            duration: 3000,
+          });
+        }
+        console.error("Lỗi thêm phòng vào giỏ hàng:", error);
+      }
+    },
+
+    amenitiesList(amenities) {
+      return amenities.split(", ");
+    },
+    getAmenityIcon(amenity) {
+      // Trả về lớp CSS cho icon tương ứng với tiện nghi
+      const icons = {
+        "Tủ quần áo": "fa fa-archive",
+        "Máy sấy tóc": "fa fa-wind",
+        "Phòng có bồn tắm": "fa fa-bath",
+        "Dịch vụ giặt ủi": "fa fa-tshirt",
+        Wifi: "fa fa-wifi",
+        "Phòng không hút thuốc": "fa fa-ban-smoking",
+        "Vòi sen": "fa fa-shower",
+        "Quầy bar mini": "fa fa-wine-glass",
+        "Khăn tắm": "fa fa-towel",
+        "Điện thoại": "fa fa-phone",
+        "Đèn bàn": "fa fa-lightbulb",
+        "Bàn làm việc": "fa fa-desk",
+        "Ga trải giường, gối": "fa fa-bed",
+        "Đồ phòng tắm": "fa fa-soap",
+        "Phòng tắm - Vòi sen": "fa fa-bath",
+        "Điện thoại": "fa fa-phone",
+        // Thêm các tiện nghi khác với icon tương ứng
+      };
+      return icons[amenity] || "fa fa-check"; // Mặc định trả về icon check nếu không có icon tương ứng
+    },
     async fetchHotelDetails() {
       try {
         const hotelId = this.$route.params.id; // Lấy ID từ route params
-        const response = await axiosClient.get(`/hotels/getHotelById/${hotelId}`);
+        const response = await axiosClient.get(
+          `/hotels/getHotelById/${hotelId}`
+        );
         console.log("Dữ liệu khách sạn:", response.data);
         this.hotel = response.data.data; // Cập nhật dữ liệu khách sạn
       } catch (error) {
         console.error("Lỗi khi lấy dữ liệu khách sạn:", error);
       }
     },
+
+    async fetchRooms() {
+      try {
+        const hotelId = this.$route.params.id;
+        const response = await axiosClient.get(`/rooms/getRooms/${hotelId}`);
+
+        // Kiểm tra nếu dữ liệu trả về là một mảng
+        if (Array.isArray(response.data.data)) {
+          this.roomList = response.data.data; // Đổi thành roomList
+          console.log("Danh sách phòng:", this.roomList);
+        } else {
+          console.error("Dữ liệu phòng không hợp lệ:", response.data.data);
+          this.roomList = []; // Gán roomList là mảng rỗng nếu dữ liệu không hợp lệ
+        }
+      } catch (error) {
+        console.error("Lỗi khi lấy danh sách phòng:", error);
+        this.roomList = []; // Gán roomList là mảng rỗng nếu có lỗi
+      }
+    },
+
+    async fetchHotelNames() {
+      try {
+        const response = await axiosClient.get("/hotels/getHotelsName");
+        this.hotelNames = response.data.data;
+      } catch (error) {
+        console.error("Lỗi khi lấy danh sách tên khách sạn:", error);
+      }
+    },
+    filterHotelNames() {
+      const normalizedInput = deburr(this.destination.toLowerCase()); // Loại bỏ dấu và chuyển thành chữ thường
+      if (normalizedInput === "") {
+        // Nếu input trống, hiển thị toàn bộ danh sách khách sạn
+        this.filteredHotelNames = this.hotelNames;
+      } else {
+        this.filteredHotelNames = this.hotelNames.filter((hotel) => {
+          const normalizedHotelName = deburr(hotel.NAME.toLowerCase()); // Loại bỏ dấu và chuyển thành chữ thường
+          return normalizedHotelName.includes(normalizedInput); // So sánh chuỗi đã chuyển đổi
+        });
+      }
+      this.showHotelSuggestions = true; // Hiển thị gợi ý
+    },
+    selectHotel(name) {
+      this.destination = name;
+      this.showHotelSuggestions = false;
+    },
+    hideSuggestionsWithDelay() {
+      setTimeout(() => {
+        this.showHotelSuggestions = false;
+      }, 200); // Đợi một khoảng thời gian ngắn để cho phép click vào gợi ý
+    },
+
+    openModal() {
+      this.isModalVisible = true;
+    },
+    closeModal() {
+      this.isModalVisible = false;
+    },
+    // Mở modal lịch
+    openCalendarModal() {
+      this.isCalendarModalVisible = true;
+      this.currentDate = new Date(); // Đặt lại currentDate về ngày hiện tại
+
+      // Mặc định chọn ngày hiện tại và 3 ngày sau
+      const today = new Date();
+      this.selectedStartDate = today;
+      const defaultEndDate = new Date();
+      defaultEndDate.setDate(today.getDate() + 2); // Mặc định 3 ngày 2 đêm
+      this.selectedEndDate = defaultEndDate;
+    },
+
+    // Đóng modal lịch
+    closeCalendarModal() {
+      this.isCalendarModalVisible = false;
+    },
+
+    disablePastDates(date) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      return date < today;
+    },
+
+    // Kiểm tra ngày được chọn
+    isSelectedDate(date) {
+      if (!date) return false;
+
+      // Lấy giá trị ngày giờ về 0 để so sánh chính xác
+      const selectedStart = this.selectedStartDate
+        ? new Date(
+            this.selectedStartDate.getFullYear(),
+            this.selectedStartDate.getMonth(),
+            this.selectedStartDate.getDate()
+          ).getTime()
+        : null;
+
+      const selectedEnd = this.selectedEndDate
+        ? new Date(
+            this.selectedEndDate.getFullYear(),
+            this.selectedEndDate.getMonth(),
+            this.selectedEndDate.getDate()
+          ).getTime()
+        : null;
+
+      const currentDate = new Date(
+        date.getFullYear(),
+        date.getMonth(),
+        date.getDate()
+      ).getTime();
+
+      // Kiểm tra nếu chỉ có ngày bắt đầu được chọn, tô màu ngày đó
+      if (selectedStart && !selectedEnd) {
+        return currentDate === selectedStart;
+      }
+
+      // Kiểm tra nếu cả hai ngày được chọn, tô màu khoảng thời gian
+      if (selectedStart && selectedEnd) {
+        return currentDate >= selectedStart && currentDate <= selectedEnd;
+      }
+
+      return false;
+    },
+
+    // Chọn ngày
+    selectDate(day) {
+      if (day.isPast || !day.date) {
+        return; // Không cho chọn ngày trong quá khứ hoặc ô trống
+      }
+
+      if (!this.selectedStartDate || this.selectedEndDate) {
+        // Nếu chưa chọn ngày bắt đầu hoặc đã chọn cả hai ngày, bắt đầu lại
+        this.selectedStartDate = day.date;
+        this.selectedEndDate = null;
+      } else {
+        if (day.date >= this.selectedStartDate) {
+          this.selectedEndDate = day.date;
+        } else {
+          // Nếu ngày chọn trước ngày bắt đầu, đặt lại ngày bắt đầu
+          this.selectedStartDate = day.date;
+          this.selectedEndDate = null;
+        }
+      }
+    },
+    bookNow(room, startDate, endDate, roomCount) {
+      // Kiểm tra trạng thái đăng nhập
+      if (!this.isLoggedIn) {
+        this.$toast.warning("Vui lòng đăng nhập để đặt phòng.", {
+          position: "top-right",
+          duration: 3000,
+        });
+        return;
+      }
+
+      // Điều hướng đến trang đặt phòng, truyền các thông tin cần thiết
+      this.$router.push({
+        name: "BookingPage",
+        params: {
+          roomId: room._id,
+        },
+        query: {
+          startDate: startDate,
+          endDate: endDate,
+          roomCount: roomCount,
+        },
+      });
+    },
+
+    // Xác nhận ngày
+    confirmDates() {
+      if (!this.selectedStartDate || !this.selectedEndDate) {
+        alert("Vui lòng chọn ngày nhận phòng và ngày trả phòng.");
+        return;
+      }
+
+      // Chuyển đổi ngày thành chuỗi để gửi lên server hoặc sử dụng
+      const startDate = this.selectedStartDate.toISOString().split("T")[0];
+      const endDate = this.selectedEndDate.toISOString().split("T")[0];
+
+      if (this.currentAction === "addToCart") {
+        // Thực hiện hành động thêm vào giỏ hàng
+        this.addToCart(this.selectedRoom, startDate, endDate, this.roomCount);
+      } else if (this.currentAction === "bookNow") {
+        // Thực hiện hành động đặt ngay
+        this.bookNow(this.selectedRoom, startDate, endDate, this.roomCount);
+      }
+
+      // Đóng modal
+      this.closeCalendarModal();
+    },
+
+    // Định dạng ngày
+    formatDate(date) {
+      if (!date) return "";
+      return date.toLocaleDateString("vi-VN");
+    },
+    validateRoomCount() {
+      if (this.roomCount < 1) {
+        this.roomCount = 1;
+      }
+    },
+  },
+  computed: {
+    nightsCount() {
+      if (this.selectedStartDate && this.selectedEndDate) {
+        const start = new Date(
+          this.selectedStartDate.getFullYear(),
+          this.selectedStartDate.getMonth(),
+          this.selectedStartDate.getDate()
+        );
+        const end = new Date(
+          this.selectedEndDate.getFullYear(),
+          this.selectedEndDate.getMonth(),
+          this.selectedEndDate.getDate()
+        );
+        const diffTime = end - start;
+        const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+        return diffDays;
+      }
+      return 0;
+    },
+    isPrevMonthDisabled() {
+      const today = new Date();
+      const prevMonthDate = new Date(this.currentDate);
+      prevMonthDate.setMonth(this.currentDate.getMonth() - 1);
+
+      return (
+        prevMonthDate.getFullYear() < today.getFullYear() ||
+        (prevMonthDate.getFullYear() === today.getFullYear() &&
+          prevMonthDate.getMonth() < today.getMonth())
+      );
+    },
+    isLoggedIn() {
+      return this.$store.getters.isLoggedIn;
+    },
+    calendar() {
+      const days = [];
+      const year = this.currentDate.getFullYear();
+      const month = this.currentDate.getMonth();
+      const totalDays = new Date(year, month + 1, 0).getDate();
+      const startDayOfWeek = new Date(year, month, 1).getDay(); // Ngày bắt đầu của tháng
+
+      let week = [];
+      // Thêm các ô trống cho các ngày trước ngày 1 của tháng
+      for (let i = 0; i < startDayOfWeek; i++) {
+        week.push({ label: "", date: null, isPast: false });
+      }
+
+      for (let day = 1; day <= totalDays; day++) {
+        const date = new Date(year, month, day);
+        const today = new Date();
+        const isPast =
+          date < today.setHours(0, 0, 0, 0) &&
+          month === today.getMonth() &&
+          year === today.getFullYear();
+
+        week.push({
+          label: day,
+          date: date,
+          isPast: isPast,
+        });
+
+        if (week.length === 7) {
+          days.push(week);
+          week = [];
+        }
+      }
+
+      // Thêm các ô trống cho các ngày sau ngày cuối cùng của tháng
+      if (week.length > 0) {
+        while (week.length < 7) {
+          week.push({ label: "", date: null, isPast: false });
+        }
+        days.push(week);
+      }
+
+      return days;
+    },
+    groupedRooms() {
+      if (!Array.isArray(this.roomList) || this.roomList.length === 0) {
+        return {};
+      }
+
+      return this.roomList.reduce((acc, room) => {
+        if (!acc[room.TYPE]) {
+          acc[room.TYPE] = {
+            roomNumbers: [],
+            bedTypeGroups: {},
+          };
+        }
+
+        acc[room.TYPE].roomNumbers.push(room.ROOM_NUMBER);
+
+        const bedType = room.CUSTOM_ATTRIBUTES.bedType || "Unknown BedType";
+        if (!acc[room.TYPE].bedTypeGroups[bedType]) {
+          acc[room.TYPE].bedTypeGroups[bedType] = [];
+        }
+
+        acc[room.TYPE].bedTypeGroups[bedType].push(room);
+
+        return acc;
+      }, {});
+    },
+    // Tính toán tháng hiện tại và định dạng
+    formattedCurrentMonth() {
+      return this.currentDate.toLocaleDateString("vi-VN", {
+        year: "numeric",
+        month: "long",
+      });
+    },
+    // Tạo các ngày trong tháng
+    daysInMonth() {
+      const days = [];
+      const year = this.currentDate.getFullYear();
+      const month = this.currentDate.getMonth();
+      const totalDays = new Date(year, month + 1, 0).getDate();
+
+      for (let i = 1; i <= totalDays; i++) {
+        days.push({
+          label: i,
+          date: new Date(year, month, i),
+        });
+      }
+      return days;
+    },
   },
 };
 </script>
 
 <style scoped>
-
-.carousel-inner {
-  max-height: 700px;
-}
-
-.carousel-item {
-  height: 80vh;
-  background-size: cover;
-  background-position: center;
-  position: relative; /* Đảm bảo các phần tử con có thể căn chỉnh chính xác */
-  /* display: flex;  */
-  align-items: center; /* Căn giữa theo chiều dọc */
-  /* justify-content: center; */
-}
-
-.carousel-item img {
-  width: 100%;
-  height: 100%; /* Đảm bảo hình ảnh lấp đầy phần chứa */
-  object-fit: cover; /* Đảm bảo hình ảnh không bị biến dạng */
-}
-
-.carousel-caption {
-  position: absolute; /* Đảm bảo caption nằm trên ảnh */
-  top: 50%; /* Đặt cách từ đỉnh carousel item */
-  left: 50%;
-  transform: translate(-50%, -50%); /* Căn giữa cả chiều ngang và dọc */
-  background-color: rgba(0, 0, 0, 0.5); /* Nền bán trong suốt */
-  padding: 10px;
-  border-radius: 5px;
-  color: white;
-  text-align: center; /* Căn giữa nội dung text */
-  width: 80%; /* Đặt chiều rộng để caption chiếm 80% chiều rộng của carousel-item */
-  height: 150px;
-  box-sizing: border-box; /* Đảm bảo padding không ảnh hưởng đến chiều rộng */
-}
-
-.search-bar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  position: absolute;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 85%;
-  background: rgba(255, 255, 255, 0.9);
-  padding: 15px;
-  border-radius: 10px;
-  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.search-fields {
-  display: flex;
-  flex-wrap: wrap; /* Cho phép các trường nhập liệu xuống dòng nếu không đủ không gian */
-  justify-content: space-between;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
-}
-
-.search-field {
-  flex: 1;
-  min-width: 200px; /* Đảm bảo các trường không quá nhỏ */
-}
-
-.search-field label {
-  display: block;
-  margin-bottom: 5px;
-  font-size: 14px;
-  color: #333;
-  font-weight: bold;
-}
-
-.search-fields input {
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  font-size: 16px;
-  box-sizing: border-box; /* Đảm bảo padding không ảnh hưởng đến chiều rộng */
-}
-
-
-.search-btn {
-  background-color: #dfaa7f;
-  color: #6d4c41;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 5px;
-  font-size: 16px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-  flex: 1;
-  min-width: 200px; 
-  margin-top: 24px;
-}
-
-.search-btn:hover {
-  background-color: #d9c7b8;
-}
-
-.input-group-text {
-  background-color: #f8f9fa;
-  border: none;
-}
-
-@media (max-width: 768px) {
-    .search-field, .search-btn {
-      flex: 1 1 100%;
-    }
-  }
-
-.hotel-details {
-  padding: 20px;
-  margin-top: 60px; /* Đảm bảo phần thông tin khách sạn không bị đè lên bởi search bar */
-}
-
-.hotel-details .address {
-  font-style: italic;
-}
-
-.hotel-details .description {
-  margin-top: 20px;
-}
-
-
-.email,
-.phone {
-  margin-left: 5px;
-}
-
+@import "./HotelDetail.scss";
 </style>

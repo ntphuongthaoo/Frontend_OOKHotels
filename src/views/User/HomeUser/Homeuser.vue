@@ -1,52 +1,29 @@
 <template>
   <div>
     <!-- Carousel với hình ảnh khách sạn -->
-    <div
-      id="carouselExampleIndicators"
-      class="carousel slide"
-      data-bs-ride="carousel"
-    >
-      <div class="carousel-indicators">
-        <button
-          v-for="(image, index) in images"
-          :key="index"
-          :data-bs-target="'#carouselExampleIndicators'"
-          :data-bs-slide-to="index"
-          :class="{ active: index === 0 }"
-          :aria-label="'Slide ' + (index + 1)"
-        ></button>
-      </div>
-      <div class="carousel-inner">
-        <div
-          v-for="(image, index) in images"
-          :key="index"
-          :class="['carousel-item', { active: index === 0 }]"
-        >
-          <img :src="image.src" class="d-block w-100" :alt="image.alt" />
-          <!-- <div class="carousel-caption d-none d-md-block">
-            <h5>{{ image.title }}</h5>
-            <p>{{ image.description }}</p>
-          </div> -->
+    <div class="product-page">
+      <!-- Banner Section -->
+      <div class="carousel">
+        <div class="carousel-inner">
+          <div
+            v-for="(banner, index) in banners"
+            :key="index"
+            class="carousel-item"
+            :class="{ active: index === currentIndex }"
+          >
+            <img :src="banner" alt="Banner" />
+          </div>
         </div>
       </div>
-      <button
-        class="carousel-control-prev"
-        type="button"
-        data-bs-target="#carouselExampleIndicators"
-        data-bs-slide="prev"
-      >
-        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-        <span class="visually-hidden">Previous</span>
-      </button>
-      <button
-        class="carousel-control-next"
-        type="button"
-        data-bs-target="#carouselExampleIndicators"
-        data-bs-slide="next"
-      >
-        <span class="carousel-control-next-icon" aria-hidden="true"></span>
-        <span class="visually-hidden">Next</span>
-      </button>
+
+      <!-- Products Section -->
+      <div class="products">
+        <div v-for="product in products" :key="product.id" class="product-card">
+          <img :src="product.image" :alt="product.name" />
+          <h3>{{ product.name }}</h3>
+          <p>{{ product.price }}</p>
+        </div>
+      </div>
     </div>
 
     <!-- Thanh tìm kiếm -->
@@ -59,15 +36,41 @@
             type="text"
             placeholder="Nhập Khách sạn / Điểm đến"
             v-model="destination"
+            @focus="filterHotelNames" 
+            @blur="hideSuggestionsWithDelay"
+            @input="filterHotelNames"
+          />
+          <ul
+            v-if="showHotelSuggestions && filteredHotelNames.length"
+            class="suggestions-list"
+          >
+            <li
+              v-for="(hotel, index) in filteredHotelNames"
+              :key="index"
+              @mousedown.prevent="selectHotel(hotel.NAME)"
+            >
+              {{ hotel.NAME }}
+            </li>
+          </ul>
+        </div>
+        <!-- Các trường tìm kiếm khác -->
+        <div class="search-field">
+          <label for="checkInDate">Ngày nhận phòng</label>
+          <input
+            id="checkInDate"
+            type="date"
+            v-model="checkInDate"
+            :min="minDate"
           />
         </div>
         <div class="search-field">
-          <label for="checkInDate">Ngày nhận phòng</label>
-          <input id="checkInDate" type="date" v-model="checkInDate" :min="minDate" />
-        </div>
-        <div class="search-field">
           <label for="checkOutDate">Ngày trả phòng</label>
-          <input id="checkOutDate" type="date" v-model="checkOutDate" :min="checkInDate || minDate" />
+          <input
+            id="checkOutDate"
+            type="date"
+            v-model="checkOutDate"
+            :min="checkInDate || minDate"
+          />
         </div>
         <div class="search-field">
           <label for="rooms">Số phòng</label>
@@ -107,26 +110,26 @@
           >
             <div class="row gx-0">
               <!-- Hai tấm bên trái -->
-              <div class="col-md-4 d-flex flex-column">
+              <div
+                class="col-md-4 d-flex flex-column group-card"
+                style="height: 600px"
+              >
                 <div
                   class="small-card flex-fill"
                   v-for="hotel in chunk.left"
                   :key="hotel._id"
                   @click="goToHotel(hotel._id)"
                 >
-                  <img :src="hotel.IMAGE" class="card-img" :alt="hotel.NAME" />
+                  <img :src="hotel.IMAGES" class="card-img" :alt="hotel.NAME" />
                   <h5 class="card-title">{{ hotel.NAME }}</h5>
                 </div>
               </div>
 
               <!-- Tấm lớn ở giữa -->
-              <div class="col-md-4">
-                <div
-                  class="big-card h-100"
-                  @click="goToHotel(chunk.middle._id)"
-                >
+              <div class="col-md-4 big-card group-card">
+                <div class="big-card" @click="goToHotel(chunk.middle._id)">
                   <img
-                    :src="chunk.middle.IMAGE"
+                    :src="chunk.middle.IMAGES"
                     class="card-img big-img h-100"
                     :alt="chunk.middle.NAME"
                   />
@@ -135,14 +138,17 @@
               </div>
 
               <!-- Hai tấm bên phải -->
-              <div class="col-md-4 d-flex flex-column">
+              <div
+                class="col-md-4 d-flex flex-column group-card"
+                style="height: 600px"
+              >
                 <div
                   class="small-card flex-fill"
                   v-for="hotel in chunk.right"
                   :key="hotel._id"
                   @click="goToHotel(hotel._id)"
                 >
-                  <img :src="hotel.IMAGE" class="card-img" :alt="hotel.NAME" />
+                  <img :src="hotel.IMAGES" class="card-img" :alt="hotel.NAME" />
                   <h5 class="card-title">{{ hotel.NAME }}</h5>
                 </div>
               </div>
@@ -175,15 +181,18 @@
 </template>
 
 <script>
-import bg1 from "@/assets/bg_1.jpg";
-import bg2 from "@/assets/bg_2.jpg";
-import bg3 from "@/assets/bg_3.jpg";
 import axiosClient from "../../../api/axiosClient";
+import { deburr } from "lodash";
+import bannerProduct from "@/assets/bg_1.jpg";
+import bannerProduct1 from "@/assets/bg_2.jpg";
+import bannerProduct2 from "@/assets/bg_3.jpg";
 
 export default {
   name: "BannerComponent",
   data() {
     return {
+      banners: [bannerProduct, bannerProduct1, bannerProduct2],
+      currentIndex: 0,
       featuredHotels: [],
       destination: "",
       checkInDate: "",
@@ -191,35 +200,28 @@ export default {
       rooms: 1,
       voucherCode: "",
       minDate: new Date().toISOString().split("T")[0],
-      images: [
-        {
-          src: bg1,
-          alt: "Hotel Image 1",
-          title: "Hotel Luxury 1",
-          description:
-            "Trải nghiệm kỳ nghỉ sang trọng tại khách sạn của chúng tôi.",
-        },
-        {
-          src: bg2,
-          alt: "Hotel Image 2",
-          title: "Hotel Luxury 2",
-          description:
-            "Tận hưởng không gian thoải mái và đẹp mắt tại khách sạn của chúng tôi.",
-        },
-        {
-          src: bg3,
-          alt: "Hotel Image 3",
-          title: "Hotel Luxury 3",
-          description:
-            "Thư giãn và tận hưởng phong cảnh đẹp tại khách sạn của chúng tôi.",
-        },
-      ],
+      hotelNames: [], // Danh sách khách sạn
+      filteredHotelNames: [], // Danh sách khách sạn đã lọc
+      showHotelSuggestions: false, // Trạng thái hiển thị gợi ý
     };
   },
   mounted() {
     this.fetchFeaturedHotels();
+    this.fetchHotelNames();
+    this.startCarousel();
   },
   methods: {
+    startCarousel() {
+      const items = document.querySelectorAll(".carousel-item");
+      this.currentIndex = 0; // Set the initial index to show the first item
+
+      setInterval(() => {
+        items[this.currentIndex].classList.remove("active");
+        this.currentIndex = (this.currentIndex + 1) % items.length;
+        items[this.currentIndex].classList.add("active");
+      }, 5000); // Change every 5 seconds
+    },
+
     async fetchFeaturedHotels() {
       try {
         const response = await axiosClient.get("/hotels/getAllHotels");
@@ -228,6 +230,36 @@ export default {
       } catch (error) {
         console.error("Lỗi khi lấy dữ liệu khách sạn:", error);
       }
+    },
+    async fetchHotelNames() {
+      try {
+        const response = await axiosClient.get("/hotels/getHotelsName");
+        this.hotelNames = response.data.data;
+      } catch (error) {
+        console.error("Lỗi khi lấy danh sách tên khách sạn:", error);
+      }
+    },
+    filterHotelNames() {
+      const normalizedInput = deburr(this.destination.toLowerCase()); // Loại bỏ dấu và chuyển thành chữ thường
+      if (normalizedInput === "") {
+        // Nếu input trống, hiển thị toàn bộ danh sách khách sạn
+        this.filteredHotelNames = this.hotelNames;
+      } else {
+        this.filteredHotelNames = this.hotelNames.filter((hotel) => {
+          const normalizedHotelName = deburr(hotel.NAME.toLowerCase()); // Loại bỏ dấu và chuyển thành chữ thường
+          return normalizedHotelName.includes(normalizedInput); // So sánh chuỗi đã chuyển đổi
+        });
+      }
+      this.showHotelSuggestions = true; // Hiển thị gợi ý
+    },
+    selectHotel(name) {
+      this.destination = name;
+      this.showHotelSuggestions = false;
+    },
+    hideSuggestionsWithDelay() {
+      setTimeout(() => {
+        this.showHotelSuggestions = false;
+      }, 200); // Đợi một khoảng thời gian ngắn để cho phép click vào gợi ý
     },
     goToHotel(hotelId) {
       this.$router.push({ name: "HotelDetail", params: { id: hotelId } });

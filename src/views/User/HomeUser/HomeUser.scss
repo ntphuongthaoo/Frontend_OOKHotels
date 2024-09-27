@@ -38,15 +38,17 @@
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
-  position: absolute;
-  bottom: 20px;
+  position: relative;
+  bottom: 50px;
   left: 50%;
   transform: translateX(-50%);
   width: 90%;
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 1);
   padding: 15px;
   border-radius: 10px;
   box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
+  z-index: 500;
+  margin-bottom: 100px;
 }
 
 .search-fields {
@@ -82,7 +84,7 @@
 
 .search-btn {
   background-color: #6d4c41;
-  color: #d9c7b8;
+  color: #f8f9fa;
   padding: 10px 20px;
   border: none;
   border-radius: 5px;
@@ -92,10 +94,13 @@
   flex: 1;
   min-width: 200px; 
   margin-top: 24px;
+  border: 2px solid;
 }
 
 .search-btn:hover {
-  background-color: #d9c7b8;
+  background-color: #6d4c41;
+  color: #ffffff;
+  border-color: #AF5940;
 }
 
 .input-group-text {
@@ -110,74 +115,122 @@
   }
 
 /* CSS cho khách sạn nổi bật */
-.featured-hotels {
-    margin-top: 50px;
-  }
-  
-  .small-card,
-  .big-card {
-    margin: 0; /* Loại bỏ khoảng cách mặc định giữa các thẻ */
-    background-color: #f9f9f9;
-    text-align: center;
-    position: relative;
-  }
-  
-  .small-card {
-    flex: 1;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .card-img {
-    width: 100%;
-    object-fit: cover;
-    height: 100%;
-  }
-  
-  .big-card {
-    height: 100%; /* Đảm bảo chiều cao ảnh lớn ở giữa bằng với cột bên */
-    margin: 0 10px;
-  }
-  
-  .big-img {
-    height: 100%;
-    object-fit: cover;
-  }
-  
-  .row.gx-0 {
-    row-gap: 0; /* Loại bỏ khoảng cách giữa các hàng */
-  }
-  
-  .col-md-4.d-flex {
-    display: flex;
-    flex-direction: column;
-    gap: 15px; /* Khoảng cách giữa các thẻ */
-  }
-  
-  /* Style cho phần tiêu đề đè lên ảnh */
-  .card-title {
-    font-size: 18px;
-    font-weight: bold;
-    color: white;
-    position: absolute;
-    bottom: 10px; /* Căn dưới một chút */
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(0, 0, 0, 0.5); /* Nền bán trong suốt để nổi bật text */
-    padding: 5px 10px;
-    border-radius: 5px;
-    margin: 0;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7); /* Thêm bóng cho text */
-  }
-  
-  .big-card .card-title {
-    font-size: 22px; /* Kích thước chữ lớn hơn cho thẻ lớn */
-  }
-  
-  h2.text-center {
-    margin-bottom: 30px;
-    margin-top: 100px;
-  }
+.featured-hotels .carousel-item {
+  cursor: pointer;
+}
+
+.small-card{
+  margin: 0;
+  background-color: #f9f9f9;
+  text-align: center;
+  position: relative;
+}
+
+.small-card {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 50%; /* Set height to 50% to make them of equal height */
+  max-height: 50%; /* Ensure the height does not exceed half of the total height */
+}
+
+.card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Cover the entire space without distortion */
+}
+
+
+
+.big-img {
+  height: 100%;
+  object-fit: cover;
+}
+
+.row.gx-0 {
+  row-gap: 0; /* Eliminate row gaps */
+}
+
+.col-md-4.d-flex {
+  display: flex;
+  flex-direction: column;
+  gap: 0; /* Ensure no gaps between small cards */
+  height: 100%; /* Set full height to match the height of the big card */
+}
+
+
+.big-card{
+  height: 600px;
+  position: relative;
+  text-align: center;
+}
+.col-md-4 .small-card,
+.col-md-4 .big-card {
+  flex: 1; /* Allow the items to take equal space */
+}
+
+.col-md-4:first-child .small-card,
+.col-md-4:last-child .small-card {
+  height: 50%; /* Each small card on the sides takes 50% of the column height */
+}
+
+.col-md-4 .big-card {
+  height: 100%; /* Big card in the center takes full column height */
+}
+
+.card-title {
+  font-size: 18px;
+  font-weight: bold;
+  color: white;
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.5);
+  padding: 5px 10px;
+  border-radius: 5px;
+  margin: 0;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+}
+
+h2.text-center {
+  margin-bottom: 30px;
+  margin-top: 100px;
+}
+.group-card{
+  padding: 0 5px;
+}
+.small-card {
+  padding: 5px 0;
+}
+
+/* Style cho gợi ý tìm kiếm */
+.suggestions-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  position: absolute;
+  background: #fff;
+  width: 20%;
+  z-index: 1000; /* Tăng z-index để đảm bảo nằm trên cùng */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Thêm đổ bóng để nổi bật */
+}
+
+.suggestions-list li {
+  padding: 10px;
+  cursor: pointer;
+}
+
+.suggestions-list li:hover {
+  background-color: #f1f1f1;
+}
+
+.group-card, .product-page, .carousel {
+  position: relative; /* Đảm bảo không thiết lập overflow hidden nếu không cần thiết */
+}
 
   

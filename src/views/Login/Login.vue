@@ -66,20 +66,19 @@ export default {
     };
   },
   methods: {
-    ...mapActions(['login']),
+    ...mapActions(["login"]),
 
     async handleSubmit() {
       // Kiểm tra giá trị đầu vào để xác định là email hay số điện thoại
-      const isEmail = this.identifier.includes('@');
+      const isEmail = this.identifier.includes("@");
       const payload = {
-        [isEmail ? 'EMAIL' : 'PHONE_NUMBER']: this.identifier,
+        [isEmail ? "EMAIL" : "PHONE_NUMBER"]: this.identifier,
         PASSWORD: this.password,
       };
 
       try {
-        // const result = await this.$store.dispatch('login', payload);
+        // const result = await this.$store.dispatch("login", payload);
         await this.login(payload);
-        
       } catch (error) {
         this.$message.error(
           error.response?.data?.message || "Đăng nhập thất bại!"

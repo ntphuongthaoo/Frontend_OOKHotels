@@ -9,6 +9,7 @@ const store = createStore({
     userInfo: null,
     editingMode: false,
     users: [],
+    cart: null,
   },
   mutations: {
     SET_USER_INFO(state, userInfo) {
@@ -22,6 +23,9 @@ const store = createStore({
     LOGOUT(state) {
       state.isLoggedIn = false;
       state.userInfo = null;
+    },
+    SET_CART(state, cart) {
+      state.cart = cart;
     },
   },
   actions: {
@@ -40,11 +44,23 @@ const store = createStore({
         if (response.status >= 200 && response.status <= 300) {
           const token = response.data.accessToken;
           localStorage.setItem("accessToken", token);
-          commit("SET_LOGIN_STATE");
+          // commit("SET_LOGIN_STATE", userInfo);
 
-          dispatch("checkToken"); // Lấy thông tin người dùng sau khi login thành công
-
-          message.success("Đăng nhập thành công!");
+          const userInfo = await dispatch("checkToken"); // Lấy thông tin người dùng sau khi login thành công
+          if (userInfo) {
+            const roles = userInfo.ROLE;
+    
+            // Kiểm tra vai trò và điều hướng dựa trên role
+            if (roles.ADMIN) {
+              router.push("/dashboard"); // Điều hướng admin đến Dashboard
+            } else if (roles.BRANCH_MANAGER) {
+              router.push("/branch_dashboard"); // Điều hướng quản lý chi nhánh
+            } else if (roles.STAFF) {
+              router.push("/staff_dashboard"); // Điều hướng nhân viên
+            } else {
+              router.push("/trangchu"); // Điều hướng người dùng thông thường
+            }
+          }
         }
       } catch (error) {
         // message.error("Đăng nhập thất bại!");
@@ -64,20 +80,12 @@ const store = createStore({
           const response = await axios.get("/users/profile");
           if (response.status >= 200 && response.status < 300) {
             const userInfo = response.data;
+            
             commit("SET_USER_INFO", userInfo);
+            // const roles = userInfo.ROLE;
 
-            const roles = userInfo.ROLE;
+            return userInfo;
 
-            // Điều hướng dựa trên vai trò
-            if (roles.ADMIN) {
-              router.push("/dashboard");  // Điều hướng admin đến trang Dashboard
-            } else if (roles.BRANCH_MANAGER) {
-              router.push("/dashboard");  // Điều hướng quản lý chi nhánh
-            } else if (roles.STAFF) {
-              router.push("/dashboard");  // Điều hướng nhân viên
-            } else {
-              router.push("/trangchu");  // Điều hướng người dùng thông thường
-            }
           } else {
             console.error("Unexpected response status:", response.status);
             dispatch("LOGOUT");
@@ -90,10 +98,28 @@ const store = createStore({
         console.log("No token found in localStorage.");
       }
     },
+    async fetchCart({ commit }) {
+      try {
+        const response = await axios.post("/carts/getCartByUserId");
+        if (response && response.data.cart) {
+          commit("SET_CART", response.data.cart);
+        }
+      } catch (error) {
+        console.error("Error fetching cart:", error);
+      }
+    },
   },
   getters: {
     isLoggedIn: (state) => state.isLoggedIn,
     userInfo: (state) => state.userInfo,
+    cartItemCount: (state) => {
+      if (state.cart && state.cart.HOTELS) {
+        return state.cart.HOTELS.reduce((count, hotel) => {
+          return count + hotel.ROOMS.length;
+        }, 0);
+      }
+      return 0;
+    },
   },
 });
 

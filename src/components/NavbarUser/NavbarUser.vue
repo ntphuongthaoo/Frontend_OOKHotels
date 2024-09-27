@@ -1,50 +1,9 @@
 <template>
   <header>
-    <div class="top-header">
-      <div class="container">
-        <div class="float-left">
-          <ul class="header-social">
-            <li><a href="#">Contact Us +44 (012) 5689 3264</a></li>
-          </ul>
-        </div>
-        <!-- <div class="float-right">
-          <div class="nice-select-wrapper">
-            <select class="currency-selector" style="display: none">
-              <option value="1">USD</option>
-            </select>
-            <div class="nice-select currency-select" tabindex="0">
-              <span class="current">USD</span>
-            </div>
-          </div>
-          <div class="nice-select-wrapper">
-            <select class="language-selector" style="display: none">
-              <option value="1">ENG</option>
-              <option value="1">FRA</option>
-              <option value="1">BAN</option>
-            </select>
-            <div class="nice-select language-select" tabindex="0">
-              <span class="current">ENG</span>
-            </div>
-          </div>
-        </div> -->
-        <div class="float-right">
-          <div v-if="!isLoggedIn" class="welcome-message">
-            CHÀO MỪNG BẠN ĐÉN VỚI OOK !!
-          </div>
-          <div v-else class="user-info">
-            <i class="fa fa-user-circle-o user-icon"></i>
-            <span class="user-name">{{ userInfo?.FULLNAME || 'User' }}</span>
-          </div>
-        </div>
-      </div>
-    </div>
     <div class="separator"></div>
     <div class="main-menu">
-      <nav class="navbar navbar-expand-lg navbar-light">
+      <nav class="navbar navbar-expand-lg">
         <div class="container">
-          <a class="navbar-brand logo" href="/trangchu">
-            <img src="../../assets/logo_ôk.png" alt="OOK Logo" />
-          </a>
           <button
             class="navbar-toggler"
             type="button"
@@ -59,59 +18,55 @@
             :class="['collapse', 'navbar-collapse', { show: isNavbarOpen }]"
             id="navbarSupportedContent"
           >
-            <ul class="navbar-nav ml-auto">
-              <li class="nav-item active">
-                <a class="nav-link" href="/trangchu">Trang chủ</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="/danh-sach-khach-san">Khách sạn</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="gallery.html">Vị Trí</a>
-              </li>
-              <!-- <li class="nav-item dropdown">
-                <a
-                  class="nav-link dropdown-toggle"
-                  href="#"
-                  role="button"
-                  data-toggle="dropdown"
-                  aria-haspopup="true"
-                  aria-expanded="false"
-                  >Pages</a
-                >
-                <div class="dropdown-menu">
-                  <a class="dropdown-item" href="elements.html">Elements</a>
-                  <a class="dropdown-item" href="rooms.html">Rooms</a>
-                </div>
-              </li>
-              <li class="nav-item dropdown">
-                <a
-                  class="nav-link dropdown-toggle"
-                  href="#"
-                  role="button"
-                  data-toggle="dropdown"
-                  aria-haspopup="true"
-                  aria-expanded="false"
-                  >Blog</a
-                >
-                <div class="dropdown-menu">
-                  <a class="dropdown-item" href="blog.html">Blog</a>
-                  <a class="dropdown-item" href="single-blog.html"
-                    >Blog Details</a
-                  >
-                </div>
-              </li> -->
-              <li class="nav-item">
-                <a class="nav-link" href="contact.html">Liên hệ</a>
-              </li>
-            </ul>
-            <div class="auth-links">
+            <div class="group-navbar">
+              <ul class="navbar-nav ml-auto">
+                <li class="nav-item active">
+                  <a class="nav-link" href="/trangchu">Trang chủ</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="/danh-sach-khach-san">Khách sạn</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="gallery.html">Vị Trí</a>
+                </li>
+
+                <li class="nav-item">
+                  <a class="nav-link" href="contact.html">Liên hệ</a>
+                </li>
+              </ul>
+            </div>
+
+            <div class="group-navbar">
+              <a class="navbar-brand logo" href="/trangchu">
+                <img
+                  src="../../assets/LOGO_MAIN.png"
+                  alt="OOK Logo"
+                  class="logo"
+                />
+              </a>
+            </div>
+
+            <div class="auth-links group-navbar">
               <template v-if="isLoggedIn">
+                <span class="user-name">{{
+                  userInfo?.FULLNAME || "User"
+                }}</span>
                 <a class="btn auth-btn logout-btn" @click="logout">Đăng xuất</a>
+                <a href="/cart" class="cart-icon" :data-count="cartItemCount">
+                  <i class="fas fa-shopping-cart"></i>
+                </a>
               </template>
               <template v-else>
                 <a class="btn auth-btn login-btn" href="/dangnhap">Đăng nhập</a>
                 <a class="btn auth-btn register-btn" href="/dangky">Đăng ký</a>
+                <a
+                  href="/cart"
+                  class="cart-icon"
+                  v-if="cartItemCount > 0"
+                  :data-count="cartItemCount"
+                >
+                  <i class="fas fa-shopping-cart"></i>
+                </a>
               </template>
             </div>
           </div>
@@ -123,25 +78,40 @@
 
 <script>
 import { mapGetters, mapActions } from "vuex";
+import axiosClient from "../../api/axiosClient";
 
 export default {
   name: "HeaderComponent",
   data() {
     return {
       isNavbarOpen: false,
+      cartItemCount: 0,
     };
   },
   computed: {
-    ...mapGetters(["isLoggedIn", "userInfo"]),
+    ...mapGetters(["isLoggedIn", "userInfo", "cartItemCount"]),
   },
   methods: {
-    ...mapActions(["logout"]),
+    ...mapActions(["logout", "fetchCart"]),
     toggleNavbar() {
       this.isNavbarOpen = !this.isNavbarOpen;
     },
   },
-  mounted() {
+  async mounted() {
+    // Chuyển async mounted ra ngoài methods
     this.$store.dispatch("checkToken"); // Kiểm tra trạng thái đăng nhập khi component được mount
+    if (this.isLoggedIn) {
+      await this.fetchCart();
+    }
+  },
+  watch: {
+    isLoggedIn(newValue) {
+      if (newValue) {
+        this.fetchCart();
+      } else {
+        this.$store.commit("SET_CART", null);
+      }
+    },
   },
 };
 </script>
@@ -157,195 +127,196 @@ header {
   z-index: 1000;
   transition: background 0.4s ease-in-out;
 
-  .top-header.hidden {
-    opacity: 0;
-    transform: translateY(-100%);
-  }
-
-  .top-header {
-    transition: opacity 0.3s ease, transform 0.3s ease;
-    background-color: #bfaf9f; // Nâu trung bình cho phần top-header
-    padding: 10px 20px;
-    .container {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      width: 100%;
-      padding-right: 15px;
-      padding-left: 15px;
-      margin-right: auto;
-      margin-left: auto;
-    }
-    .float-left {
-      .header-social {
-        list-style: none;
-        margin: 0;
-        padding: 0;
-        li {
-          a {
-            color: #6d4c41; // Màu nâu đậm hơn cho text
-            text-decoration: none;
-          }
-        }
-      }
-    }
-
-    .float-right {
-      display: flex;
-      .nice-select-wrapper {
-        margin-left: 20px;
-      }
-    }
-    .welcome-message {
-      font-size: 16px;
-      color: #333;
-    }
-
-    .user-info {
-      display: flex;
-      align-items: center;
-    }
-
-    .user-icon {
-      font-size: 30px; /* Cài đặt kích thước icon */
-      color: #333; /* Cài đặt màu sắc cho icon */
-      margin-right: 10px;
-    }
-
-    .user-name {
-      font-size: 16px;
-      color: #333;
-    }
-  }
-
   .separator {
     border-top: 1px solid #d9c7b8; // Nâu trung bình cho đường phân cách
     margin-bottom: 0;
   }
 
   .main-menu {
-    background-color: #d9c7b8; // Nâu đậm cho nền navbar
+    background-color: #6d4c41; // Nâu đậm cho nền navbar
+
     .navbar {
-      .container {
+      padding: 1rem 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+
+      .logo {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
         display: flex;
-        justify-content: space-between;
+        justify-content: center;
         align-items: center;
 
-        .logo img {
-          height: 40px;
+        img {
+          height: 50px;
         }
+      }
 
-        .navbar-toggler {
-          border: none;
-          background: transparent;
-          .navbar-toggler-icon {
+      .navbar-toggler {
+        border: none;
+        background: transparent;
+        .navbar-toggler-icon {
+          display: block;
+          width: 30px;
+          height: 3px;
+          background-color: #ffffff; // Màu trắng cho biểu tượng hamburger
+          position: relative;
+          &:before,
+          &:after {
+            content: "";
             display: block;
             width: 30px;
             height: 3px;
-            background-color: #ffffff; // Màu trắng cho biểu tượng hamburger
-            position: relative;
-            &:before,
-            &:after {
-              content: "";
-              display: block;
-              width: 30px;
-              height: 3px;
-              background-color: #ffffff; // Màu trắng cho biểu tượng hamburger
-              position: absolute;
-              left: 0;
-              transition: transform 0.3s ease;
-            }
-            &:before {
-              top: -8px;
-            }
-            &:after {
-              top: 8px;
-            }
+            background-color: #ffffff;
+            position: absolute;
+            left: 0;
+            transition: transform 0.3s ease;
+          }
+          &:before {
+            top: -8px;
+          }
+          &:after {
+            top: 8px;
           }
         }
+      }
 
-        .navbar-collapse {
-          display: none; /* Ẩn menu mặc định */
-          &.show {
-            display: block; /* Hiển thị menu khi lớp 'show' được thêm */
-          }
-
-          .navbar-nav {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-
-            .nav-link {
-              color: #ffffff; // Màu trắng cho text link
-              transition: color 0.3s;
-
-              &:hover {
-                color: #6d4c41; // Màu nâu đậm khi hover
-              }
-            }
-
-            .dropdown-menu {
-              background-color: #6d4c41; // Nâu đậm cho nền dropdown
-              border: 1px solid #d9c7b8; // Nâu trung bình cho viền dropdown
-              box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-              .dropdown-item {
-                color: #ffffff; // Màu trắng cho text dropdown
-                transition: background-color 0.3s;
-
-                &:hover {
-                  background-color: #d9c7b8; // Màu nâu trung bình khi hover
-                }
-              }
-            }
-          }
+      .navbar-collapse {
+        display: none; /* Ẩn menu mặc định */
+        &.show {
+          display: block; /* Hiển thị menu khi lớp 'show' được thêm */
         }
 
-        .auth-links {
+        .navbar-nav {
           display: flex;
           align-items: center;
-          gap: 10px; /* Khoảng cách giữa các nút */
-          margin-left: auto; /* Đưa auth-links sang bên phải */
+          gap: 15px;
+          flex-wrap: wrap;
 
-          .btn {
-            display: inline-block;
-            padding: 10px 20px;
-            font-size: 14px;
-            font-weight: bold;
-            border-radius: 4px;
+          .nav-link {
+            color: #ffffff;
+            transition: color 0.3s;
+            position: relative;
+            padding: 12px 20px;
+            min-width: 120px;
             text-align: center;
-            transition: background-color 0.3s, border-color 0.3s, color 0.3s;
-            border: 2px solid; // Màu viền thay đổi tùy theo loại nút
-            color: #ffffff; // Màu trắng cho text nút
+            transition: color 0.3s ease;
 
             &:hover {
-              background-color: #6d4c41; // Màu nâu đậm cho nền khi hover
-              color: #ffffff; // Màu trắng cho text khi hover
-              border-color: #6d4c41; // Màu nâu đậm cho viền khi hover
+              color: #f5c490;
+            }
+
+            &::after {
+              content: "";
+              position: absolute;
+              width: 0;
+              height: 2px;
+              background-color: #f8b400;
+              left: 0;
+              bottom: 0;
+              transition: width 0.3s ease;
+            }
+
+            &:hover::after {
+              width: 100%;
             }
           }
 
-          .login-btn {
-            border-color: #ffffff; // Màu trắng cho viền nút đăng nhập
-            background-color: transparent; // Nền trong suốt cho nút đăng nhập
+          .dropdown-menu {
+            background-color: #6d4c41;
+            border: 1px solid #d9c7b8;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            .dropdown-item {
+              color: #ffffff;
+              transition: background-color 0.3s;
+
+              &:hover {
+                background-color: #d9c7b8;
+              }
+            }
+          }
+        }
+      }
+
+      .auth-links {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-left: auto;
+
+        .btn {
+          padding: 10px 20px;
+          font-size: 14px;
+          font-weight: bold;
+          border-radius: 4px;
+          text-align: center;
+          border: 2px solid;
+          color: #ffffff;
+          transition: background-color 0.3s, border-color 0.3s, color 0.3s;
+
+          &:hover {
+            background-color: #6d4c41;
+            color: #ffffff;
+            border-color: #f5c490;
+          }
+        }
+
+        .cart-icon {
+          font-size: 24px;
+          color: #ffffff; // Màu trắng cho icon giỏ hàng
+          position: relative; // Để thêm thông báo số lượng sản phẩm sau này
+          margin-right: 20px;
+          text-decoration: none;
+          transition: color 0.3s ease;
+          margin-left: 20px;
+
+          &:hover {
+            color: #f5c490; // Màu vàng nhạt khi hover
           }
 
-          .register-btn {
-            border-color: #d9c7b8; // Màu nâu trung bình cho viền nút đăng ký
-            background-color: #d9c7b8; // Màu nâu trung bình cho nền nút đăng ký
-            color: #3f0e00; // Màu nâu tối cho text nút đăng ký
-          }
-
-          .register-btn:hover {
-            background-color: #6d4c41; // Màu nâu đậm cho nền nút đăng ký khi hover
-            border-color: #6d4c41; // Màu nâu đậm cho viền nút đăng ký khi hover
-          }
-          .logout-btn {
-            border-color: #3f0e00;
-            background-color: #d9c7b8;
+          // Thông báo số lượng sản phẩm trong giỏ hàng
+          &::after {
+            content: attr(data-count);
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background-color: #f5c490;
             color: #3f0e00;
+            border-radius: 50%;
+            padding: 2px 5px;
+            font-size: 12px;
+            display: none; // Ẩn nếu chưa có sản phẩm
           }
+        }
+        .cart-icon[data-count]:not([data-count="0"])::after {
+          display: block; /* Hiển thị khi data-count khác 0 */
+        }
 
-          .logout-btn:hover {
+        .login-btn {
+          border-color: #ffffff;
+          background-color: transparent;
+        }
+
+        .register-btn {
+          border-color: #d9c7b8;
+          background-color: #d9c7b8;
+          color: #3f0e00;
+
+          &:hover {
+            background-color: #6d4c41;
+            border-color: #f5c490;
+          }
+        }
+
+        .logout-btn {
+          border-color: #3f0e00;
+          background-color: #d9c7b8;
+          color: #3f0e00;
+
+          &:hover {
             background-color: #6d4c41;
             border-color: #6d4c41;
           }
@@ -354,12 +325,36 @@ header {
     }
   }
 
-  @media (max-width: 768px) {
+  @media (max-width: 300px) {
     .main-menu {
+      .navbar {
+        flex-direction: column;
+        align-items: center;
+
+        // Đặt logo lên đầu
+        .group-navbar:nth-child(1) {
+          position: static; // Khi màn hình nhỏ, logo không cần absolute
+          order: -2; // Đưa logo lên đầu
+          margin-bottom: 15px; // Khoảng cách logo và menu
+        }
+      }
+
       .navbar-collapse {
         .navbar-nav {
           flex-direction: column;
           align-items: flex-start;
+        }
+
+        .auth-links {
+          flex-direction: column;
+          gap: 5px;
+          align-items: center;
+        }
+
+        .btn {
+          width: 100%;
+          text-align: left;
+          padding: 10px 0;
         }
       }
     }
