@@ -1,5 +1,5 @@
 <template>
-  <footer class="footer">
+  <footer ref="footer" class="footer">
     <div class="footer-container">
       <div class="footer-section about">
         <h3>Về ETHEREAL</h3>
@@ -49,6 +49,21 @@
 <script>
 export default {
   name: "FooterComponent",
+  mounted() {
+    this.updateFooterOffset();
+    window.addEventListener('resize', this.updateFooterOffset); // Cập nhật khi thay đổi kích thước cửa sổ
+  },
+  beforeDestroy() {
+    window.removeEventListener('resize', this.updateFooterOffset);
+  },
+  methods: {
+    updateFooterOffset() {
+      const footer = this.$refs.footer; // Sử dụng ref để lấy phần tử footer
+      if (footer) {
+        this.$store.dispatch('updateFooterOffset', footer.offsetTop); // Gửi vị trí của footer vào Vuex
+      }
+    },
+  },
 };
 </script>
 
@@ -58,6 +73,7 @@ export default {
   color: #ffffff;
   padding: 50px 0; // Giảm padding trên và dưới để làm cho footer gọn hơn
   font-size: 14px;
+  z-index: 999;
 
   .footer-container {
     display: flex;

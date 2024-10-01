@@ -20,6 +20,7 @@ import store from "@/store"
 const routes = [
 	{
 		path: "/dangnhap",
+		name: "Login",
 		component: Login,
 		meta: {
 			layout: LoginLayout,
@@ -71,11 +72,6 @@ const routes = [
 		meta: {
 			layout: UserLayout,
 		},
-		props: route => ({
-		  hotelId: route.query.hotelId,
-		  roomType: route.query.roomType,
-		  roomNumbers: route.query.roomNumbers, // Danh sách các số phòng
-		}),
 	  }
 	// {
 	// 	path: "/danh-sach-khach-san",
@@ -92,36 +88,42 @@ const router = createRouter({
 })
 
 router.beforeEach((to, from, next) => {
-    const isLoggedIn = store.getters.isLoggedIn; // Kiểm tra trạng thái đăng nhập
-    const userInfo = store.getters.userInfo; // Lấy thông tin người dùng
+	console.log("Chuyển hướng đến:", to.name);
+  next();
+    // const isLoggedIn = store.getters.isLoggedIn; // Kiểm tra trạng thái đăng nhập
+    // const userInfo = store.getters.userInfo; // Lấy thông tin người dùng
 
-    let userRole = '';
-    if (userInfo?.ROLE?.ADMIN) {
-        userRole = 'admin';
-    } else if (userInfo?.ROLE?.BRANCH_MANAGER) {
-        userRole = 'branch_manager';
-    } else if (userInfo?.ROLE?.STAFF) {
-        userRole = 'staff';
-    } else {
-        userRole = 'user';
-    }
+    // let userRole = '';
+    // if (userInfo?.ROLE?.ADMIN) {
+    //     userRole = 'admin';
+    // } else if (userInfo?.ROLE?.BRANCH_MANAGER) {
+    //     userRole = 'branch_manager';
+    // } else if (userInfo?.ROLE?.STAFF) {
+    //     userRole = 'staff';
+    // } else {
+    //     userRole = 'user';
+    // }
 
-    // Nếu người dùng đã đăng nhập và cố gắng truy cập trang đăng nhập thì chuyển hướng
-    if (to.path === '/dangnhap' && isLoggedIn) {
-        if (userRole === 'admin') {
-            return next('/dashboard'); // Chuyển hướng admin đến dashboard
-        } else {
-            return next('/trangchu'); // Chuyển hướng người dùng thường đến trang chủ
-        }
-    }
+    // // Nếu người dùng đã đăng nhập và cố gắng truy cập trang đăng nhập thì chuyển hướng
+    // if (to.path === '/dangnhap' && isLoggedIn) {
+    //     if (userRole === 'admin') {
+    //         return next('/dashboard'); // Chuyển hướng admin đến dashboard
+    //     } else {
+    //         return next('/trangchu'); // Chuyển hướng người dùng thường đến trang chủ
+    //     }
+    // }
 
-    // Nếu trang yêu cầu xác thực và người dùng chưa đăng nhập thì chuyển đến trang đăng nhập
-    if (to.matched.some(record => record.meta.requiresAuth) && !isLoggedIn) {
-        return next('/dangnhap');
-    }
+    // // Nếu trang yêu cầu xác thực và người dùng chưa đăng nhập thì chuyển đến trang đăng nhập
+    // if (to.matched.some(record => record.meta.requiresAuth) && !isLoggedIn) {
+    //     // Chuyển hướng đến trang đăng nhập và lưu lại trang hiện tại trong query.redirect
+    //     return next({
+    //         path: '/dangnhap',
+    //         query: { redirect: to.fullPath } // Lưu đường dẫn của trang hiện tại
+    //     });
+    // }
 
-    // Nếu không có vấn đề gì, tiếp tục điều hướng
-    next();
+    // // Nếu không có vấn đề gì, tiếp tục điều hướng
+    // next();
 });
 
 

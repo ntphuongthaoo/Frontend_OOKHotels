@@ -424,6 +424,7 @@ i h3 {
   width: 800px;
   max-width: 90%;
   position: relative;
+  text-align: center;
 }
 
 .calendar-modal-content .close {
@@ -505,51 +506,33 @@ i h3 {
 
 .selected-dates {
   display: flex;
-  flex-direction: column; /* Thay đổi thành cột */
-  align-items: center;
+  justify-content: center; /* Căn đều giữa các phần tử */
+  align-items: center; /* Căn giữa dọc */
   margin-top: 20px;
-
-  .date-range {
-    display: flex;
-    flex-direction: column; /* Sắp xếp theo cột */
-    align-items: center;
-    margin-bottom: 10px;
-
-    label {
-      font-weight: bold;
-      margin-bottom: 5px;
-      font-size: 16px;
-    }
-
-    .date-display {
-      font-size: 18px;
-      color: #2c3e50;
-    }
-  }
-
-  .room-count {
-    display: flex;
-    align-items: center;
-    margin-top: 10px;
-
-    label {
-      font-weight: bold;
-      margin-right: 10px;
-      font-size: 16px;
-    }
-
-    input[type="number"] {
-      width: 60px;
-      padding: 5px;
-      font-size: 16px;
-      text-align: center;
-    }
-  }
 }
+
+.date-range,
+.people-range {
+  display: flex;
+  flex-direction: column; /* Căn dọc các phần tử */
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.date-display,
+input[type="number"] {
+  font-size: 16px;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  margin-top: 5px;
+  text-align: center; /* Căn giữa nội dung */
+}
+
 
 .confirm-button {
   margin-top: 20px;
-  background-color: #3498db;
+  background-color: #3e2723;
   color: #fff;
   padding: 10px 20px;
   font-size: 18px;
@@ -557,6 +540,31 @@ i h3 {
   cursor: pointer;
 
   &:hover {
-    background-color: #2980b9;
+    background-color: #3e2723;
   }
 }
+
+.people-counter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px; /* Khoảng cách giữa các phần tử */
+}
+
+.counter-btn {
+  padding: 5px 10px;
+  font-size: 16px;
+  font-weight: bold;
+  background-color: #6d4c41;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.counter-btn:disabled {
+  background-color: #ddd; /* Màu nền khi nút bị vô hiệu hóa */
+  cursor: not-allowed; /* Con trỏ không cho phép */
+}
+
+

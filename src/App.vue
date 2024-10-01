@@ -25,7 +25,8 @@ import "vue3-toastify/dist/index.css";
 	margin: 0;
 	padding: 0;
 	box-sizing: border-box;
-	font-family: 'Fira sans', sans-serif;
+	font-family: "Lato", sans-serif;
+	font-style: normal;
 }
 
 body {

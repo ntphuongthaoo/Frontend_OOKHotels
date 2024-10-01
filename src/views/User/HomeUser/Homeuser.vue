@@ -29,17 +29,24 @@
     <!-- Thanh tìm kiếm -->
     <div class="search-bar">
       <div class="search-fields">
-        <div class="search-field">
-          <label for="destination">Địa điểm bạn muốn đến là gì?</label>
-          <input
-            id="destination"
-            type="text"
-            placeholder="Nhập Khách sạn / Điểm đến"
-            v-model="destination"
-            @focus="filterHotelNames" 
-            @blur="hideSuggestionsWithDelay"
-            @input="filterHotelNames"
-          />
+        <!-- Địa điểm -->
+        <div class="search-field date-range-field">
+          <label for="destination">Bạn muốn nghỉ dưỡng ở đâu?</label>
+          <div class="input-group">
+            <span class="input-group-text">
+              <i class="fas fa-map-marker-alt"></i>
+            </span>
+            <input
+              id="destination"
+              type="text"
+              class="form-control"
+              placeholder="Nhập Khách sạn / Điểm đến"
+              v-model="destination"
+              @focus="filterHotelNames"
+              @blur="hideSuggestionsWithDelay"
+              @input="filterHotelNames"
+            />
+          </div>
           <ul
             v-if="showHotelSuggestions && filteredHotelNames.length"
             class="suggestions-list"
@@ -53,46 +60,65 @@
             </li>
           </ul>
         </div>
-        <!-- Các trường tìm kiếm khác -->
-        <div class="search-field">
-          <label for="checkInDate">Ngày nhận phòng</label>
-          <input
-            id="checkInDate"
-            type="date"
-            v-model="checkInDate"
-            :min="minDate"
-          />
+
+        <!-- Ngày nhận - trả phòng -->
+        <div class="search-field date-range-field">
+          <label for="dateRange">Ngày nhận - trả phòng</label>
+          <div class="input-group">
+            <span class="input-group-text">
+              <i class="fas fa-calendar-alt"></i>
+            </span>
+            <DatePicker
+              v-model="dateRange"
+              type="daterange"
+              placeholder="Ngày nhận - trả phòng"
+              format="DD/MM/YYYY"
+              :min-date="minDate"
+              input-class="form-control"
+            />
+          </div>
         </div>
-        <div class="search-field">
-          <label for="checkOutDate">Ngày trả phòng</label>
-          <input
-            id="checkOutDate"
-            type="date"
-            v-model="checkOutDate"
-            :min="checkInDate || minDate"
-          />
-        </div>
+
+        <!-- Số phòng -->
         <div class="search-field">
           <label for="rooms">Số phòng</label>
-          <input
-            id="rooms"
-            type="number"
-            placeholder="Phòng"
-            v-model="rooms"
-            min="1"
-          />
+          <div class="input-group">
+            <span class="input-group-text">
+              <i class="fas fa-bed"></i>
+            </span>
+            <input
+              id="rooms"
+              type="number"
+              class="form-control"
+              placeholder="1 Phòng"
+              v-model="rooms"
+              min="1"
+            />
+          </div>
         </div>
-        <div class="search-field">
-          <label for="voucherCode">Mã khuyến mãi</label>
-          <input
-            id="voucherCode"
-            type="text"
-            placeholder="Nhập mã khuyến mại/mã Voucher"
-            v-model="voucherCode"
-          />
+
+        <!-- Mã khuyến mãi -->
+        <div class="search-field date-range-field">
+          <label for="voucherCode">Mã khuyến mãi/Voucher</label>
+          <div class="input-group">
+            <span class="input-group-text">
+              <i class="fas fa-tag"></i>
+            </span>
+            <input
+              id="voucherCode"
+              type="text"
+              class="form-control"
+              placeholder="Nhập mã khuyến mại/mã Voucher"
+              v-model="voucherCode"
+            />
+          </div>
         </div>
-        <div>
-          <button class="search-btn" @click="searchRooms">Tìm kiếm</button>
+
+        <!-- Nút tìm kiếm -->
+        <div class="search-field search-button">
+          <button class="search-btn" @click="searchRooms">
+            <i class="fas fa-search"></i> TÌM KIẾM
+          </button>
         </div>
       </div>
     </div>
@@ -186,20 +212,30 @@ import { deburr } from "lodash";
 import bannerProduct from "@/assets/bg_1.jpg";
 import bannerProduct1 from "@/assets/bg_2.jpg";
 import bannerProduct2 from "@/assets/bg_3.jpg";
+import DatePicker from "vue-datepicker-next";
+import "vue-datepicker-next/index.css";
 
 export default {
   name: "BannerComponent",
+  components: {
+    DatePicker,
+  },
   data() {
+    const today = new Date(); // Lấy ngày hiện tại
+    const checkIn = new Date(today); // Ngày nhận phòng là hôm nay
+    const checkOut = new Date(today); // Ngày trả phòng là 3 ngày sau
+    checkOut.setDate(checkOut.getDate() + 2); // Thiết lập khoảng ngày là 3 ngày
     return {
       banners: [bannerProduct, bannerProduct1, bannerProduct2],
       currentIndex: 0,
       featuredHotels: [],
       destination: "",
-      checkInDate: "",
-      checkOutDate: "",
+      checkInDate: checkIn,
+      checkOutDate: checkOut,
       rooms: 1,
       voucherCode: "",
-      minDate: new Date().toISOString().split("T")[0],
+      minDate: today,
+      dateRange: [checkIn, checkOut],
       hotelNames: [], // Danh sách khách sạn
       filteredHotelNames: [], // Danh sách khách sạn đã lọc
       showHotelSuggestions: false, // Trạng thái hiển thị gợi ý
@@ -267,8 +303,8 @@ export default {
     searchRooms() {
       console.log({
         destination: this.destination,
-        checkInDate: this.checkInDate,
-        checkOutDate: this.checkOutDate,
+        checkInDate: this.dateRange[0],
+        checkOutDate: this.dateRange[1],
         rooms: this.rooms,
         voucherCode: this.voucherCode,
       });

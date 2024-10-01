@@ -10,6 +10,7 @@ const store = createStore({
     editingMode: false,
     users: [],
     cart: null,
+    footerOffsetTop: 0,
   },
   mutations: {
     SET_USER_INFO(state, userInfo) {
@@ -26,6 +27,9 @@ const store = createStore({
     },
     SET_CART(state, cart) {
       state.cart = cart;
+    },
+    SET_FOOTER_OFFSET(state, offset) {
+      state.footerOffsetTop = offset;
     },
   },
   actions: {
@@ -107,6 +111,9 @@ const store = createStore({
       } catch (error) {
         console.error("Error fetching cart:", error);
       }
+    },
+    updateFooterOffset({ commit }, offset) {
+      commit('SET_FOOTER_OFFSET', offset);
     },
   },
   getters: {

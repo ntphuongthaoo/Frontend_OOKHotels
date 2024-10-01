@@ -79,6 +79,8 @@ export default {
       try {
         // const result = await this.$store.dispatch("login", payload);
         await this.login(payload);
+        const redirect = this.$route.query.redirect || "/trangchu";
+        this.$router.push(redirect);
       } catch (error) {
         this.$message.error(
           error.response?.data?.message || "Đăng nhập thất bại!"

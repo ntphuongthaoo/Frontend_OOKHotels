@@ -99,18 +99,17 @@ export default {
   },
   async mounted() {
     // Chuyển async mounted ra ngoài methods
-    this.$store.dispatch("checkToken"); // Kiểm tra trạng thái đăng nhập khi component được mount
+    await this.$store.dispatch("checkToken"); // Kiểm tra trạng thái đăng nhập khi component được mount
     if (this.isLoggedIn) {
       await this.fetchCart();
     }
   },
   watch: {
-    isLoggedIn(newValue) {
-      if (newValue) {
-        this.fetchCart();
-      } else {
-        this.$store.commit("SET_CART", null);
-      }
+    "$store.state.cart": {
+      handler() {
+        this.cartItemCount = this.$store.getters.cartItemCount;
+      },
+      deep: true,
     },
   },
 };
@@ -276,21 +275,20 @@ header {
           &:hover {
             color: #f5c490; // Màu vàng nhạt khi hover
           }
-
-          // Thông báo số lượng sản phẩm trong giỏ hàng
-          &::after {
-            content: attr(data-count);
-            position: absolute;
-            top: -10px;
-            right: -10px;
-            background-color: #f5c490;
-            color: #3f0e00;
-            border-radius: 50%;
-            padding: 2px 5px;
-            font-size: 12px;
-            display: none; // Ẩn nếu chưa có sản phẩm
-          }
         }
+        .cart-icon::after {
+          content: attr(data-count);
+          position: absolute;
+          top: -10px;
+          right: -10px;
+          background-color: #f5c490;
+          color: #3f0e00;
+          border-radius: 50%;
+          padding: 2px 5px;
+          font-size: 12px;
+          display: none; /* Ẩn nếu chưa có sản phẩm */
+        }
+
         .cart-icon[data-count]:not([data-count="0"])::after {
           display: block; /* Hiển thị khi data-count khác 0 */
         }

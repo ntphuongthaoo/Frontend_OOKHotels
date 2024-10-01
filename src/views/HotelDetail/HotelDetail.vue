@@ -74,6 +74,7 @@
             @mouseleave="hoverBedType(null, null)"
           >
             <img
+              v-if="rooms[0]?.IMAGES && rooms[0].IMAGES.length > 0"
               :src="rooms[0].IMAGES[0]"
               class="room-image"
               alt="Room Image"
@@ -102,6 +103,7 @@
             <!-- Phần hình ảnh phòng chiếm 3/4 chiều rộng -->
             <div class="room-images">
               <img
+                v-if="selectedRoom?.IMAGES && selectedRoom.IMAGES.length > 0"
                 :src="selectedRoom.IMAGES[mainImageIndex]"
                 alt="Room Image"
                 class="main-image"
@@ -150,7 +152,7 @@
               </p>
               <div class="action">
                 <button
-                  @click="openCalendarModalForRoom(selectedRoom)"
+                  @click="openCalendarModalForRoom(selectedRoom, 'addToCart')"
                   class="cart"
                 >
                   <i class="fa fa-cart-plus" aria-hidden="true"></i>
@@ -219,17 +221,6 @@
               {{ formatDate(selectedEndDate) }}
             </div>
           </div>
-
-          <!-- Trường số phòng -->
-          <div class="room-count">
-            <label>Số phòng:</label>
-            <input
-              type="number"
-              v-model.number="roomCount"
-              min="1"
-              @input="validateRoomCount"
-            />
-          </div>
         </div>
 
         <!-- Nút xác nhận -->
@@ -241,8 +232,9 @@
 
 <script>
 import axiosClient from "../../api/axiosClient";
-import DatePicker from "vue-datepicker-next"; // Import vue-datepicker-next
+import DatePicker from "vue-datepicker-next";
 import "vue-datepicker-next/index.css";
+import Swal from "sweetalert2";
 
 export default {
   props: ["id"],
@@ -268,7 +260,6 @@ export default {
       selectedEndDate: "",
       currentDate: new Date(),
       currentAction: "",
-      roomCount: 1,
     };
   },
   mounted() {
@@ -303,9 +294,9 @@ export default {
 
     openCalendarModalForRoom(room, action) {
       if (!this.isLoggedIn) {
-        this.$toast.warning("Vui lòng đăng nhập để thêm phòng vào giỏ hàng hoặc đặt phòng.", {
-          position: "top-right",
-          duration: 3000,
+        this.$router.push({
+          name: "Login", // Tên của route đăng nhập
+          query: { redirect: this.$route.fullPath }, // Lưu trang hiện tại để chuyển lại sau khi đăng nhập
         });
         return;
       }
@@ -350,59 +341,63 @@ export default {
       this.mainImageIndex = index; // Thay đổi hình ảnh chính khi click vào hình nhỏ
     },
 
-    openBookingModal(roomGroup, action) {
-      if (action === "book") {
-        // Lấy danh sách các phòng thuộc phòng đại diện
-        const roomNumbers = roomGroup.roomNumbers.join(","); // Ví dụ: "101,102,103"
-
-        // Điều hướng đến trang booking và truyền các thông tin cần thiết
-        this.$router.push({
-          name: "BookingPage",
-          query: {
-            hotelId: this.hotel._id,
-            roomType: roomGroup.type,
-            roomNumbers: roomNumbers, // Truyền danh sách các phòng thuộc phòng đại diện
-          },
-        });
-      }
-    },
-
-    async addToCart(room, startDate, endDate, roomCount) {
-      // Kiểm tra trạng thái đăng nhập
+    openBookingModal(action) {
       if (!this.isLoggedIn) {
-        this.$toast.warning("Vui lòng đăng nhập để thêm phòng vào giỏ hàng.", {
-          position: "top-right",
-          duration: 3000,
+        this.$router.push({
+          name: "Login",
+          query: { redirect: this.$route.fullPath },
         });
         return;
       }
+      this.currentAction = "book";
 
+      // Mở modal chọn ngày
+      this.openCalendarModal();
+    },
+
+    async addToCart(room, startDate, endDate) {
       try {
-        // Gửi yêu cầu thêm phòng vào giỏ hàng, bao gồm số phòng
+        // Gửi yêu cầu thêm phòng vào giỏ hàng
         const response = await axiosClient.post("/carts/addRoomToCart", {
           roomId: room._id,
           startDate: startDate,
           endDate: endDate,
-          roomCount: roomCount,
         });
 
-        if (response.status === 200) {
-          this.$toast.success("Đã thêm phòng vào giỏ hàng.", {
-            position: "top-right",
-            duration: 3000,
+        // Kiểm tra nếu thêm phòng thành công
+        if (response.data.success) {
+          Swal.fire({
+            icon: "success",
+            title: "Thành công",
+            text: "Thêm phòng vào giỏ hàng thành công.",
+            confirmButtonText: "OK",
+          });
+
+          await this.$store.dispatch("fetchCart");
+        } else {
+          // Hiển thị thông báo lỗi khác (nếu có)
+          Swal.fire({
+            icon: "error",
+            title: "Lỗi",
+            text: response.data.message,
+            confirmButtonText: "OK",
           });
         }
       } catch (error) {
-        // Xử lý lỗi
+        // Xử lý lỗi khi gửi yêu cầu
         if (error.response && error.response.data.message) {
-          this.$toast.error(error.response.data.message, {
-            position: "top-right",
-            duration: 3000,
+          Swal.fire({
+            icon: "error",
+            title: "Lỗi",
+            text: error.response.data.message,
+            confirmButtonText: "OK",
           });
         } else {
-          this.$toast.error("Có lỗi xảy ra khi thêm phòng vào giỏ hàng.", {
-            position: "top-right",
-            duration: 3000,
+          Swal.fire({
+            icon: "error",
+            title: "Lỗi",
+            text: "Có lỗi xảy ra khi thêm phòng vào giỏ hàng.",
+            confirmButtonText: "OK",
           });
         }
         console.error("Lỗi thêm phòng vào giỏ hàng:", error);
@@ -456,7 +451,6 @@ export default {
         // Kiểm tra nếu dữ liệu trả về là một mảng
         if (Array.isArray(response.data.data)) {
           this.roomList = response.data.data; // Đổi thành roomList
-          console.log("Danh sách phòng:", this.roomList);
         } else {
           console.error("Dữ liệu phòng không hợp lệ:", response.data.data);
           this.roomList = []; // Gán roomList là mảng rỗng nếu dữ liệu không hợp lệ
@@ -588,7 +582,7 @@ export default {
         }
       }
     },
-    bookNow(room, startDate, endDate, roomCount) {
+    bookNow(startDate, endDate) {
       // Kiểm tra trạng thái đăng nhập
       if (!this.isLoggedIn) {
         this.$toast.warning("Vui lòng đăng nhập để đặt phòng.", {
@@ -598,24 +592,36 @@ export default {
         return;
       }
 
-      // Điều hướng đến trang đặt phòng, truyền các thông tin cần thiết
       this.$router.push({
         name: "BookingPage",
-        params: {
-          roomId: room._id,
-        },
         query: {
-          startDate: startDate,
-          endDate: endDate,
-          roomCount: roomCount,
+          hotelId: this.hotel._id,
+          startDate: startDate, // Dùng startDate truyền vào
+          endDate: endDate, // Dùng endDate truyền vào
+          roomId: this.selectedRoom._id,
         },
       });
     },
 
-    // Xác nhận ngày
     confirmDates() {
       if (!this.selectedStartDate || !this.selectedEndDate) {
-        alert("Vui lòng chọn ngày nhận phòng và ngày trả phòng.");
+        this.$toast.warning("Vui lòng chọn ngày bắt đầu và kết thúc.", {
+          position: "top-right",
+          duration: 3000,
+        });
+        return;
+      }
+
+      // Kiểm tra nếu ngày bắt đầu và ngày kết thúc là cùng một ngày
+      if (this.selectedStartDate.getTime() === this.selectedEndDate.getTime()) {
+        this.$toast.warning(
+          "Ngày nhận và ngày trả phòng không được trùng nhau.",
+          {
+            position: "top-right",
+            duration: 3000,
+          }
+        );
+
         return;
       }
 
@@ -623,14 +629,41 @@ export default {
       const startDate = this.selectedStartDate.toISOString().split("T")[0];
       const endDate = this.selectedEndDate.toISOString().split("T")[0];
 
-      if (this.currentAction === "addToCart") {
-        // Thực hiện hành động thêm vào giỏ hàng
-        this.addToCart(this.selectedRoom, startDate, endDate, this.roomCount);
-      } else if (this.currentAction === "bookNow") {
-        // Thực hiện hành động đặt ngay
-        this.bookNow(this.selectedRoom, startDate, endDate, this.roomCount);
-      }
+      console.log("Chuyển đến BookingPage với hotelId:", this.hotel._id);
+      console.log("Ngày nhận phòng:", startDate, "Ngày trả phòng:", endDate);
 
+      if (this.currentAction === "addToCart") {
+    this.addToCart(this.selectedRoom, startDate, endDate);
+  } else if (this.currentAction === "book") {
+    // Ưu tiên điều hướng đến BookingPage khi currentAction là "book"
+    console.log("Đang thực hiện điều hướng đến trang BookingPage");
+    this.$router
+      .push({
+        name: "BookingPage",
+        query: {
+          hotelId: this.hotel._id,
+          startDate,
+          endDate,
+        },
+      })
+      .catch((err) => {
+        console.error("Lỗi khi chuyển hướng:", err);
+      });
+  } else if (this.currentAction === "bookNow") {
+    // Điều hướng đến trang PaymentPage nếu currentAction là "bookNow"
+    if (this.selectedRoom) {
+      console.log("Điều hướng đến PaymentPage với thông tin phòng đã chọn");
+      this.$router.push({
+        name: "PaymentPage",
+        query: {
+          hotelId: this.hotel._id,
+          roomId: this.selectedRoom._id,
+          startDate,
+          endDate,
+        },
+      });
+    }
+  }
       // Đóng modal
       this.closeCalendarModal();
     },
@@ -639,11 +672,6 @@ export default {
     formatDate(date) {
       if (!date) return "";
       return date.toLocaleDateString("vi-VN");
-    },
-    validateRoomCount() {
-      if (this.roomCount < 1) {
-        this.roomCount = 1;
-      }
     },
   },
   computed: {

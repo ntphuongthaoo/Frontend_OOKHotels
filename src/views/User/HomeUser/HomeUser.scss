@@ -36,71 +36,144 @@
 
 .search-bar {
   display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
+  justify-content: center;
+  align-items: center;
+  background: #fff;
+  padding: 20px 20px; /* Điều chỉnh padding */
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  width: 95%; /* Tăng chiều rộng thanh tìm kiếm */
+  max-width: 1350px; /* Giới hạn chiều rộng tối đa */
+  margin: -50px auto 20px auto; /* Đẩy thanh tìm kiếm lên phía trên */
   position: relative;
-  bottom: 50px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 90%;
-  background: rgba(255, 255, 255, 1);
-  padding: 15px;
-  border-radius: 10px;
-  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
-  z-index: 500;
-  margin-bottom: 100px;
+  z-index: 2;
 }
 
 .search-fields {
   display: flex;
-  flex-wrap: wrap; /* Cho phép các trường nhập liệu xuống dòng nếu không đủ không gian */
-  justify-content: space-between;
+  gap: 30px;
+  flex-wrap: nowrap; /* Đảm bảo các trường nằm trên một hàng ngang */
   align-items: center;
-  gap: 10px;
   width: 100%;
 }
 
 .search-field {
-  flex: 1;
-  min-width: 200px; /* Đảm bảo các trường không quá nhỏ */
+  flex: 1; /* Giúp các trường cân đối */
+  min-width: 150px; /* Đảm bảo kích thước tối thiểu */
+  display: flex;
+  flex-direction: column;
+  gap: 5px; /* Khoảng cách giữa label và input */
+}
+
+.date-range-field {
+  flex: 1.4; /* Chiếm nhiều không gian hơn cho trường ngày nhận - trả phòng */
 }
 
 .search-field label {
-  display: block;
-  margin-bottom: 5px;
-  font-size: 14px;
+  font-size: 18px;
+  font-weight: 600;
   color: #333;
-  font-weight: bold;
 }
 
-.search-fields input {
-  padding: 10px;
+.input-group {
+  display: flex;
+  align-items: center;
+  position: relative;
+  width: 100%;
+  flex-wrap: nowrap;
+}
+
+
+
+.input-group-text {
+  background-color: #f8f9fa;
   border: 1px solid #ddd;
-  border-radius: 5px;
+  border-right: none;
+  border-radius: 5px 0 0 5px;
+  padding: 10px;
   font-size: 16px;
-  box-sizing: border-box; /* Đảm bảo padding không ảnh hưởng đến chiều rộng */
+  height: 40px; /* Chiều cao đồng đều */
+  display: flex;
+  align-items: center; /* Căn giữa icon theo chiều dọc */
 }
 
+.input-group .form-control {
+  border-radius: 0 5px 5px 0;
+  border: 1px solid #ddd;
+  padding: 10px;
+  font-size: 16px;
+  height: 40px; /* Đảm bảo chiều cao đồng đều */
+  width: 100%;
+  border-bottom-left-radius: 0px;
+}
 
 .search-btn {
   background-color: #6d4c41;
-  color: #f8f9fa;
-  padding: 10px 20px;
+  color: #fff;
+  padding: 10px 20px; /* Thu nhỏ nút tìm kiếm */
   border: none;
   border-radius: 5px;
   font-size: 16px;
   cursor: pointer;
   transition: background-color 0.3s;
-  flex: 1;
-  min-width: 200px; 
-  margin-top: 24px;
-  border: 2px solid;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 40px; /* Chiều cao tương tự các input */
+  justify-content: center;
+  min-width: 120px; /* Đảm bảo kích thước tối thiểu cho nút */
+  margin-top: 29px;
+}
+
+.search-btn i {
+  font-size: 18px;
 }
 
 .search-btn:hover {
-  background-color: #6d4c41;
-  color: #ffffff;
-  border-color: #AF5940;
+  background-color: #3f0e00;
+}
+
+.suggestions-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  position: absolute;
+  background: #fff;
+  width: 100px; /* Đảm bảo chiều rộng phù hợp với input */
+  z-index: 1000; /* Tăng z-index để đảm bảo nằm trên cùng */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Thêm đổ bóng để nổi bật */
+  top: 92px; /* Hiển thị ngay bên dưới ô input */
+
+}
+
+.suggestions-list li {
+  padding: 10px;
+  cursor: pointer;
+}
+
+.suggestions-list li:hover {
+  background-color: #f1f1f1;
+}
+
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .search-fields {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .search-btn {
+    width: 100%; /* Chiều rộng 100% khi màn hình nhỏ */
+    justify-content: center;
+  }
+
+  .search-bar {
+    padding: 10px 15px; /* Giảm padding cho màn hình nhỏ */
+  }
 }
 
 .input-group-text {
@@ -108,11 +181,7 @@
   border: none;
 }
 
-@media (max-width: 768px) {
-    .search-field, .search-btn {
-      flex: 1 1 100%;
-    }
-  }
+
 
 /* CSS cho khách sạn nổi bật */
 .featured-hotels .carousel-item {
