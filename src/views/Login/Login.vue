@@ -30,7 +30,7 @@
             </div>
             <button type="submit" class="login-button">Đăng nhập</button>
             <p class="signup-link">
-              CHƯA CÓ TÀI KHOẢN? <a href="dangky">ĐĂNG KÝ</a>
+              CHƯA CÓ TÀI KHOẢN? <a href="register">ĐĂNG KÝ</a>
             </p>
             <div class="social-login">
               <p>Hoặc đăng nhập với:</p>
@@ -79,7 +79,7 @@ export default {
       try {
         // const result = await this.$store.dispatch("login", payload);
         await this.login(payload);
-        const redirect = this.$route.query.redirect || "/trangchu";
+        const redirect = this.$route.query.redirect || "/home";
         this.$router.push(redirect);
       } catch (error) {
         this.$message.error(

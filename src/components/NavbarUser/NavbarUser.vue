@@ -21,7 +21,7 @@
             <div class="group-navbar">
               <ul class="navbar-nav ml-auto">
                 <li class="nav-item active">
-                  <a class="nav-link" href="/trangchu">Trang chủ</a>
+                  <a class="nav-link" href="/home">Trang chủ</a>
                 </li>
                 <li class="nav-item">
                   <a class="nav-link" href="/danh-sach-khach-san">Khách sạn</a>
@@ -37,7 +37,7 @@
             </div>
 
             <div class="group-navbar">
-              <a class="navbar-brand logo" href="/trangchu">
+              <a class="navbar-brand logo" href="/home">
                 <img
                   src="../../assets/LOGO_MAIN.png"
                   alt="OOK Logo"
@@ -57,8 +57,8 @@
                 </a>
               </template>
               <template v-else>
-                <a class="btn auth-btn login-btn" href="/dangnhap">Đăng nhập</a>
-                <a class="btn auth-btn register-btn" href="/dangky">Đăng ký</a>
+                <a class="btn auth-btn login-btn" href="/login">Đăng nhập</a>
+                <a class="btn auth-btn register-btn" href="/register">Đăng ký</a>
                 <a
                   href="/cart"
                   class="cart-icon"
@@ -125,6 +125,12 @@ header {
   width: 100%;
   z-index: 1000;
   transition: background 0.4s ease-in-out;
+
+  .user-name {
+    font-weight: 800;
+    font-size: 16px;
+    color: #d9c7b8;
+  }
 
   .separator {
     border-top: 1px solid #d9c7b8; // Nâu trung bình cho đường phân cách

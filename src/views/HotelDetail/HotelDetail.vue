@@ -576,7 +576,6 @@ export default {
         if (day.date >= this.selectedStartDate) {
           this.selectedEndDate = day.date;
         } else {
-          // Nếu ngày chọn trước ngày bắt đầu, đặt lại ngày bắt đầu
           this.selectedStartDate = day.date;
           this.selectedEndDate = null;
         }
@@ -633,37 +632,37 @@ export default {
       console.log("Ngày nhận phòng:", startDate, "Ngày trả phòng:", endDate);
 
       if (this.currentAction === "addToCart") {
-    this.addToCart(this.selectedRoom, startDate, endDate);
-  } else if (this.currentAction === "book") {
-    // Ưu tiên điều hướng đến BookingPage khi currentAction là "book"
-    console.log("Đang thực hiện điều hướng đến trang BookingPage");
-    this.$router
-      .push({
-        name: "BookingPage",
-        query: {
-          hotelId: this.hotel._id,
+        this.addToCart(this.selectedRoom, startDate, endDate);
+      } else if (this.currentAction === "book") {
+        // Ưu tiên điều hướng đến BookingPage khi currentAction là "book"
+        console.log("Đang thực hiện điều hướng đến trang BookingPage");
+        this.$router
+          .push({
+            name: "BookingPage",
+            query: {
+              hotelId: this.hotel._id,
+              startDate,
+              endDate,
+            },
+          })
+          .catch((err) => {
+            console.error("Lỗi khi chuyển hướng:", err);
+          });
+      } else if (this.currentAction === "bookNow") {
+        this.$store.dispatch("setBookingDetails", {
+          hotel: this.hotel,
+          room: this.selectedRoom,
           startDate,
           endDate,
-        },
-      })
-      .catch((err) => {
-        console.error("Lỗi khi chuyển hướng:", err);
-      });
-  } else if (this.currentAction === "bookNow") {
-    // Điều hướng đến trang PaymentPage nếu currentAction là "bookNow"
-    if (this.selectedRoom) {
-      console.log("Điều hướng đến PaymentPage với thông tin phòng đã chọn");
-      this.$router.push({
-        name: "PaymentPage",
-        query: {
-          hotelId: this.hotel._id,
-          roomId: this.selectedRoom._id,
-          startDate,
-          endDate,
-        },
-      });
-    }
-  }
+          totalPrice: this.selectedRoom.PRICE_PERNIGHT * this.nightsCount, // Tính tổng giá
+        });
+
+        // Điều hướng đến trang PaymentPage
+        console.log("Điều hướng đến PaymentPage với thông tin phòng đã chọn")
+        this.$router.push({
+          name: "PaymentPage",
+        });
+      }
       // Đóng modal
       this.closeCalendarModal();
     },

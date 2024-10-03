@@ -65,25 +65,7 @@
               </div>
             </td>
             <td>
-              <div class="people-counter">
-                <button
-                  @click="decreasePeople(room)"
-                  :disabled="room.people <= 1"
-                  class="counter-btn"
-                >
-                  -
-                </button>
                 <span>{{ room.people }}</span>
-                <button
-                  @click="increasePeople(room)"
-                  :disabled="
-                    room.people >= room.CUSTOM_ATTRIBUTES?.number_of_people
-                  "
-                  class="counter-btn"
-                >
-                  +
-                </button>
-              </div>
             </td>
             <td>{{ room.totalPrice.toLocaleString() }} VND</td>
             <td>

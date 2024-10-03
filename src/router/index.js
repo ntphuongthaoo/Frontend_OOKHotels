@@ -13,13 +13,14 @@ import HotelDetail from '../views/HotelDetail/HotelDetail.vue'
 import ListHotels from '../views/ListHotels/ListHotels.vue'
 import BookingPage from '../views/Booking/BookingPage.vue'
 import CartPage from '../views/Cart/CartPage.vue'
+import PaymentPage from '../views/Payment/PaymentPage.vue'
 // Page Organization
 import store from "@/store"
  
 
 const routes = [
 	{
-		path: "/dangnhap",
+		path: "/login",
 		name: "Login",
 		component: Login,
 		meta: {
@@ -27,14 +28,14 @@ const routes = [
 		}
 	},
 	{
-		path: "/dangky",
+		path: "/register",
 		component: RegisterUser,
 		meta: {
 			layout: LoginLayout,
 		}
 	},
 	{
-		path: "/trangchu",
+		path: "/home",
 		component: HomeUser,
 		meta: {
 			layout: UserLayout,
@@ -48,7 +49,7 @@ const routes = [
 		}
 	},
 	{
-		path: "/trangchu/khach-san/:id",
+		path: "/home/hotel/:id",
 		name: "HotelDetail",
 		component: HotelDetail,
 		meta: {
@@ -72,6 +73,14 @@ const routes = [
 		meta: {
 			layout: UserLayout,
 		},
+	},
+	{
+		path: '/booking/payment',
+		name: 'PaymentPage',
+		component: PaymentPage,
+		meta: {
+			layout: UserLayout,
+		},
 	  }
 	// {
 	// 	path: "/danh-sach-khach-san",
@@ -85,7 +94,14 @@ const routes = [
 const router = createRouter({
 	history: createWebHistory(),
 	routes,
-})
+	scrollBehavior(to, from, savedPosition) {
+	  if (savedPosition) {
+		return savedPosition; // Nếu có vị trí cuộn được lưu, cuộn lại vị trí đó
+	  } else {
+		return { top: 0 }; // Cuộn về đầu trang
+	  }
+	},
+  });
 
 router.beforeEach((to, from, next) => {
 	console.log("Chuyển hướng đến:", to.name);
@@ -105,11 +121,11 @@ router.beforeEach((to, from, next) => {
     // }
 
     // // Nếu người dùng đã đăng nhập và cố gắng truy cập trang đăng nhập thì chuyển hướng
-    // if (to.path === '/dangnhap' && isLoggedIn) {
+    // if (to.path === '/login' && isLoggedIn) {
     //     if (userRole === 'admin') {
     //         return next('/dashboard'); // Chuyển hướng admin đến dashboard
     //     } else {
-    //         return next('/trangchu'); // Chuyển hướng người dùng thường đến trang chủ
+    //         return next('/home'); // Chuyển hướng người dùng thường đến trang chủ
     //     }
     // }
 
@@ -117,7 +133,7 @@ router.beforeEach((to, from, next) => {
     // if (to.matched.some(record => record.meta.requiresAuth) && !isLoggedIn) {
     //     // Chuyển hướng đến trang đăng nhập và lưu lại trang hiện tại trong query.redirect
     //     return next({
-    //         path: '/dangnhap',
+    //         path: '/login',
     //         query: { redirect: to.fullPath } // Lưu đường dẫn của trang hiện tại
     //     });
     // }

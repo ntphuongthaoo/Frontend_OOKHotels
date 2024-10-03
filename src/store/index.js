@@ -11,6 +11,13 @@ const store = createStore({
     users: [],
     cart: null,
     footerOffsetTop: 0,
+    bookingDetails: {
+      hotel: null,
+      room: null,
+      startDate: null,
+      endDate: null,
+      totalPrice: 0,
+    },
   },
   mutations: {
     SET_USER_INFO(state, userInfo) {
@@ -31,6 +38,11 @@ const store = createStore({
     SET_FOOTER_OFFSET(state, offset) {
       state.footerOffsetTop = offset;
     },
+    SET_BOOKING_DETAIL(state, details) {
+      console.log("Đang lưu chi tiết booking vào state:", details);
+      state.bookingDetails = details;
+    },
+
   },
   actions: {
     async login({ commit, dispatch }, credentials) {
@@ -62,7 +74,7 @@ const store = createStore({
             } else if (roles.STAFF) {
               router.push("/staff_dashboard"); // Điều hướng nhân viên
             } else {
-              router.push("/trangchu"); // Điều hướng người dùng thông thường
+              router.push("/home"); // Điều hướng người dùng thông thường
             }
           }
         }
@@ -75,7 +87,7 @@ const store = createStore({
       localStorage.removeItem("accessToken");
       commit("LOGOUT");
       message.success("Đã đăng xuất thành công!");
-      router.push('/dangnhap');
+      router.push('/login');
     },
     async checkToken({ commit, dispatch }) {
       const token = localStorage.getItem("accessToken");
@@ -115,6 +127,10 @@ const store = createStore({
     updateFooterOffset({ commit }, offset) {
       commit('SET_FOOTER_OFFSET', offset);
     },
+
+    setBookingDetails({ commit }, details) {
+      commit("SET_BOOKING_DETAILS", details);
+    },
   },
   getters: {
     isLoggedIn: (state) => state.isLoggedIn,
@@ -126,6 +142,9 @@ const store = createStore({
         }, 0);
       }
       return 0;
+    },
+    getBookingDetails(state) {
+      return state.bookingDetails;
     },
   },
 });

@@ -13,7 +13,7 @@
       <div class="footer-section links">
         <h3>Liên kết nhanh</h3>
         <ul>
-          <li><a href="/trangchu">Trang chủ</a></li>
+          <li><a href="/home">Trang chủ</a></li>
           <li><a href="/danh-sach-khach-san">Khách sạn</a></li>
           <li><a href="/about">Về chúng tôi</a></li>
           <li><a href="/contact">Liên hệ</a></li>

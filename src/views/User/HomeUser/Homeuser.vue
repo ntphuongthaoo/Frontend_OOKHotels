@@ -31,7 +31,7 @@
       <div class="search-fields">
         <!-- Địa điểm -->
         <div class="search-field date-range-field">
-          <label for="destination">Bạn muốn nghỉ dưỡng ở đâu?</label>
+          <label for="destination">Bạn muốn đến đâu?</label>
           <div class="input-group">
             <span class="input-group-text">
               <i class="fas fa-map-marker-alt"></i>
@@ -61,20 +61,38 @@
           </ul>
         </div>
 
-        <!-- Ngày nhận - trả phòng -->
         <div class="search-field date-range-field">
-          <label for="dateRange">Ngày nhận - trả phòng</label>
+          <label for="checkInDate">Ngày nhận phòng</label>
           <div class="input-group">
             <span class="input-group-text">
               <i class="fas fa-calendar-alt"></i>
             </span>
-            <DatePicker
-              v-model="dateRange"
-              type="daterange"
-              placeholder="Ngày nhận - trả phòng"
-              format="DD/MM/YYYY"
-              :min-date="minDate"
-              input-class="form-control"
+            <input
+              id="checkInDate"
+              type="date"
+              class="form-control"
+              v-model="checkInDate"
+              :min="minDate"
+              @change="updateCheckOutMinDate"
+              placeholder="Chọn ngày nhận phòng"
+            />
+          </div>
+        </div>
+
+        <!-- Ngày trả phòng -->
+        <div class="search-field date-range-field">
+          <label for="checkOutDate">Ngày trả phòng</label>
+          <div class="input-group">
+            <span class="input-group-text">
+              <i class="fas fa-calendar-alt"></i>
+            </span>
+            <input
+              id="checkOutDate"
+              type="date"
+              class="form-control"
+              v-model="checkOutDate"
+              :min="minCheckOutDate"
+              placeholder="Chọn ngày trả phòng"
             />
           </div>
         </div>
@@ -221,24 +239,23 @@ export default {
     DatePicker,
   },
   data() {
-    const today = new Date(); // Lấy ngày hiện tại
-    const checkIn = new Date(today); // Ngày nhận phòng là hôm nay
-    const checkOut = new Date(today); // Ngày trả phòng là 3 ngày sau
-    checkOut.setDate(checkOut.getDate() + 2); // Thiết lập khoảng ngày là 3 ngày
+    const today = new Date().toISOString().split("T")[0];
+
     return {
       banners: [bannerProduct, bannerProduct1, bannerProduct2],
       currentIndex: 0,
       featuredHotels: [],
       destination: "",
-      checkInDate: checkIn,
-      checkOutDate: checkOut,
+      checkInDate: null,
+      checkOutDate: null,
       rooms: 1,
       voucherCode: "",
       minDate: today,
-      dateRange: [checkIn, checkOut],
+      minCheckOutDate: null,
       hotelNames: [], // Danh sách khách sạn
       filteredHotelNames: [], // Danh sách khách sạn đã lọc
       showHotelSuggestions: false, // Trạng thái hiển thị gợi ý
+      selectedHotelId: null,
     };
   },
   mounted() {
@@ -247,6 +264,15 @@ export default {
     this.startCarousel();
   },
   methods: {
+    updateCheckOutMinDate() {
+      if (this.checkInDate) {
+        // Cập nhật ngày trả phòng phải lớn hơn ngày nhận phòng ít nhất 1 ngày
+        const checkInDate = new Date(this.checkInDate);
+        checkInDate.setDate(checkInDate.getDate() + 1); // Ngày trả phòng tối thiểu là 1 ngày sau ngày nhận phòng
+        this.minCheckOutDate = checkInDate.toISOString().split("T")[0];
+      }
+    },
+
     startCarousel() {
       const items = document.querySelectorAll(".carousel-item");
       this.currentIndex = 0; // Set the initial index to show the first item
@@ -271,27 +297,66 @@ export default {
       try {
         const response = await axiosClient.get("/hotels/getHotelsName");
         this.hotelNames = response.data.data;
+        console.log("Hotel names response:", response.data.data);
       } catch (error) {
         console.error("Lỗi khi lấy danh sách tên khách sạn:", error);
       }
     },
+
     filterHotelNames() {
+      const hotelPrefix = "Khách sạn ETHEREAL"; // Chuỗi cố định để tìm kiếm và cắt bỏ
+
       const normalizedInput = deburr(this.destination.toLowerCase()); // Loại bỏ dấu và chuyển thành chữ thường
+
+      // Lọc danh sách khách sạn, chỉ hiển thị tên sau "Khách sạn ETHEREAL"
       if (normalizedInput === "") {
-        // Nếu input trống, hiển thị toàn bộ danh sách khách sạn
-        this.filteredHotelNames = this.hotelNames;
-      } else {
-        this.filteredHotelNames = this.hotelNames.filter((hotel) => {
-          const normalizedHotelName = deburr(hotel.NAME.toLowerCase()); // Loại bỏ dấu và chuyển thành chữ thường
-          return normalizedHotelName.includes(normalizedInput); // So sánh chuỗi đã chuyển đổi
+        // Nếu input trống, hiển thị toàn bộ danh sách khách sạn (chỉ phần tên sau "Khách sạn ETHEREAL")
+        this.filteredHotelNames = this.hotelNames.map((hotel) => {
+          if (hotel.NAME.includes(hotelPrefix)) {
+            return {
+              ...hotel,
+              NAME: hotel.NAME.split(hotelPrefix)[1].trim(), // Cắt phần "Khách sạn ETHEREAL"
+            };
+          }
+          return hotel; // Nếu không có "Khách sạn ETHEREAL" thì giữ nguyên
         });
+      } else {
+        // Lọc theo chuỗi nhập của người dùng và chỉ hiển thị tên sau "Khách sạn ETHEREAL"
+        this.filteredHotelNames = this.hotelNames
+          .filter((hotel) => {
+            const normalizedHotelName = deburr(hotel.NAME.toLowerCase());
+            return normalizedHotelName.includes(normalizedInput);
+          })
+          .map((hotel) => {
+            if (hotel.NAME.includes(hotelPrefix)) {
+              return {
+                ...hotel,
+                NAME: hotel.NAME.split(hotelPrefix)[1].trim(), // Cắt phần "Khách sạn ETHEREAL"
+              };
+            }
+            return hotel; // Nếu không có "Khách sạn ETHEREAL" thì giữ nguyên
+          });
       }
       this.showHotelSuggestions = true; // Hiển thị gợi ý
     },
     selectHotel(name) {
-      this.destination = name;
-      this.showHotelSuggestions = false;
+      const hotelPrefix = "Khách sạn ETHEREAL";
+      let fullHotelName = `${hotelPrefix} ${name}`; // Tạo lại tên đầy đủ của khách sạn
+
+      // Tìm khách sạn dựa trên tên đầy đủ
+      const selectedHotel = this.hotelNames.find(
+        (hotel) => hotel.NAME === fullHotelName
+      );
+
+      if (selectedHotel) {
+        // Gán tên khách sạn và ID đã chọn
+        this.destination = name; // Hiển thị tên rút gọn sau "Khách sạn ETHEREAL"
+        this.selectedHotelId = selectedHotel._id; // Lưu ID của khách sạn đã chọn
+      }
+
+      this.showHotelSuggestions = false; // Ẩn danh sách gợi ý
     },
+
     hideSuggestionsWithDelay() {
       setTimeout(() => {
         this.showHotelSuggestions = false;
@@ -301,12 +366,56 @@ export default {
       this.$router.push({ name: "HotelDetail", params: { id: hotelId } });
     },
     searchRooms() {
-      console.log({
-        destination: this.destination,
-        checkInDate: this.dateRange[0],
-        checkOutDate: this.dateRange[1],
-        rooms: this.rooms,
-        voucherCode: this.voucherCode,
+      if (!this.destination) {
+        this.$toast.warning("Bạn chưa chọn địa điểm.", {
+          position: "top-right",
+          duration: 3000,
+        });
+        return;
+      }
+
+      if (!this.checkInDate) {
+        this.$toast.warning("Bạn chưa chọn ngày nhận phòng.", {
+          position: "top-right",
+          duration: 3000,
+        });
+        return;
+      }
+
+      if (!this.checkOutDate) {
+        this.$toast.warning("Bạn chưa chọn ngày trả phòng.", {
+          position: "top-right",
+          duration: 5000,
+        });
+        return;
+      }
+
+      if (new Date(this.checkOutDate) <= new Date(this.checkInDate)) {
+        this.$toast.warning(
+          "Ngày trả phòng phải lớn hơn ngày nhận phòng ít nhất 1 ngày.",
+          {
+            position: "top-right",
+            duration: 5000,
+          }
+        );
+        return;
+      }
+
+      if (!this.selectedHotelId) {
+        console.error("Hotel ID is not selected.");
+        return;
+      }
+      console.log("Hotel ID:", this.selectedHotelId);
+
+      // Điều hướng đến trang Booking và truyền các tham số tìm kiếm qua URL
+      this.$router.push({
+        name: "BookingPage",
+        query: {
+          hotelId: this.selectedHotelId, // ID khách sạn
+          checkInDate: this.checkInDate, // Ngày nhận phòng
+          checkOutDate: this.checkOutDate, // Ngày trả phòng
+          numberOfRooms: this.rooms, // Số phòng
+        },
       });
     },
   },

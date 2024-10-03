@@ -118,7 +118,7 @@
               <span v-else class="loading-spinner"></span>
             </button>
             <p class="login-link">
-              BẠN ĐÃ CÓ TÀI KHOẢN? <a href="/dangnhap">ĐĂNG NHẬP</a>
+              BẠN ĐÃ CÓ TÀI KHOẢN? <a href="/login">ĐĂNG NHẬP</a>
             </p>
 
             <div class="social-login">
@@ -244,7 +244,7 @@ export default {
             duration: 5000, // Thời gian hiển thị (ms)
             dismissible: true, // Cho phép đóng thông báo bằng tay
           });
-          this.$router.push("/dangnhap");
+          this.$router.push("/login");
         } else if (response.data.errors) {
           this.otpErrors = response.data.errors; // Gán lỗi từ backend vào đối tượng otpErrors
         }
