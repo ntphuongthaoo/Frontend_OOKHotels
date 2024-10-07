@@ -602,6 +602,71 @@ export default {
       });
     },
 
+    // confirmDates() {
+    //   if (!this.selectedStartDate || !this.selectedEndDate) {
+    //     this.$toast.warning("Vui lòng chọn ngày bắt đầu và kết thúc.", {
+    //       position: "top-right",
+    //       duration: 3000,
+    //     });
+    //     return;
+    //   }
+
+    //   // Kiểm tra nếu ngày bắt đầu và ngày kết thúc là cùng một ngày
+    //   if (this.selectedStartDate.getTime() === this.selectedEndDate.getTime()) {
+    //     this.$toast.warning(
+    //       "Ngày nhận và ngày trả phòng không được trùng nhau.",
+    //       {
+    //         position: "top-right",
+    //         duration: 3000,
+    //       }
+    //     );
+
+    //     return;
+    //   }
+
+    //   // Chuyển đổi ngày thành chuỗi để gửi lên server hoặc sử dụng
+    //   const startDate = this.selectedStartDate.toISOString().split("T")[0];
+    //   const endDate = this.selectedEndDate.toISOString().split("T")[0];
+
+    //   console.log("Chuyển đến BookingPage với hotelId:", this.hotel._id);
+    //   console.log("Ngày nhận phòng:", startDate, "Ngày trả phòng:", endDate);
+
+    //   if (this.currentAction === "addToCart") {
+    //     this.addToCart(this.selectedRoom, startDate, endDate);
+    //   } else if (this.currentAction === "book") {
+    //     // Ưu tiên điều hướng đến BookingPage khi currentAction là "book"
+    //     console.log("Đang thực hiện điều hướng đến trang BookingPage");
+    //     this.$router
+    //       .push({
+    //         name: "BookingPage",
+    //         query: {
+    //           hotelId: this.hotel._id,
+    //           startDate,
+    //           endDate,
+    //         },
+    //       })
+    //       .catch((err) => {
+    //         console.error("Lỗi khi chuyển hướng:", err);
+    //       });
+    //   } else if (this.currentAction === "bookNow") {
+    //     this.$store.dispatch("setBookingDetails", {
+    //       hotel: this.hotel,
+    //       room: this.selectedRoom,
+    //       startDate,
+    //       endDate,
+    //       totalPrice: this.selectedRoom.PRICE_PERNIGHT * this.nightsCount, // Tính tổng giá
+    //     });
+
+    //     // Điều hướng đến trang PaymentPage
+    //     console.log("Điều hướng đến PaymentPage với thông tin phòng đã chọn")
+    //     this.$router.push({
+    //       name: "PaymentPage",
+    //     });
+    //   }
+    //   // Đóng modal
+    //   this.closeCalendarModal();
+    // },
+
     confirmDates() {
       if (!this.selectedStartDate || !this.selectedEndDate) {
         this.$toast.warning("Vui lòng chọn ngày bắt đầu và kết thúc.", {
@@ -611,7 +676,7 @@ export default {
         return;
       }
 
-      // Kiểm tra nếu ngày bắt đầu và ngày kết thúc là cùng một ngày
+      // Kiểm tra nếu ngày nhận và ngày trả là cùng một ngày
       if (this.selectedStartDate.getTime() === this.selectedEndDate.getTime()) {
         this.$toast.warning(
           "Ngày nhận và ngày trả phòng không được trùng nhau.",
@@ -620,50 +685,72 @@ export default {
             duration: 3000,
           }
         );
-
         return;
       }
 
-      // Chuyển đổi ngày thành chuỗi để gửi lên server hoặc sử dụng
+      // Chuyển đổi ngày thành chuỗi định dạng YYYY-MM-DD
       const startDate = this.selectedStartDate.toISOString().split("T")[0];
       const endDate = this.selectedEndDate.toISOString().split("T")[0];
 
       console.log("Chuyển đến BookingPage với hotelId:", this.hotel._id);
       console.log("Ngày nhận phòng:", startDate, "Ngày trả phòng:", endDate);
 
-      if (this.currentAction === "addToCart") {
-        this.addToCart(this.selectedRoom, startDate, endDate);
-      } else if (this.currentAction === "book") {
-        // Ưu tiên điều hướng đến BookingPage khi currentAction là "book"
-        console.log("Đang thực hiện điều hướng đến trang BookingPage");
-        this.$router
-          .push({
-            name: "BookingPage",
-            query: {
-              hotelId: this.hotel._id,
+      switch (this.currentAction) {
+        case "addToCart":
+          // Thêm phòng vào giỏ hàng
+          this.addToCart(this.selectedRoom, startDate, endDate);
+          break;
+
+        case "book":
+          // Điều hướng đến BookingPage với các query params
+          console.log("Đang thực hiện điều hướng đến trang BookingPage");
+          this.$router
+            .push({
+              name: "BookingPage",
+              query: {
+                hotelId: this.hotel._id,
+                startDate,
+                endDate,
+              },
+            })
+            .catch((err) => {
+              console.error("Lỗi khi chuyển hướng:", err);
+            });
+          break;
+
+        case "bookNow":
+          if (this.selectedRoom) {
+            this.$store.commit("SET_BOOKING_DETAIL", {
+              hotel: this.hotel,
+              room: this.selectedRoom,
               startDate,
               endDate,
-            },
-          })
-          .catch((err) => {
-            console.error("Lỗi khi chuyển hướng:", err);
-          });
-      } else if (this.currentAction === "bookNow") {
-        this.$store.dispatch("setBookingDetails", {
-          hotel: this.hotel,
-          room: this.selectedRoom,
-          startDate,
-          endDate,
-          totalPrice: this.selectedRoom.PRICE_PERNIGHT * this.nightsCount, // Tính tổng giá
-        });
+              totalPrice: this.selectedRoom.PRICE_PERNIGHT * this.nightsCount, // Tính tổng giá dựa trên số đêm
+            });
 
-        // Điều hướng đến trang PaymentPage
-        console.log("Điều hướng đến PaymentPage với thông tin phòng đã chọn")
-        this.$router.push({
-          name: "PaymentPage",
-        });
+            console.log("Booking details:", {
+              hotel: this.hotel,
+              room: this.selectedRoom,
+              startDate,
+              endDate,
+              totalPrice: this.selectedRoom.PRICE_PERNIGHT * this.nightsCount,
+            });
+
+            console.log(
+              "Điều hướng đến PaymentPage với thông tin phòng đã chọn"
+            );
+            this.$router.push({
+              name: "PaymentPage",
+            });
+          }
+
+          break;
+
+        default:
+          console.error("Hành động không xác định:", this.currentAction);
       }
-      // Đóng modal
+
+      // Đóng modal sau khi hoàn tất
       this.closeCalendarModal();
     },
 

@@ -65,7 +65,7 @@
               </div>
             </td>
             <td>
-                <span>{{ room.people }}</span>
+              <span>{{ room.people }}</span>
             </td>
             <td>{{ room.totalPrice.toLocaleString() }} VND</td>
             <td>
@@ -233,6 +233,42 @@ export default {
         floatingModal.style.top = "auto";
       }
     },
+
+    getSelectedRooms() {
+      const selectedRooms = [];
+
+      this.hotels.forEach((hotel) => {
+        hotel.ROOMS.forEach((room) => {
+          if (room.isSelected) {
+            selectedRooms.push({
+              roomId: room.ROOM_ID,
+              startDate: room.startDate,
+              endDate: room.endDate,
+              pricePerNight: room.pricePerNight,
+              totalPrice: room.totalPrice,
+              roomNumber: room.roomNumber,
+              people: room.people,
+              hotelName: hotel.HOTEL_NAME,
+            });
+          }
+        });
+      });
+
+      return selectedRooms;
+    },
+
+    async checkout() {
+      const selectedRooms = this.getSelectedRooms();
+
+      // Chuyển hướng sang trang payment với thông tin các phòng đã chọn
+      this.$router.push({
+        name: "PaymentPage", // Tên của route tương ứng với trang thanh toán
+        query: {
+          rooms: JSON.stringify(selectedRooms), // Truyền dữ liệu phòng qua query
+        },
+      });
+    },
+
     // Phương thức gọi API để lấy dữ liệu giỏ hàng
     async fetchCartData() {
       try {
@@ -412,309 +448,5 @@ export default {
 </script>
 
 <style scoped>
-.cart-container {
-  width: 100%;
-  overflow-x: auto;
-  margin: 20px auto;
-  background-color: #f9f9f9;
-  padding: 20px;
-  padding-bottom: 150px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.custom-table {
-  width: 100%;
-  border-collapse: collapse;
-  text-align: left;
-}
-
-.custom-table thead {
-  background-color: #f4f4f4;
-}
-
-.custom-table th,
-.custom-table td {
-  padding: 20px 20px;
-  border-bottom: 1px solid #ddd;
-  color: #6d4c41;
-  text-align: center;
-}
-
-.custom-table th {
-  font-weight: bold;
-  color: #2c3e50;
-}
-
-.custom-table tbody tr:nth-child(even) {
-  background-color: #f2f2f2;
-}
-
-.custom-table .room-image {
-  width: 250px; /* Giảm kích thước ảnh */
-  height: 150px;
-  border-radius: 4px;
-  object-fit: cover;
-}
-
-.edit-btn,
-.delete-btn,
-.book-btn {
-  padding: 5px 10px;
-  margin: 5px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-}
-
-.edit-btn {
-  background-color: #3498db;
-  color: #fff;
-}
-
-.delete-btn {
-  background-color: #e74c3c;
-  color: #fff;
-}
-
-.book-btn {
-  background-color: #6d4c41;
-  color: #fff;
-}
-
-.edit-btn:hover,
-.delete-btn:hover,
-.book-btn:hover {
-  opacity: 0.8;
-}
-
-.modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.modal-content {
-  background: #fff;
-  padding: 20px;
-  border-radius: 8px;
-  width: 300px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-h3 {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 40px;
-  color: #6d4c41;
-}
-
-.room-number-box {
-  border: 2px solid #6d4c41;
-  border-radius: 5px;
-  padding: 5px 10px;
-  display: inline-block;
-}
-.custom-table .hotel-name {
-  text-align: left;
-  cursor: pointer;
-}
-
-.modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
-.modal-content {
-  background: #fff;
-  padding: 20px;
-  border-radius: 8px;
-  width: 400px;
-  max-width: 90%;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.modal-content h2 {
-  margin-top: 0;
-  color: #6d4c41;
-  text-align: center;
-}
-
-.form-group {
-  margin-bottom: 15px;
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: 5px;
-  color: #333;
-}
-
-.form-group input {
-  width: 100%;
-  padding: 8px;
-  box-sizing: border-box;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-
-.modal-buttons {
-  display: flex;
-  justify-content: flex-end;
-}
-
-.update-btn,
-.cancel-btn {
-  padding: 8px 16px;
-  margin-left: 10px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-}
-
-.update-btn {
-  background-color: #28a745;
-  color: #fff;
-}
-
-.cancel-btn {
-  background-color: #6c757d;
-  color: #fff;
-}
-
-.update-btn:hover,
-.cancel-btn:hover {
-  opacity: 0.9;
-}
-
-.custom-checkbox {
-  width: 20px;
-  height: 20px;
-  accent-color: #6d4c41; /* Màu khi check */
-  cursor: pointer;
-}
-
-/* Modal nổi */
-.floating-modal {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  background-color: #fff; /* Màu nền trắng */
-  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1); /* Bóng mờ sang trọng */
-  display: flex;
-  justify-content: center; /* Căn giữa modal */
-  align-items: center;
-  padding: 20px 40px; /* Padding rộng hơn */
-  border-top: 2px solid #ddd; /* Viền trên nhẹ */
-  z-index: 1000;
-  transition: all 0.3s ease-in-out; /* Hiệu ứng mượt */
-}
-
-.floating-modal .modal-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  width: 100%;
-  max-width: 1200px; /* Giới hạn chiều rộng tối đa */
-  background-color: #f9f9f9; /* Màu nền modal nhạt */
-  padding: 15px 30px; /* Padding trong modal */
-  border-radius: 12px; /* Bo góc mượt */
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15); /* Bóng mờ mềm mại */
-}
-
-.modal-info {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 20px; /* Khoảng cách giữa các mục */
-  flex-grow: 1; /* Để modal-info chiếm không gian còn lại */
-}
-
-.modal-info .room-info,
-.modal-info .price-info {
-  display: flex;
-  align-items: center; /* Căn giữa dọc */
-  font-size: 18px; /* Kích thước chữ lớn hơn */
-  color: #444; /* Màu chữ đậm hơn */
-  font-weight: bold; /* Chữ đậm */
-  white-space: nowrap; /* Không xuống dòng */
-}
-
-.modal-info span {
-  font-size: 18px; /* Kích thước chữ lớn hơn */
-  color: #444; /* Màu chữ đậm hơn */
-  font-weight: bold; /* Chữ đậm */
-}
-
-.modal-info strong {
-  font-size: 20px; /* Kích thước chữ in đậm */
-  color: #d35400; /* Màu cam nổi bật */
-  margin-left: 5px; /* Khoảng cách giữa chữ và số */
-}
-
-.booking {
-  margin-top: 20px;
-}
-.checkout-btn {
-  padding: 12px 25px; /* Tăng kích thước nút */
-  background-color: #6d4c41; /* Màu nâu */
-  color: white;
-  border: none;
-  border-radius: 6px; /* Bo góc nút */
-  cursor: pointer;
-  font-size: 16px;
-  font-weight: bold;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Bóng mờ nhẹ cho nút */
-  transition: background-color 0.3s ease-in-out, transform 0.3s ease-in-out; /* Hiệu ứng chuyển màu và phóng to */
-}
-
-.checkout-btn:hover {
-  background-color: #5a3c32; /* Màu nâu đậm hơn khi hover */
-  transform: translateY(-2px); /* Hiệu ứng phóng to nhẹ khi hover */
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2); /* Tăng bóng mờ khi hover */
-}
-
-.floating-modal.sticky {
-  position: absolute; /* Chuyển sang absolute khi chạm đến footer */
-  bottom: auto; /* Vô hiệu hóa bottom để modal không dính xuống cuối trang */
-}
-
-/* Responsive: Đảm bảo modal hiển thị tốt trên màn hình nhỏ */
-@media (max-width: 768px) {
-  .floating-modal {
-    padding: 15px 20px; /* Giảm padding trên màn hình nhỏ */
-  }
-
-  .modal-content {
-    flex-direction: column; /* Sắp xếp dọc trên màn hình nhỏ */
-    padding: 20px;
-    text-align: center; /* Căn giữa nội dung */
-  }
-
-  .modal-info {
-    gap: 15px; /* Giảm khoảng cách giữa các phần tử */
-  }
-
-  .checkout-btn {
-    width: 100%; /* Nút chiếm toàn bộ chiều rộng */
-    margin-top: 15px; /* Khoảng cách trên nút */
-  }
-}
+@import "./CartPage.scss";
 </style>
