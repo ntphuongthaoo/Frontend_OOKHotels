@@ -24,7 +24,7 @@
                   <a class="nav-link" href="/home">Trang chủ</a>
                 </li>
                 <li class="nav-item">
-                  <a class="nav-link" href="/danh-sach-khach-san">Khách sạn</a>
+                  <a class="nav-link" href="/booking-history">Lịch sử</a>
                 </li>
                 <li class="nav-item">
                   <a class="nav-link" href="gallery.html">Vị Trí</a>

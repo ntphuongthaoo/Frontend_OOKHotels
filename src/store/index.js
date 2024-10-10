@@ -18,6 +18,7 @@ const store = createStore({
       endDate: null,
       totalPrice: 0,
     },
+    selectedRoomsCart: [],
   },
   mutations: {
     SET_USER_INFO(state, userInfo) {
@@ -41,6 +42,9 @@ const store = createStore({
     SET_BOOKING_DETAIL(state, details) {
       console.log("Đang lưu chi tiết booking vào state:", details);
       state.bookingDetails = details;
+    },
+    SET_SELECTEDROOMS_CART(state, rooms) {
+      state.selectedRoomsCart = rooms;
     },
 
   },
@@ -146,6 +150,7 @@ const store = createStore({
     getBookingDetails(state) {
       return state.bookingDetails;
     },
+    getSelectedRoomsCart: (state) => state.selectedRoomsCart,
   },
 });
 

@@ -84,6 +84,9 @@
             </h4>
             <p>Diện tích: {{ rooms[0].CUSTOM_ATTRIBUTES.area }}m²</p>
             <p>Giá: {{ rooms[0].PRICE_PERNIGHT }} VND/đêm</p>
+            <p>
+              Số người: {{ rooms[0].CUSTOM_ATTRIBUTES.number_of_people }} người
+            </p>
             <div class="room-actions">
               <button
                 class="book-now"
@@ -150,10 +153,15 @@
               <p>
                 <strong>Giá:</strong> {{ selectedRoom.PRICE_PERNIGHT }} VND/đêm
               </p>
+              <p>
+                <strong>Số người:</strong>
+                {{ selectedRoom.CUSTOM_ATTRIBUTES.number_of_people }} người
+              </p>
               <div class="action">
                 <button
                   @click="openCalendarModalForRoom(selectedRoom, 'addToCart')"
                   class="cart"
+                  :disabled="selectedRoom?.IS_IN_CART || false"
                 >
                   <i class="fa fa-cart-plus" aria-hidden="true"></i>
                 </button>
@@ -366,6 +374,8 @@ export default {
 
         // Kiểm tra nếu thêm phòng thành công
         if (response.data.success) {
+          await this.fetchRooms();
+          
           Swal.fire({
             icon: "success",
             title: "Thành công",
@@ -451,6 +461,7 @@ export default {
         // Kiểm tra nếu dữ liệu trả về là một mảng
         if (Array.isArray(response.data.data)) {
           this.roomList = response.data.data; // Đổi thành roomList
+          console.log("Danh sách phòng với IS_IN_CART:", this.roomList);
         } else {
           console.error("Dữ liệu phòng không hợp lệ:", response.data.data);
           this.roomList = []; // Gán roomList là mảng rỗng nếu dữ liệu không hợp lệ
@@ -856,7 +867,11 @@ export default {
           acc[room.TYPE].bedTypeGroups[bedType] = [];
         }
 
-        acc[room.TYPE].bedTypeGroups[bedType].push(room);
+        // acc[room.TYPE].bedTypeGroups[bedType].push(room);
+        acc[room.TYPE].bedTypeGroups[bedType].push({
+          ...room,
+          IS_IN_CART: room.IS_IN_CART, // Lấy giá trị IS_IN_CART
+        });
 
         return acc;
       }, {});

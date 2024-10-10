@@ -14,6 +14,7 @@ import ListHotels from '../views/ListHotels/ListHotels.vue'
 import BookingPage from '../views/Booking/BookingPage.vue'
 import CartPage from '../views/Cart/CartPage.vue'
 import PaymentPage from '../views/Payment/PaymentPage.vue'
+import BookingHistory from '../views/BookingHistory/BookingHistory.vue'
 // Page Organization
 import store from "@/store"
  
@@ -78,6 +79,14 @@ const routes = [
 		path: '/booking/payment',
 		name: 'PaymentPage',
 		component: PaymentPage,
+		meta: {
+			layout: UserLayout,
+		},
+	  },
+	{
+		path: '/booking-history',
+		name: 'BookingHistory',
+		component: BookingHistory,
 		meta: {
 			layout: UserLayout,
 		},

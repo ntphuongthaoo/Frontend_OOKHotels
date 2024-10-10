@@ -260,16 +260,11 @@ export default {
     async checkout() {
       const selectedRooms = this.getSelectedRooms();
 
-      // Chuyển hướng sang trang payment với thông tin các phòng đã chọn
-      this.$router.push({
-        name: "PaymentPage", // Tên của route tương ứng với trang thanh toán
-        query: {
-          rooms: JSON.stringify(selectedRooms), // Truyền dữ liệu phòng qua query
-        },
-      });
+      this.$store.commit("SET_SELECTEDROOMS_CART", selectedRooms);
+
+      this.$router.push({ name: "PaymentPage" });
     },
 
-    // Phương thức gọi API để lấy dữ liệu giỏ hàng
     async fetchCartData() {
       try {
         const response = await axiosClient.post("/carts/getCartByUserId");
@@ -287,7 +282,8 @@ export default {
               endDate: room.END_DATE, // Ngày kết thúc
               people: room.CUSTOM_ATTRIBUTES.number_of_people || 1, // Số người
               totalPrice: room.TOTAL_PRICE_FOR_ROOM, // Tổng giá cho phòng
-              ROOM_ID: room.ROOM_ID, // ID phòng
+              ROOM_ID: room.ROOM_ID,
+              IS_IN_CART: room.IS_IN_CART, // ID phòng
               isSelected: false, // Trạng thái chọn của phòng
             })),
           }));
@@ -370,7 +366,7 @@ export default {
 
         if (result.isConfirmed) {
           await axiosClient.post("/carts/removeRoomFromCart", { roomId });
-          this.fetchCartData();
+          await this.fetchCartData();
           await this.$store.dispatch("fetchCart");
           Swal.fire("Đã xóa!", "Phòng đã được xóa khỏi giỏ hàng.", "success");
         }
