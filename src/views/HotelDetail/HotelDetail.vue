@@ -210,7 +210,7 @@
                   v-for="day in week"
                   :key="day.date"
                   :class="{
-                    disabled: day.isPast,
+                    disabled: day.isPast || !day.isAvailable,
                     selected: isSelectedDate(day.date),
                   }"
                   @click="selectDate(day)"
@@ -308,7 +308,8 @@ export default {
         });
         return;
       }
-      this.selectedRoom = room; // Lưu phòng được chọn
+      this.selectedRoom = room;
+      console.log("dữ liệu phòng: ", this.selectedRoom);
       this.currentAction = action; // Lưu hành động hiện tại
       this.openCalendarModal(); // Mở modal lịch
     },
@@ -375,7 +376,7 @@ export default {
         // Kiểm tra nếu thêm phòng thành công
         if (response.data.success) {
           await this.fetchRooms();
-          
+
           Swal.fire({
             icon: "success",
             title: "Thành công",
@@ -509,17 +510,69 @@ export default {
     closeModal() {
       this.isModalVisible = false;
     },
-    // Mở modal lịch
+
     openCalendarModal() {
       this.isCalendarModalVisible = true;
       this.currentDate = new Date(); // Đặt lại currentDate về ngày hiện tại
 
       // Mặc định chọn ngày hiện tại và 3 ngày sau
       const today = new Date();
-      this.selectedStartDate = today;
-      const defaultEndDate = new Date();
-      defaultEndDate.setDate(today.getDate() + 2); // Mặc định 3 ngày 2 đêm
-      this.selectedEndDate = defaultEndDate;
+      const startDate = new Date(today.getTime()); // Tạo đối tượng Date mới cho startDate
+      const endDate = new Date(today.getTime());
+      endDate.setDate(endDate.getDate() + 2); // Mặc định 3 ngày 2 đêm
+
+      // Gọi hàm để tìm ngày khả dụng
+      const { newStartDate, newEndDate } = this.findAvailableDates(
+        startDate,
+        endDate
+      );
+
+      // Cập nhật ngày bắt đầu và kết thúc sau khi tìm được ngày khả dụng
+      this.selectedStartDate = newStartDate;
+      this.selectedEndDate = newEndDate;
+    },
+
+    findAvailableDates(startDate, endDate) {
+      let availableStart = new Date(startDate.getTime()); // Sao chép startDate
+      let availableEnd = new Date(endDate.getTime()); // Sao chép endDate
+
+      // Lặp qua các ngày để kiểm tra ngày nào khả dụng
+      while (!this.isDateRangeAvailable(availableStart, availableEnd)) {
+        availableStart.setDate(availableStart.getDate() + 1); // Kiểm tra ngày tiếp theo
+        availableEnd = new Date(availableStart.getTime()); // Tạo đối tượng mới cho availableEnd
+        availableEnd.setDate(availableStart.getDate() + 2); // Tính lại ngày kết thúc sau 3 ngày
+      }
+
+      return { newStartDate: availableStart, newEndDate: availableEnd };
+    },
+
+    isDateRangeAvailable(startDate, endDate) {
+      // Danh sách các ngày không khả dụng của phòng từ AVAILABILITY
+      const unavailableDates = this.getUnavailableDates();
+
+      // Kiểm tra từng ngày trong khoảng từ startDate đến endDate
+      for (
+        let d = new Date(startDate.getTime());
+        d <= endDate;
+        d.setDate(d.getDate() + 1)
+      ) {
+        const dateStr = d.toISOString().split("T")[0]; // Chuyển ngày thành chuỗi để so sánh
+        if (unavailableDates.includes(dateStr)) {
+          return false; // Nếu một ngày nào đó không khả dụng, trả về false
+        }
+      }
+
+      return true; // Nếu tất cả các ngày trong khoảng đều khả dụng, trả về true
+    },
+
+    getUnavailableDates() {
+      // Danh sách các ngày đã bị đặt (không khả dụng), có thể lấy từ AVAILABILITY của phòng
+      return this.selectedRoom.AVAILABILITY.filter(
+        (availability) => !availability.AVAILABLE
+      ).map((availability) => {
+        const date = new Date(availability.DATE);
+        return date.toISOString().split("T")[0]; // Chuyển đổi ngày thành chuỗi 'YYYY-MM-DD'
+      });
     },
 
     // Đóng modal lịch
@@ -575,7 +628,7 @@ export default {
 
     // Chọn ngày
     selectDate(day) {
-      if (day.isPast || !day.date) {
+      if (day.isPast || !day.date || !day.isAvailable) {
         return; // Không cho chọn ngày trong quá khứ hoặc ô trống
       }
 
@@ -612,71 +665,6 @@ export default {
         },
       });
     },
-
-    // confirmDates() {
-    //   if (!this.selectedStartDate || !this.selectedEndDate) {
-    //     this.$toast.warning("Vui lòng chọn ngày bắt đầu và kết thúc.", {
-    //       position: "top-right",
-    //       duration: 3000,
-    //     });
-    //     return;
-    //   }
-
-    //   // Kiểm tra nếu ngày bắt đầu và ngày kết thúc là cùng một ngày
-    //   if (this.selectedStartDate.getTime() === this.selectedEndDate.getTime()) {
-    //     this.$toast.warning(
-    //       "Ngày nhận và ngày trả phòng không được trùng nhau.",
-    //       {
-    //         position: "top-right",
-    //         duration: 3000,
-    //       }
-    //     );
-
-    //     return;
-    //   }
-
-    //   // Chuyển đổi ngày thành chuỗi để gửi lên server hoặc sử dụng
-    //   const startDate = this.selectedStartDate.toISOString().split("T")[0];
-    //   const endDate = this.selectedEndDate.toISOString().split("T")[0];
-
-    //   console.log("Chuyển đến BookingPage với hotelId:", this.hotel._id);
-    //   console.log("Ngày nhận phòng:", startDate, "Ngày trả phòng:", endDate);
-
-    //   if (this.currentAction === "addToCart") {
-    //     this.addToCart(this.selectedRoom, startDate, endDate);
-    //   } else if (this.currentAction === "book") {
-    //     // Ưu tiên điều hướng đến BookingPage khi currentAction là "book"
-    //     console.log("Đang thực hiện điều hướng đến trang BookingPage");
-    //     this.$router
-    //       .push({
-    //         name: "BookingPage",
-    //         query: {
-    //           hotelId: this.hotel._id,
-    //           startDate,
-    //           endDate,
-    //         },
-    //       })
-    //       .catch((err) => {
-    //         console.error("Lỗi khi chuyển hướng:", err);
-    //       });
-    //   } else if (this.currentAction === "bookNow") {
-    //     this.$store.dispatch("setBookingDetails", {
-    //       hotel: this.hotel,
-    //       room: this.selectedRoom,
-    //       startDate,
-    //       endDate,
-    //       totalPrice: this.selectedRoom.PRICE_PERNIGHT * this.nightsCount, // Tính tổng giá
-    //     });
-
-    //     // Điều hướng đến trang PaymentPage
-    //     console.log("Điều hướng đến PaymentPage với thông tin phòng đã chọn")
-    //     this.$router.push({
-    //       name: "PaymentPage",
-    //     });
-    //   }
-    //   // Đóng modal
-    //   this.closeCalendarModal();
-    // },
 
     confirmDates() {
       if (!this.selectedStartDate || !this.selectedEndDate) {
@@ -825,10 +813,18 @@ export default {
           month === today.getMonth() &&
           year === today.getFullYear();
 
+        // Kiểm tra ngày có khả dụng hay không từ AVAILABILITY của phòng đã chọn
+        const isAvailable = this.selectedRoom?.AVAILABILITY.some(
+          (availability) =>
+            new Date(availability.DATE).toDateString() ===
+              date.toDateString() && availability.AVAILABLE
+        );
+
         week.push({
           label: day,
           date: date,
           isPast: isPast,
+          isAvailable: isAvailable !== false,
         });
 
         if (week.length === 7) {

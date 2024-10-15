@@ -123,6 +123,9 @@ const store = createStore({
         const response = await axios.post("/carts/getCartByUserId");
         if (response && response.data.cart) {
           commit("SET_CART", response.data.cart);
+        } else {
+          // Đặt cart thành đối tượng trống nếu giỏ hàng trống
+          commit("SET_CART", {});
         }
       } catch (error) {
         console.error("Error fetching cart:", error);
@@ -140,9 +143,10 @@ const store = createStore({
     isLoggedIn: (state) => state.isLoggedIn,
     userInfo: (state) => state.userInfo,
     cartItemCount: (state) => {
-      if (state.cart && state.cart.HOTELS) {
+      if (state.cart && Array.isArray(state.cart.HOTELS)) {
+        // Lọc các phòng có TOTAL_PRICE_FOR_ROOM khác null, sau đó đếm số phòng
         return state.cart.HOTELS.reduce((count, hotel) => {
-          return count + hotel.ROOMS.length;
+          return count + hotel.ROOMS.filter(room => room.TOTAL_PRICE_FOR_ROOM !== null).length;
         }, 0);
       }
       return 0;

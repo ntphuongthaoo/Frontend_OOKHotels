@@ -52,18 +52,20 @@
                   userInfo?.FULLNAME || "User"
                 }}</span>
                 <a class="btn auth-btn logout-btn" @click="logout">Đăng xuất</a>
-                <a href="/cart" class="cart-icon" :data-count="cartItemCount">
+                <a href="/cart" class="cart-icon" :data-count="checkCartItemCount">
                   <i class="fas fa-shopping-cart"></i>
                 </a>
               </template>
               <template v-else>
                 <a class="btn auth-btn login-btn" href="/login">Đăng nhập</a>
-                <a class="btn auth-btn register-btn" href="/register">Đăng ký</a>
+                <a class="btn auth-btn register-btn" href="/register"
+                  >Đăng ký</a
+                >
                 <a
                   href="/cart"
                   class="cart-icon"
                   v-if="cartItemCount > 0"
-                  :data-count="cartItemCount"
+                  :data-count="checkCartItemCount"
                 >
                   <i class="fas fa-shopping-cart"></i>
                 </a>
@@ -85,11 +87,14 @@ export default {
   data() {
     return {
       isNavbarOpen: false,
-      cartItemCount: 0,
     };
   },
   computed: {
     ...mapGetters(["isLoggedIn", "userInfo", "cartItemCount"]),
+    checkCartItemCount() {
+      console.log("Cart Item Count:", this.cartItemCount);
+      return this.cartItemCount;
+    },
   },
   methods: {
     ...mapActions(["logout", "fetchCart"]),
@@ -104,14 +109,14 @@ export default {
       await this.fetchCart();
     }
   },
-  watch: {
-    "$store.state.cart": {
-      handler() {
-        this.cartItemCount = this.$store.getters.cartItemCount;
-      },
-      deep: true,
-    },
-  },
+  // watch: {
+  //   "$store.state.cart": {
+  //     handler() {
+  //       this.cartItemCount = this.$store.getters.cartItemCount;
+  //     },
+  //     deep: true,
+  //   },
+  // },
 };
 </script>
 

@@ -66,7 +66,7 @@ export default {
     };
   },
   methods: {
-    ...mapActions(["login"]),
+    ...mapActions(["login", "checkToken"]),
 
     async handleSubmit() {
       // Kiểm tra giá trị đầu vào để xác định là email hay số điện thoại
@@ -79,12 +79,24 @@ export default {
       try {
         // const result = await this.$store.dispatch("login", payload);
         await this.login(payload);
-        const redirect = this.$route.query.redirect || "/home";
-        this.$router.push(redirect);
+
+        const userInfo = await this.checkToken();
+
+        if (userInfo && userInfo.ROLE && userInfo.ROLE.ADMIN) {
+          this.$router.push("/dashboard");
+          
+        } else {
+          // Nếu là người dùng bình thường, thực hiện điều hướng đến trang trước đó
+          const redirect = this.$route.query.redirect || "/home";
+          this.$router.push(redirect);
+        }
       } catch (error) {
-        this.$message.error(
-          error.response?.data?.message || "Đăng nhập thất bại!"
-        );
+        if (error.response && error.response.status >= 400) {
+          // Chỉ hiển thị thông báo lỗi khi có lỗi từ server
+          this.$message.error(
+            error.response?.data?.message || "Đăng nhập thất bại!"
+          );
+        }
       }
     },
   },

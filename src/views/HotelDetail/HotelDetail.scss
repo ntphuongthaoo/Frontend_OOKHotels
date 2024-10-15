@@ -454,6 +454,7 @@ i h3 {
   background-color: #f0f0f0;
   color: #ccc;
   cursor: not-allowed;
+  pointer-events: none;
 }
 
 .calendar-table td.selected {

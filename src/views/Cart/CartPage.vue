@@ -1,123 +1,165 @@
 <template>
   <div class="cart-container">
-    <h3>Giỏ hàng của bạn</h3>
-
-    <!-- Phần đầu của bảng -->
-    <table class="custom-table">
-      <thead>
-        <tr>
-          <th></th>
-          <th></th>
-          <th>Loại</th>
-          <th>Giá/Đêm</th>
-          <th>Thời gian</th>
-          <th>Số phòng</th>
-          <th>Số người</th>
-          <th>Tổng giá</th>
-          <th>Thao tác</th>
-        </tr>
-      </thead>
-
-      <tbody>
-        <template v-for="(hotel, index) in hotels" :key="index">
-          <tr class="hotel-name-row">
-            <td>
-              <input
-                type="checkbox"
-                v-model="hotel.isSelected"
-                @change="toggleHotelRooms(hotel)"
-                class="custom-checkbox"
-              />
-            </td>
-            <td colspan="8" class="hotel-name" @click="goToHotelDetail(hotel)">
-              <i class="fa fa-hotel"></i> {{ hotel.HOTEL_NAME }}
-            </td>
+    <div v-if="hotels.length > 0">
+      <h3>Giỏ hàng của bạn</h3>
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <th></th>
+            <th></th>
+            <th>Loại</th>
+            <th>Giá/Đêm</th>
+            <th>Thời gian</th>
+            <th>Số phòng</th>
+            <th>Số người</th>
+            <th>Tổng giá</th>
+            <th>Thao tác</th>
           </tr>
+        </thead>
 
-          <tr v-for="(room, roomIndex) in hotel.ROOMS" :key="roomIndex">
-            <td>
-              <input
-                type="checkbox"
-                v-model="room.isSelected"
-                @change="toggleRoom(room)"
-                class="custom-checkbox"
-              />
-            </td>
-            <td class="image-column">
-              <img
-                :src="room.imageUrl || '/assets/default-room.jpg'"
-                alt="Room Image"
-                class="room-image"
-              />
-            </td>
-            <td>{{ room.type }}</td>
-            <td>{{ room.pricePerNight.toLocaleString() }} VND</td>
-            <td>
-              <p>
-                {{ formatDate(room.startDate) }} -
-                {{ formatDate(room.endDate) }}
-              </p>
-              <p>{{ calculateStayDuration(room.startDate, room.endDate) }}</p>
-            </td>
-            <td>
-              <div class="room-number-box">
-                {{ room.roomNumber }}
+        <tbody>
+          <template v-for="(hotel, index) in hotels" :key="index">
+            <tr class="hotel-name-row">
+              <td>
+                <input
+                  type="checkbox"
+                  v-model="hotel.isSelected"
+                  @change="toggleHotelRooms(hotel)"
+                  class="custom-checkbox"
+                />
+              </td>
+              <td
+                colspan="8"
+                class="hotel-name"
+                @click="goToHotelDetail(hotel)"
+              >
+                <i class="fa fa-hotel"></i> {{ hotel.HOTEL_NAME }}
+              </td>
+            </tr>
+
+            <tr v-for="(room, roomIndex) in hotel.ROOMS" :key="roomIndex">
+              <td>
+                <input
+                  type="checkbox"
+                  v-model="room.isSelected"
+                  @change="toggleRoom(room)"
+                  class="custom-checkbox"
+                />
+              </td>
+              <td class="image-column">
+                <img
+                  v-if="room.imageUrl"
+                  :src="room.imageUrl"
+                  alt="Room Image"
+                  class="room-image"
+                />
+              </td>
+              <td>{{ room.type }}</td>
+              <td>{{ room.pricePerNight?.toLocaleString() }} VND</td>
+              <td>
+                <p>
+                  {{ formatDate(room.startDate) }} -
+                  {{ formatDate(room.endDate) }}
+                </p>
+                <p>{{ calculateStayDuration(room.startDate, room.endDate) }}</p>
+              </td>
+              <td>
+                <div class="room-number-box">
+                  {{ room.roomNumber }}
+                </div>
+              </td>
+              <td>
+                <span>{{ room.people }}</span>
+              </td>
+              <td>{{ room.totalPrice?.toLocaleString() }} VND</td>
+              <td>
+                <button class="edit-btn" @click="showUpdateModal(room)">
+                  Chỉnh sửa
+                </button>
+                <button class="delete-btn" @click="removeRoom(room.ROOM_ID)">
+                  Xóa
+                </button>
+              </td>
+            </tr>
+          </template>
+        </tbody>
+      </table>
+      <!-- Modal chọn ngày -->
+      <div v-if="isCalendarModalVisible" class="calendar-modal">
+        <div class="calendar-modal-content">
+          <span class="close" @click="closeCalendarModal">&times;</span>
+          <h2>Chọn ngày đặt phòng</h2>
+          <!-- Nút chuyển tháng -->
+          <div class="month-navigation">
+            <button @click="prevMonth" :disabled="isPrevMonthDisabled">
+              &lt; Tháng trước
+            </button>
+            <span>{{ formattedCurrentMonth }}</span>
+            <button @click="nextMonth">&gt; Tháng sau</button>
+          </div>
+          <!-- Hiển thị lịch ở đây -->
+          <div class="calendar-container">
+            <table class="calendar-table">
+              <!-- Hiển thị tiêu đề ngày trong tuần -->
+              <thead>
+                <tr>
+                  <th>CN</th>
+                  <th>T2</th>
+                  <th>T3</th>
+                  <th>T4</th>
+                  <th>T5</th>
+                  <th>T6</th>
+                  <th>T7</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(week, index) in calendar" :key="index">
+                  <td
+                    v-for="day in week"
+                    :key="day.date"
+                    :class="{
+                      disabled: day.isPast || !day.isAvailable,
+                      selected: isSelectedDate(day.date),
+                    }"
+                    @click="selectDate(day)"
+                  >
+                    {{ day.label }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="selected-dates">
+            <div class="date-range">
+              <label>Ngày nhận - trả phòng:</label>
+              <div class="date-display">
+                {{ formatDate(selectedStartDate) }} -
+                {{ formatDate(selectedEndDate) }}
               </div>
-            </td>
-            <td>
-              <span>{{ room.people }}</span>
-            </td>
-            <td>{{ room.totalPrice.toLocaleString() }} VND</td>
-            <td>
-              <button class="edit-btn" @click="showUpdateModal(room)">
-                Chỉnh sửa
-              </button>
-              <button class="delete-btn" @click="removeRoom(room.ROOM_ID)">
-                Xóa
-              </button>
-            </td>
-          </tr>
-        </template>
-      </tbody>
-    </table>
-    <!-- Modal for updating room information -->
-    <div v-if="showModal" class="modal">
-      <div class="modal-content">
-        <h2>Cập nhật phòng</h2>
+            </div>
+          </div>
 
-        <div class="form-group">
-          <label for="startDate">Ngày bắt đầu:</label>
-          <input
-            type="date"
-            id="startDate"
-            v-model="selectedRoom.newStartDate"
-          />
-        </div>
-
-        <div class="form-group">
-          <label for="endDate">Ngày kết thúc:</label>
-          <input type="date" id="endDate" v-model="selectedRoom.newEndDate" />
-        </div>
-
-        <div class="modal-buttons">
-          <button class="update-btn" @click="confirmUpdateRoom">
-            Cập nhật
+          <!-- Nút xác nhận -->
+          <button class="confirm-button" @click="confirmUpdateRoom">
+            Xác nhận
           </button>
-          <button class="cancel-btn" @click="closeModal">Hủy</button>
+        </div>
+      </div>
+
+      <div v-if="totalRooms > 0" class="floating-modal">
+        <div class="modal-content">
+          <div class="modal-info">
+            <span>Tổng số lượng phòng: {{ totalRooms }}</span>
+            <span>Tổng giá: {{ totalPrice.toLocaleString() }} VND</span>
+          </div>
+          <div class="booking">
+            <button class="checkout-btn" @click="checkout">Đặt phòng</button>
+          </div>
         </div>
       </div>
     </div>
-
-    <div v-if="totalRooms > 0" class="floating-modal">
-      <div class="modal-content">
-        <div class="modal-info">
-          <span>Tổng số lượng phòng: {{ totalRooms }}</span>
-          <span>Tổng giá: {{ totalPrice.toLocaleString() }} VND</span>
-        </div>
-        <div class="booking">
-          <button class="checkout-btn" @click="checkout">Đặt phòng</button>
-        </div>
-      </div>
+    <div v-else class="empty-cart-container">
+      <p><i class="fas fa-shopping-cart"></i> Giỏ hàng của bạn đang trống.</p>
     </div>
   </div>
 </template>
@@ -143,6 +185,12 @@ export default {
       lastRoomOffsetTop: 0, // Vị trí trên của phòng cuối cùng trong giỏ hàng
       floatingModalHeight: 0, // Chiều cao của modal nổi
       gapSpace: 150,
+      availableRooms: [],
+      isCalendarModalVisible: false, // Trạng thái hiển thị modal lịch
+      selectedStartDate: null,
+      selectedEndDate: null,
+      currentDate: new Date(),
+      currentAction: "",
     };
   },
   async created() {
@@ -164,8 +212,397 @@ export default {
     footerOffsetTop() {
       return this.$store.state.footerOffsetTop; // Lấy giá trị từ Vuex
     },
+    hasRoomsInCart() {
+      // Kiểm tra xem có bất kỳ khách sạn nào có phòng hay không
+      return this.hotels.some((hotel) => hotel.ROOMS && hotel.ROOMS.length > 0);
+    },
+    formattedCurrentMonth() {
+      return this.currentDate.toLocaleDateString("vi-VN", {
+        year: "numeric",
+        month: "long",
+      });
+    },
+    // Tạo các ngày trong tháng
+    daysInMonth() {
+      const days = [];
+      const year = this.currentDate.getFullYear();
+      const month = this.currentDate.getMonth();
+      const totalDays = new Date(year, month + 1, 0).getDate();
+
+      for (let i = 1; i <= totalDays; i++) {
+        days.push({
+          label: i,
+          date: new Date(year, month, i),
+        });
+      }
+      return days;
+    },
+    isPrevMonthDisabled() {
+      const today = new Date();
+      const prevMonthDate = new Date(this.currentDate);
+      prevMonthDate.setMonth(this.currentDate.getMonth() - 1);
+
+      return (
+        prevMonthDate.getFullYear() < today.getFullYear() ||
+        (prevMonthDate.getFullYear() === today.getFullYear() &&
+          prevMonthDate.getMonth() < today.getMonth())
+      );
+    },
+    calendar() {
+      const days = [];
+      const year = this.currentDate.getFullYear();
+      const month = this.currentDate.getMonth();
+      const totalDays = new Date(year, month + 1, 0).getDate();
+      const startDayOfWeek = new Date(year, month, 1).getDay(); // Ngày bắt đầu của tháng
+
+      let week = [];
+      // Thêm các ô trống cho các ngày trước ngày 1 của tháng
+      for (let i = 0; i < startDayOfWeek; i++) {
+        week.push({ label: "", date: null, isPast: false, isAvailable: false });
+      }
+
+      for (let day = 1; day <= totalDays; day++) {
+        const date = new Date(year, month, day);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0); // Đặt thời gian của ngày hôm nay về 0 giờ để so sánh
+        const isPast = date < today;
+
+        // Kiểm tra tính khả dụng của ngày
+        const isAvailable =
+          Array.isArray(this.selectedRoom?.AVAILABILITY) &&
+          this.selectedRoom.AVAILABILITY.some(
+            (availability) =>
+              new Date(availability.DATE).toDateString() ===
+                date.toDateString() && availability.AVAILABLE
+          );
+
+        week.push({
+          label: day,
+          date: date,
+          isPast: isPast,
+          isAvailable: isAvailable !== false,
+        });
+
+        if (week.length === 7) {
+          days.push(week);
+          week = [];
+        }
+      }
+
+      // Thêm các ô trống cho các ngày sau ngày cuối cùng của tháng
+      if (week.length > 0) {
+        while (week.length < 7) {
+          week.push({
+            label: "",
+            date: null,
+            isPast: false,
+            isAvailable: false,
+          });
+        }
+        days.push(week);
+      }
+
+      return days;
+    },
   },
   methods: {
+    prevMonth() {
+      if (this.isPrevMonthDisabled) {
+        return; // Nếu nút bị vô hiệu hóa, không làm gì cả
+      }
+      const prevMonthDate = new Date(this.currentDate);
+      prevMonthDate.setMonth(this.currentDate.getMonth() - 1);
+      this.currentDate = prevMonthDate;
+    },
+
+    // Chuyển sang tháng sau
+    nextMonth() {
+      const nextMonthDate = new Date(this.currentDate);
+      nextMonthDate.setMonth(this.currentDate.getMonth() + 1);
+      this.currentDate = nextMonthDate;
+    },
+
+    openCalendarModalForRoom(room, action) {
+      if (!this.isLoggedIn) {
+        this.$router.push({
+          name: "Login", // Tên của route đăng nhập
+          query: { redirect: this.$route.fullPath }, // Lưu trang hiện tại để chuyển lại sau khi đăng nhập
+        });
+        return;
+      }
+      this.selectedRoom = room;
+      console.log("dữ liệu phòng: ", this.selectedRoom);
+      this.currentAction = action; // Lưu hành động hiện tại
+      this.openCalendarModal(); // Mở modal lịch
+    },
+
+    openCalendarModal() {
+      this.isCalendarModalVisible = true;
+      this.currentDate = new Date(); // Đặt lại currentDate về ngày hiện tại
+
+      // Sử dụng newStartDate và newEndDate nếu chúng tồn tại
+      if (this.selectedRoom.newStartDate && this.selectedRoom.newEndDate) {
+        this.selectedStartDate = new Date(this.selectedRoom.newStartDate);
+        this.selectedEndDate = new Date(this.selectedRoom.newEndDate);
+      } else if (this.selectedRoom.startDate && this.selectedRoom.endDate) {
+        // Hoặc sử dụng startDate và endDate nếu có
+        this.selectedStartDate = new Date(this.selectedRoom.startDate);
+        this.selectedEndDate = new Date(this.selectedRoom.endDate);
+      } else {
+        // Nếu không có, mặc định ngày hiện tại và 2 ngày sau
+        const today = new Date();
+        const startDate = new Date(today.getTime());
+        const endDate = new Date(today.getTime());
+        endDate.setDate(endDate.getDate() + 2);
+        this.selectedStartDate = startDate;
+        this.selectedEndDate = endDate;
+      }
+    },
+
+    findAvailableDates(startDate, endDate) {
+      let availableStart = new Date(startDate.getTime()); // Sao chép startDate
+      let availableEnd = new Date(endDate.getTime()); // Sao chép endDate
+
+      // Lặp qua các ngày để kiểm tra ngày nào khả dụng
+      while (!this.isDateRangeAvailable(availableStart, availableEnd)) {
+        availableStart.setDate(availableStart.getDate() + 1); // Kiểm tra ngày tiếp theo
+        availableEnd = new Date(availableStart.getTime()); // Tạo đối tượng mới cho availableEnd
+        availableEnd.setDate(availableStart.getDate() + 2); // Tính lại ngày kết thúc sau 3 ngày
+      }
+
+      return { newStartDate: availableStart, newEndDate: availableEnd };
+    },
+
+    isDateRangeAvailable(startDate, endDate) {
+      // Danh sách các ngày không khả dụng của phòng từ AVAILABILITY
+      const unavailableDates = this.getUnavailableDates();
+
+      // Kiểm tra từng ngày trong khoảng từ startDate đến endDate
+      for (
+        let d = new Date(startDate.getTime());
+        d <= endDate;
+        d.setDate(d.getDate() + 1)
+      ) {
+        const dateStr = d.toISOString().split("T")[0]; // Chuyển ngày thành chuỗi để so sánh
+        if (unavailableDates.includes(dateStr)) {
+          return false; // Nếu một ngày nào đó không khả dụng, trả về false
+        }
+      }
+
+      return true; // Nếu tất cả các ngày trong khoảng đều khả dụng, trả về true
+    },
+
+    getUnavailableDates() {
+      if (
+        !this.selectedRoom ||
+        !Array.isArray(this.selectedRoom.AVAILABILITY)
+      ) {
+        return []; // Nếu không có AVAILABILITY, trả về mảng trống
+      }
+
+      return this.selectedRoom.AVAILABILITY.filter(
+        (availability) => !availability.AVAILABLE // Chỉ giữ các ngày không khả dụng
+      ).map((availability) => {
+        const date = new Date(availability.DATE);
+        return date.toISOString().split("T")[0]; // Trả về chuỗi ngày dạng YYYY-MM-DD
+      });
+    },
+    // Đóng modal lịch
+    closeCalendarModal() {
+      this.isCalendarModalVisible = false;
+    },
+
+    disablePastDates(date) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      return date < today;
+    },
+
+    // Kiểm tra ngày được chọn
+    isSelectedDate(date) {
+      if (!date) return false;
+
+      // Lấy giá trị ngày giờ về 0 để so sánh chính xác
+      const selectedStart = this.selectedStartDate
+        ? new Date(
+            this.selectedStartDate.getFullYear(),
+            this.selectedStartDate.getMonth(),
+            this.selectedStartDate.getDate()
+          ).getTime()
+        : null;
+
+      const selectedEnd = this.selectedEndDate
+        ? new Date(
+            this.selectedEndDate.getFullYear(),
+            this.selectedEndDate.getMonth(),
+            this.selectedEndDate.getDate()
+          ).getTime()
+        : null;
+
+      const currentDate = new Date(
+        date.getFullYear(),
+        date.getMonth(),
+        date.getDate()
+      ).getTime();
+
+      // Kiểm tra nếu chỉ có ngày bắt đầu được chọn, tô màu ngày đó
+      if (selectedStart && !selectedEnd) {
+        return currentDate === selectedStart;
+      }
+
+      // Kiểm tra nếu cả hai ngày được chọn, tô màu khoảng thời gian
+      if (selectedStart && selectedEnd) {
+        return currentDate >= selectedStart && currentDate <= selectedEnd;
+      }
+
+      return false;
+    },
+
+    selectDate(day) {
+      if (day.isPast || !day.date || !day.isAvailable) {
+        return; // Không cho chọn ngày trong quá khứ hoặc ô trống
+      }
+
+      if (!this.selectedStartDate || this.selectedEndDate) {
+        // Nếu chưa chọn ngày bắt đầu hoặc đã chọn cả hai ngày, bắt đầu lại
+        this.selectedStartDate = day.date;
+        this.selectedEndDate = null;
+      } else {
+        if (day.date >= this.selectedStartDate) {
+          this.selectedEndDate = day.date;
+        } else {
+          this.selectedStartDate = day.date;
+          this.selectedEndDate = null;
+        }
+      }
+    },
+
+    // Kiểm tra ngày bắt đầu
+    validateStartDate() {
+      if (this.getUnavailableDates().includes(this.selectedRoom.newStartDate)) {
+        Swal.fire({
+          title: "Ngày đã được đặt!",
+          text: "Vui lòng chọn ngày khác cho ngày bắt đầu.",
+          icon: "error",
+          confirmButtonText: "OK",
+        });
+        this.selectedRoom.newStartDate = ""; // Xóa ngày không hợp lệ
+      }
+    },
+
+    // Kiểm tra ngày kết thúc
+    validateEndDate() {
+      if (this.getUnavailableDates().includes(this.selectedRoom.newEndDate)) {
+        Swal.fire({
+          title: "Ngày đã được đặt!",
+          text: "Vui lòng chọn ngày khác cho ngày kết thúc.",
+          icon: "error",
+          confirmButtonText: "OK",
+        });
+        this.selectedRoom.newEndDate = ""; // Xóa ngày không hợp lệ
+      }
+    },
+
+    getTodayDate() {
+      const today = new Date();
+      const day = String(today.getDate()).padStart(2, "0");
+      const month = String(today.getMonth() + 1).padStart(2, "0"); // Tháng bắt đầu từ 0
+      const year = today.getFullYear();
+      return `${year}-${month}-${day}`;
+    },
+
+    // Hàm trả về ngày kế tiếp của một ngày
+    getNextDay(date) {
+      if (!date) return this.getTodayDate(); // Nếu chưa chọn ngày nhận, trả về ngày hiện tại
+      const nextDay = new Date(date);
+      nextDay.setDate(nextDay.getDate() + 1); // Cộng thêm 1 ngày vào ngày đã chọn
+      const day = String(nextDay.getDate()).padStart(2, "0");
+      const month = String(nextDay.getMonth() + 1).padStart(2, "0"); // Tháng bắt đầu từ 0
+      const year = nextDay.getFullYear();
+      return `${year}-${month}-${day}`; // Trả về ngày kế tiếp theo định dạng yyyy-mm-dd
+    },
+
+    // Kiểm tra ngày có được đặt (AVAILABLE là false) hay không
+    isDateUnavailable(date) {
+      return this.selectedRoom.AVAILABILITY.some(
+        (availability) =>
+          availability.date === date && availability.AVAILABLE === false
+      );
+    },
+
+    // Hàm kiểm tra ngày đã chọn có hợp lệ không
+    isValidDateRange(startDate, endDate) {
+      // Kiểm tra ngày bắt đầu hoặc kết thúc có phải là ngày đã được đặt hay không
+      if (
+        this.isDateUnavailable(startDate) ||
+        this.isDateUnavailable(endDate)
+      ) {
+        Swal.fire({
+          title: "Lỗi",
+          text: "Ngày bạn chọn đã được đặt. Vui lòng chọn ngày khác.",
+          icon: "error",
+          confirmButtonText: "OK",
+        });
+        return false;
+      }
+      return true;
+    },
+
+    async confirmUpdateRoom() {
+      // Kiểm tra nếu ngày hợp lệ thì mới cập nhật
+      if (!this.selectedStartDate || !this.selectedEndDate) {
+        Swal.fire({
+          title: "Lỗi",
+          text: "Vui lòng chọn ngày bắt đầu và kết thúc.",
+          icon: "error",
+          confirmButtonText: "OK",
+          customClass: {
+            popup: "swal2-custom-popup",
+          },
+        });
+        return;
+      }
+
+      // Cập nhật ngày mới vào selectedRoom
+      this.selectedRoom.newStartDate = this.selectedStartDate
+        .toISOString()
+        .split("T")[0];
+      this.selectedRoom.newEndDate = this.selectedEndDate
+        .toISOString()
+        .split("T")[0];
+
+      // Tiếp tục quy trình cập nhật phòng
+      // Gọi API để cập nhật thông tin phòng
+      try {
+        const result = await Swal.fire({
+          title: "Bạn chắc chắn muốn cập nhật thông tin phòng này không?",
+          icon: "question",
+          showCancelButton: true,
+          confirmButtonColor: "#28a745",
+          cancelButtonColor: "#6c757d",
+          confirmButtonText: "Cập nhật",
+          cancelButtonText: "Hủy",
+          customClass: {
+            popup: "swal2-custom-popup",
+          },
+        });
+
+        if (result.isConfirmed) {
+          await this.updateRoom(); // Gọi phương thức cập nhật phòng
+        }
+      } catch (error) {
+        console.error("Error confirming update:", error);
+        Swal.fire({
+          title: "Lỗi!",
+          text: "Có lỗi xảy ra khi xác nhận cập nhật.",
+          icon: "error",
+          customClass: {
+            popup: "swal2-custom-popup",
+          },
+        });
+      }
+    },
+
     increasePeople(room) {
       if (room.people < room.CUSTOM_ATTRIBUTES.number_of_people) {
         room.people += 1;
@@ -269,25 +706,44 @@ export default {
       try {
         const response = await axiosClient.post("/carts/getCartByUserId");
         console.log("Cart Data:", response.data);
-        if (response.data.cart && response.data.cart.HOTELS) {
+
+        // Kiểm tra nếu có giỏ hàng và giỏ hàng chứa danh sách khách sạn
+        if (response.data.cart && Array.isArray(response.data.cart.HOTELS)) {
           this.hotels = response.data.cart.HOTELS.map((hotel) => ({
             HOTEL_NAME: hotel.HOTEL_NAME,
             HOTEL_ID: hotel.HOTEL_ID,
-            ROOMS: hotel.ROOMS.map((room) => ({
-              imageUrl: room.IMAGES[0] || "/assets/default-room.jpg", // URL ảnh đầu tiên hoặc ảnh mặc định
-              type: `${room.TYPE} ${room.CUSTOM_ATTRIBUTES.bedType}`, // Loại phòng + loại giường
-              pricePerNight: room.PRICE_PERNIGHT, // Giá mỗi đêm
-              roomNumber: room.ROOM_NUMBER, // Số phòng
-              startDate: room.START_DATE, // Ngày bắt đầu
-              endDate: room.END_DATE, // Ngày kết thúc
-              people: room.CUSTOM_ATTRIBUTES.number_of_people || 1, // Số người
-              totalPrice: room.TOTAL_PRICE_FOR_ROOM, // Tổng giá cho phòng
-              ROOM_ID: room.ROOM_ID,
-              IS_IN_CART: room.IS_IN_CART, // ID phòng
-              isSelected: false, // Trạng thái chọn của phòng
-            })),
-          }));
+            // Lọc bỏ các phòng không hợp lệ (phòng có TOTAL_PRICE_FOR_ROOM là null)
+            ROOMS: Array.isArray(hotel.ROOMS)
+              ? hotel.ROOMS.filter(
+                  (room) => room.TOTAL_PRICE_FOR_ROOM !== null
+                ).map((room) => ({
+                  imageUrl: room.IMAGES && room.IMAGES[0],
+                  type: `${room.TYPE} ${room.CUSTOM_ATTRIBUTES?.bedType || ""}`,
+                  pricePerNight: room.PRICE_PERNIGHT,
+                  roomNumber: room.ROOM_NUMBER,
+                  startDate: room.START_DATE,
+                  endDate: room.END_DATE,
+                  people: room.CUSTOM_ATTRIBUTES?.number_of_people || 1,
+                  totalPrice: room.TOTAL_PRICE_FOR_ROOM,
+                  ROOM_ID: room.ROOM_ID,
+                  IS_IN_CART: room.IS_IN_CART,
+                  AVAILABILITY: room.AVAILABILITY,
+                  isSelected: false,
+                }))
+              : [], // Nếu không có phòng nào thì gán mảng rỗng
+          })).filter((hotel) => hotel.ROOMS.length > 0); // Lọc những khách sạn không có phòng
+
+          // Nếu sau khi lọc mà không còn khách sạn nào có phòng thì giỏ hàng trống
+          if (this.hotels.length === 0) {
+            console.log("Giỏ hàng trống.");
+          }
+        } else {
+          // Nếu không có giỏ hàng hoặc giỏ hàng không chứa khách sạn thì gán giá trị trống
+          this.hotels = [];
+          console.log("Giỏ hàng trống.");
         }
+
+        // Tính lại tổng số phòng và tổng giá trị giỏ hàng
         this.calculateTotal();
       } catch (error) {
         console.error("Error fetching cart data:", error);
@@ -343,6 +799,9 @@ export default {
 
     // Phương thức tính thời gian ở (ví dụ: "3 ngày 2 đêm")
     calculateStayDuration(startDate, endDate) {
+      if (!startDate || !endDate) {
+        return "0 ngày 0 đêm";
+      }
       const start = new Date(startDate);
       const end = new Date(endDate);
       const duration = Math.floor((end - start) / (1000 * 60 * 60 * 24)); // Tính số ngày ở
@@ -367,7 +826,7 @@ export default {
         if (result.isConfirmed) {
           await axiosClient.post("/carts/removeRoomFromCart", { roomId });
           await this.fetchCartData();
-          await this.$store.dispatch("fetchCart");
+          this.$store.dispatch("fetchCart");
           Swal.fire("Đã xóa!", "Phòng đã được xóa khỏi giỏ hàng.", "success");
         }
       } catch (error) {
@@ -384,12 +843,12 @@ export default {
 
     // Phương thức hiển thị modal chỉnh sửa
     showUpdateModal(room) {
-      this.selectedRoom = {
-        roomId: room.ROOM_ID,
-        newStartDate: room.startDate.split("T")[0],
-        newEndDate: room.endDate.split("T")[0],
-      };
-      this.showModal = true; // Hiển thị modal cập nhật
+      // Sao chép toàn bộ đối tượng phòng
+      this.selectedRoom = { ...room };
+      // Thêm thuộc tính newStartDate và newEndDate nếu cần
+      this.selectedRoom.newStartDate = room.startDate.split("T")[0];
+      this.selectedRoom.newEndDate = room.endDate.split("T")[0];
+      this.openCalendarModal(); // Mở modal lịch
     },
 
     // Phương thức đóng modal
@@ -397,46 +856,56 @@ export default {
       this.showModal = false;
     },
 
-    async confirmUpdateRoom() {
-      try {
-        const result = await Swal.fire({
-          title: "Bạn chắc chắn muốn cập nhật thông tin phòng này không?",
-          icon: "question",
-          showCancelButton: true,
-          confirmButtonColor: "#28a745",
-          cancelButtonColor: "#6c757d",
-          confirmButtonText: "Cập nhật",
-          cancelButtonText: "Hủy",
-        });
+    // async confirmUpdateRoom() {
+    //   try {
+    //     const result = await Swal.fire({
+    //       title: "Bạn chắc chắn muốn cập nhật thông tin phòng này không?",
+    //       icon: "question",
+    //       showCancelButton: true,
+    //       confirmButtonColor: "#28a745",
+    //       cancelButtonColor: "#6c757d",
+    //       confirmButtonText: "Cập nhật",
+    //       cancelButtonText: "Hủy",
+    //     });
 
-        if (result.isConfirmed) {
-          this.updateRoom(); // Gọi phương thức cập nhật phòng
-        }
-      } catch (error) {
-        console.error("Error confirming update:", error);
-        Swal.fire("Lỗi!", "Có lỗi xảy ra khi xác nhận cập nhật.", "error");
-      }
-    },
+    //     if (result.isConfirmed) {
+    //       this.updateRoom(); // Gọi phương thức cập nhật phòng
+    //     }
+    //   } catch (error) {
+    //     console.error("Error confirming update:", error);
+    //     Swal.fire("Lỗi!", "Có lỗi xảy ra khi xác nhận cập nhật.", "error");
+    //   }
+    // },
 
     // Phương thức cập nhật thông tin phòng
     async updateRoom() {
       try {
         await axiosClient.post("/carts/updateRoomInCart", {
-          roomId: this.selectedRoom.roomId,
-          newStartDate: this.selectedRoom.newStartDate,
-          newEndDate: this.selectedRoom.newEndDate,
+          roomId: this.selectedRoom.ROOM_ID, // Thay đổi ở đây
+          newStartDate: this.selectedStartDate.toISOString().split("T")[0],
+          newEndDate: this.selectedEndDate.toISOString().split("T")[0],
         });
 
         await this.fetchCartData();
-        this.closeModal();
-        Swal.fire(
-          "Thành công!",
-          "Thông tin phòng đã được cập nhật.",
-          "success"
-        );
+        this.closeCalendarModal();
+        Swal.fire({
+          title: "Thành công!",
+          text: "Thông tin phòng đã được cập nhật.",
+          icon: "success",
+          customClass: {
+            popup: "swal2-custom-popup",
+          },
+        });
       } catch (error) {
         console.error("Error updating room:", error);
-        Swal.fire("Lỗi!", "Có lỗi xảy ra khi cập nhật phòng.", "error");
+        Swal.fire({
+          title: "Lỗi!",
+          text: "Có lỗi xảy ra khi cập nhật phòng.",
+          icon: "error",
+          customClass: {
+            popup: "swal2-custom-popup",
+          },
+        });
       }
     },
   },

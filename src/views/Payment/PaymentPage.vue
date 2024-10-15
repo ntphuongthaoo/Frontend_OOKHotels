@@ -12,10 +12,16 @@
             type="text"
             v-model="customerName"
             class="form-control"
+            :class="{ 'is-invalid': errors.customerName }"
+            @input="handleInput('customerName')"
             required
             placeholder="Nhập tên khách hàng"
           />
+          <div v-if="errors.customerName" class="invalid-feedback">
+            {{ errors.customerName }}
+          </div>
         </div>
+
         <div class="form-group">
           <label for="customerPhone">Số điện thoại</label>
           <input
@@ -23,10 +29,16 @@
             type="text"
             v-model="customerPhone"
             class="form-control"
+            :class="{ 'is-invalid': errors.customerPhone }"
+            @input="handleInput('customerPhone')"
             required
             placeholder="Nhập số điện thoại"
           />
+          <div v-if="errors.customerPhone" class="invalid-feedback">
+            {{ errors.customerPhone }}
+          </div>
         </div>
+
         <div class="form-group">
           <label for="citizenId">Số CCCD</label>
           <input
@@ -34,9 +46,14 @@
             type="text"
             v-model="citizenId"
             class="form-control"
+            :class="{ 'is-invalid': errors.citizenId }"
+            @input="handleInput('citizenId')"
             required
             placeholder="Nhập số CCCD"
           />
+          <div v-if="errors.citizenId" class="invalid-feedback">
+            {{ errors.citizenId }}
+          </div>
         </div>
       </form>
     </div>
@@ -132,6 +149,11 @@ export default {
       customerPhone: "",
       citizenId: "",
       selectedRooms: [],
+      errors: {
+        customerName: "",
+        customerPhone: "",
+        citizenId: "",
+      },
     };
   },
   created() {
@@ -204,6 +226,9 @@ export default {
 
       return total;
     },
+    isLoggedIn() {
+      return this.$store.getters.isLoggedIn;
+    },
   },
 
   methods: {
@@ -224,10 +249,43 @@ export default {
       const d = new Date(date);
       return d.toLocaleDateString();
     },
+
+    validateInput() {
+      // Kiểm tra các trường hợp bắt buộc
+      this.errors.customerName = this.customerName ? "" : "Vui lòng nhập tên khách hàng.";
+      this.errors.customerPhone = this.customerPhone ? "" : "Vui lòng nhập số điện thoại.";
+      this.errors.citizenId = this.citizenId ? "" : "Vui lòng nhập số CCCD.";
+      
+      // Kiểm tra định dạng số điện thoại
+      if (this.customerPhone && !/^\d{10}$/.test(this.customerPhone)) {
+        this.errors.customerPhone = "Số điện thoại không hợp lệ. Vui lòng nhập số có 10 chữ số.";
+      }
+    },
+
+    handleInput(field) {
+      this.errors[field] = "";
+    },
+
     async processPayment() {
-      console.log("Customer Name:", this.customerName);
-      console.log("Customer Phone:", this.customerPhone);
-      console.log("Citizen ID:", this.citizenId);
+      if (!this.isLoggedIn) {
+        this.$router.push({
+          name: "Login",
+          query: { redirect: this.$route.fullPath },
+        });
+        return;
+      }
+
+      this.validateInput();
+
+      // Nếu có lỗi, dừng lại và hiển thị lỗi
+      if (
+        this.errors.customerName ||
+        this.errors.customerPhone ||
+        this.errors.citizenId
+      ) {
+        return; // Không tiếp tục nếu có lỗi
+      }
+
       if (!this.selectedRoom && this.selectedRooms.length === 0) {
         this.$toast.error("Vui lòng chọn phòng trước khi thanh toán.");
         return;
@@ -331,7 +389,7 @@ export default {
 .customer-info label {
   font-weight: 700;
   font-size: 16px;
-  margin-bottom: 10px;
+  margin-bottom: 5px;
 }
 
 .customer-info input {
@@ -342,7 +400,7 @@ export default {
   outline: none;
   font-size: 16px;
   padding: 5px 15px;
-  margin-bottom: 15px;
+  margin-bottom: 5px;
 }
 
 .right-booking-info {
@@ -418,4 +476,38 @@ export default {
   background-color: #ccc;
   cursor: not-allowed;
 }
+
+.invalid-feedback {
+  color: #dc3545; /* Màu đỏ cho thông báo lỗi */
+  font-size: 0.875em; /* Kích thước chữ nhỏ hơn */
+  margin-top: 5px; /* Khoảng cách giữa trường nhập liệu và thông báo lỗi */
+  margin-bottom: 50px;
+  display: block; /* Hiển thị như khối để tách biệt */
+  position: absolute; /* Đặt vị trí tuyệt đối để dễ dàng điều chỉnh */
+  top: 100%; /* Đặt thông báo lỗi ngay dưới trường nhập liệu */
+  left: 0; /* Căn trái cho thông báo lỗi */
+}
+
+.form-group {
+  margin-bottom: 25px; /* Tạo khoảng cách giữa các nhóm */
+  position: relative; /* Đặt vị trí tương đối cho nhóm để có thể dễ dàng xử lý */
+}
+
+
+.form-control {
+  height: 45px;
+  background: #ffffff;
+  border: 1px solid #cccccc;
+  border-radius: 3px;
+  outline: none;
+  font-size: 16px;
+  padding: 5px 15px;
+  margin-bottom: 5px; /* Khoảng cách giữa trường nhập liệu và thông báo lỗi */
+}
+
+/* Thay đổi vị trí label khi có lỗi */
+.is-invalid {
+  border-color: #dc3545; /* Đỏ cho trường hợp lỗi */
+}
+
 </style>

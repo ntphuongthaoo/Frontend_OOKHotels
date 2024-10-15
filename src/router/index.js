@@ -15,6 +15,10 @@ import BookingPage from '../views/Booking/BookingPage.vue'
 import CartPage from '../views/Cart/CartPage.vue'
 import PaymentPage from '../views/Payment/PaymentPage.vue'
 import BookingHistory from '../views/BookingHistory/BookingHistory.vue'
+
+// dashboard
+import AdminLayout from '../layouts/AdminLayout/AdminLayout.vue'
+import MainPage from '../views/Dashboard/MainPage.vue'
 // Page Organization
 import store from "@/store"
  
@@ -90,14 +94,24 @@ const routes = [
 		meta: {
 			layout: UserLayout,
 		},
-	  }
-	// {
-	// 	path: "/danh-sach-khach-san",
-	// 	component: HomeUser,
-	// 	meta: {
-	// 		layout: UserLayout,
-	// 	}
-	// },
+	  },
+
+	// Dashboard
+	{
+		path: "/loginadmin",
+		name: "LoginAdmin",
+		component: Login,
+		meta: {
+			layout: LoginLayout,
+		}
+	},
+	{
+		path: "/dashboard",
+		component: MainPage,
+		meta: {
+			layout: AdminLayout,
+		}
+	},
 	
 ]
 const router = createRouter({
