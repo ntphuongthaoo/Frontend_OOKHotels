@@ -691,9 +691,6 @@ export default {
       const startDate = this.selectedStartDate.toISOString().split("T")[0];
       const endDate = this.selectedEndDate.toISOString().split("T")[0];
 
-      console.log("Chuyển đến BookingPage với hotelId:", this.hotel._id);
-      console.log("Ngày nhận phòng:", startDate, "Ngày trả phòng:", endDate);
-
       switch (this.currentAction) {
         case "addToCart":
           // Thêm phòng vào giỏ hàng
@@ -701,8 +698,6 @@ export default {
           break;
 
         case "book":
-          // Điều hướng đến BookingPage với các query params
-          console.log("Đang thực hiện điều hướng đến trang BookingPage");
           this.$router
             .push({
               name: "BookingPage",
@@ -735,9 +730,6 @@ export default {
               totalPrice: this.selectedRoom.PRICE_PERNIGHT * this.nightsCount,
             });
 
-            console.log(
-              "Điều hướng đến PaymentPage với thông tin phòng đã chọn"
-            );
             this.$router.push({
               name: "PaymentPage",
             });

@@ -19,6 +19,7 @@ import BookingHistory from '../views/BookingHistory/BookingHistory.vue'
 // dashboard
 import AdminLayout from '../layouts/AdminLayout/AdminLayout.vue'
 import MainPage from '../views/Dashboard/MainPage.vue'
+import HotelManagement from '../views/Dashboard/HotelManagement.vue'
 // Page Organization
 import store from "@/store"
  
@@ -107,10 +108,28 @@ const routes = [
 	},
 	{
 		path: "/dashboard",
+		name: 'dashboard',
 		component: MainPage,
 		meta: {
 			layout: AdminLayout,
 		}
+	},
+	{
+		path: "/dashboard/hotels",
+		name: 'hotels',
+		component: HotelManagement,
+		meta: {
+			layout: AdminLayout,
+		}
+	},
+	{
+		path: "/dashboard/hotel/:id",
+		name: "HotelDetailDashboard",
+		component: HotelDetail,
+		meta: {
+			layout: AdminLayout,
+		},
+		props: true,
 	},
 	
 ]

@@ -36,7 +36,17 @@ export default {
   },
   methods: {
     navigate(page) {
-      this.$emit("navigate", page); // Phát sự kiện navigate
+      switch (page) {
+        case 'hotels':
+          this.$router.push({ name: 'hotels' }); // Điều hướng đến trang quản lý khách sạn
+          break;
+        case 'dashboard':
+          this.$router.push({ name: 'dashboard' });
+          break;
+        // Thêm các trường hợp khác tương tự nếu cần
+        default:
+          break;
+      }
     },
   },
 };
