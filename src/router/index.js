@@ -17,9 +17,13 @@ import PaymentPage from '../views/Payment/PaymentPage.vue'
 import BookingHistory from '../views/BookingHistory/BookingHistory.vue'
 
 // dashboard
+import RegisterStaff from '../views/RegisterStaff/RegisterStaff.vue'
 import AdminLayout from '../layouts/AdminLayout/AdminLayout.vue'
 import MainPage from '../views/Dashboard/MainPage.vue'
 import HotelManagement from '../views/Dashboard/HotelManagement.vue'
+import HotelDetailDashboard from '../views/Dashboard/HotelDetailDashboard.vue'
+import BookingManagement from '../views/Dashboard/BookingManagement.vue'
+import UserManagement from '../views/Dashboard/UserManagement.vue'
 // Page Organization
 import store from "@/store"
  
@@ -36,6 +40,13 @@ const routes = [
 	{
 		path: "/register",
 		component: RegisterUser,
+		meta: {
+			layout: LoginLayout,
+		}
+	},
+	{
+		path: "/registerStaff",
+		component: RegisterStaff,
 		meta: {
 			layout: LoginLayout,
 		}
@@ -125,7 +136,25 @@ const routes = [
 	{
 		path: "/dashboard/hotel/:id",
 		name: "HotelDetailDashboard",
-		component: HotelDetail,
+		component: HotelDetailDashboard,
+		meta: {
+			layout: AdminLayout,
+		},
+		props: true,
+	},
+	{
+		path: "/dashboard/bookingManagement",
+		name: "bookings",
+		component: BookingManagement,
+		meta: {
+			layout: AdminLayout,
+		},
+		props: true,
+	},
+	{
+		path: "/dashboard/users",
+		name: "users",
+		component: UserManagement,
 		meta: {
 			layout: AdminLayout,
 		},

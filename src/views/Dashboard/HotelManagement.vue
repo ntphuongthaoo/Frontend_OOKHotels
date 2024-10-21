@@ -48,6 +48,7 @@
             Chỉnh sửa
           </button>
           <button
+            v-if="activeTab === 'active'"
             class="delete-button"
             @click.stop="confirmDeleteHotel(hotel._id)"
           >
@@ -248,7 +249,20 @@ export default {
           await this.deleteHotel(hotelId); // Gọi hàm deleteHotel để thực hiện xóa
           Swal.fire("Đã xóa!", "Khách sạn đã được xóa thành công.", "success");
         } catch (error) {
-          Swal.fire("Lỗi", "Không thể xóa khách sạn.", "error");
+          // Kiểm tra lỗi từ API và thông báo quyền truy cập
+          if (
+            error.response &&
+            error.response.data.message ===
+              "Access denied. Insufficient permissions."
+          ) {
+            Swal.fire(
+              "Thông báo",
+              "Bạn không có quyền thực hiện hành động này.",
+              "warning"
+            );
+          } else {
+            Swal.fire("Lỗi", "Không thể xóa khách sạn.", "error");
+          }
         }
       }
     },
@@ -380,16 +394,29 @@ export default {
         this.isAddHotelModalOpen = false;
         this.resetForm();
       } catch (error) {
-        Swal.fire("Lỗi", "Không thể thêm/chỉnh sửa khách sạn.", "error");
+        // Kiểm tra lỗi từ API và thông báo quyền truy cập
+        if (
+          error.response &&
+          error.response.data.message ===
+            "Access denied. Insufficient permissions."
+        ) {
+          Swal.fire(
+            "Thông báo",
+            "Bạn không có quyền thực hiện hành động này.",
+            "warning"
+          );
+        } else {
+          Swal.fire("Lỗi", "Không thể thêm/chỉnh sửa khách sạn.", "error");
+        }
       }
     },
     async deleteHotel(hotelId) {
       try {
         await axiosClient.post(`/hotels/deleteHotel/${hotelId}`);
-        await this.fetchHotels();
-        Swal.fire("Đã xóa!", "Khách sạn đã được xóa thành công.", "success");
+        return response; // Trả về phản hồi nếu xóa thành công
       } catch (error) {
-        Swal.fire("Lỗi", "Không thể xóa khách sạn.", "error");
+        // Ném lỗi để có thể xử lý ở nơi gọi hàm
+        throw error;
       }
     },
     resetForm() {

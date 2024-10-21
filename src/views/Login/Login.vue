@@ -82,13 +82,15 @@ export default {
 
         const userInfo = await this.checkToken();
 
-        if (userInfo && userInfo.ROLE && userInfo.ROLE.ADMIN) {
-          this.$router.push("/dashboard");
-          
-        } else {
-          // Nếu là người dùng bình thường, thực hiện điều hướng đến trang trước đó
-          const redirect = this.$route.query.redirect || "/home";
-          this.$router.push(redirect);
+        if (userInfo && userInfo.ROLE) {
+          // Chuyển hướng đến trang dashboard cho cả ADMIN và STAFF
+          if (userInfo.ROLE.ADMIN || userInfo.ROLE.STAFF) {
+            this.$router.push("/dashboard");
+          } else {
+            // Nếu là người dùng bình thường, thực hiện điều hướng đến trang trước đó
+            const redirect = this.$route.query.redirect || "/home";
+            this.$router.push(redirect);
+          }
         }
       } catch (error) {
         if (error.response && error.response.status >= 400) {

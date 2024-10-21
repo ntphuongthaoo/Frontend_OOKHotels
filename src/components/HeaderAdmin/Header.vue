@@ -4,9 +4,8 @@
       <h1>{{ title }}</h1>
     </div>
     <div class="header-right">
-      <input type="text" placeholder="Tìm kiếm..." />
       <div class="user-info">
-        <span>Xin chào, Admin</span>
+        <span class="user-name">{{ userInfo?.FULLNAME || "Người dùng" }}</span>
         <img src="../../assets/avatar.jpg" alt="Avatar" />
       </div>
     </div>
@@ -14,6 +13,8 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
+
 export default {
   name: "Header",
   props: {
@@ -21,6 +22,13 @@ export default {
       type: String,
       default: "Dashboard Quản Lý",
     },
+  },
+  computed: {
+    ...mapGetters(["isLoggedIn", "userInfo"]), 
+  },
+  async mounted() {
+    // Chuyển async mounted ra ngoài methods
+    await this.$store.dispatch("checkToken"); // Kiểm tra trạng thái đăng nhập khi component được mount
   },
 };
 </script>
@@ -30,7 +38,7 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #fff;
+  background-color: #e8e9ff;
   color: #7274FF;
   padding: 10px 20px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -71,4 +79,9 @@ export default {
   border-radius: 50%;
   margin-left: 10px;
 }
+.user-name {
+    font-weight: 800;
+    font-size: 16px;
+    color: #7274FF;
+  }
 </style>
