@@ -161,6 +161,7 @@
             <button @click.prevent="verifyOtp" class="otp-button">
               Xác thực
             </button>
+            <button @click.prevent="resendOtp" class="resend-otp-button">Gửi lại OTP</button>
           </div>
         </div>
       </div>
@@ -189,6 +190,24 @@ export default {
     };
   },
   methods: {
+    async resendOtp() {
+  try {
+    const response = await axiosClient.post("/users/resendOTP", { email: this.EMAIL });
+
+    if (response.data.success) {
+      this.$toast.success("OTP mới đã được gửi thành công!", {
+        position: "top-right",
+        duration: 5000,
+        dismissible: true,
+      });
+    } else {
+      this.$toast.error("Không thể gửi lại mã OTP.");
+    }
+  } catch (error) {
+    console.error("Error resending OTP:", error);
+    this.$toast.error("Đã xảy ra lỗi khi gửi lại mã OTP!");
+  }
+},
     async handleSubmit() {
       this.errors = {}; // Reset lỗi trước khi gửi yêu cầu
 

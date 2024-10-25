@@ -19,6 +19,18 @@
         <option value="CheckedOut">Đã trả phòng</option>
         <option value="Canceled">Đã hủy</option>
       </select>
+
+      <!-- Thanh lọc khách sạn -->
+      <select
+        v-model="selectedHotelId"
+        @change="handleFilter"
+        :disabled="!isAdmin && !!userHotelId"
+      >
+        <option value="">Tất cả khách sạn</option>
+        <option v-for="hotel in hotels" :key="hotel._id" :value="hotel._id">
+          {{ hotel.NAME }}
+        </option>
+      </select>
     </div>
 
     <!-- Bảng danh sách đặt phòng -->
@@ -46,7 +58,6 @@
           <td v-if="booking.LIST_ROOMS.length > 0">
             {{ extractHotelName(booking.LIST_ROOMS[0].ROOM_ID.HOTEL_ID.NAME) }}
           </td>
-
           <td>
             <button @click="viewBookingDetails(booking)">Xem chi tiết</button>
             <button
@@ -144,16 +155,6 @@
             </div>
           </div>
 
-          <div class="section">
-            <h3>Thông Tin Đặt Phòng</h3>
-            <div class="info-group">
-              <p>
-                <strong>Ngày Đặt:</strong>
-                {{ formatDate(selectedBooking.createdAt) }}
-              </p>
-            </div>
-          </div>
-
           <div class="modal-footer">
             <button class="close-button" @click="closeDetailModal">Đóng</button>
           </div>
@@ -171,8 +172,10 @@ export default {
   data() {
     return {
       bookings: [],
+      hotels: [],
       searchKeyword: "",
       selectedStatus: "",
+      selectedHotelId: "",
       isDetailModalOpen: false,
       selectedBooking: null,
       currentPage: 1,
@@ -181,7 +184,6 @@ export default {
     };
   },
   computed: {
-    // Lọc đặt phòng theo từ khóa và trạng thái
     filteredBookings() {
       return this.bookings.filter((booking) => {
         const matchesKeyword =
@@ -190,17 +192,41 @@ export default {
           ) || booking.CUSTOMER_PHONE.includes(this.searchKeyword);
         const matchesStatus =
           this.selectedStatus === "" || booking.STATUS === this.selectedStatus;
-        return matchesKeyword && matchesStatus;
+        const matchesHotel =
+          this.selectedHotelId === "" ||
+          (booking.LIST_ROOMS &&
+            booking.LIST_ROOMS.some(
+              (room) => room.ROOM_ID.HOTEL_ID._id === this.selectedHotelId
+            ));
+        return matchesKeyword && matchesStatus && matchesHotel;
       });
+    },
+    isAdmin() {
+      return this.$store.getters.isAdmin;
+    },
+    userHotelId() {
+      return this.$store.getters.getHotelId;
     },
   },
   methods: {
-    // Lấy danh sách đặt phòng từ server
     async fetchBookings() {
       try {
-        const response = await axiosClient.get(
-          `/bookings/getAllBookings?page=${this.currentPage}&limit=${this.pageSize}`
-        );
+        let url = `/bookings/getAllBookings?page=${this.currentPage}&limit=${this.pageSize}`;
+
+        // Thêm điều kiện lọc theo trạng thái
+        if (this.selectedStatus) {
+          url += `&status=${this.selectedStatus}`;
+        }
+
+        // Thêm điều kiện lọc theo khách sạn (chỉ nếu không phải admin)
+        if (this.selectedHotelId) {
+          url += `&hotelId=${this.selectedHotelId}`;
+        } else if (!this.isAdmin && this.userHotelId) {
+          this.selectedHotelId = this.userHotelId;
+          url += `&hotelId=${this.userHotelId}`;
+        }
+
+        const response = await axiosClient.get(url);
         if (response.data.success) {
           this.bookings = response.data.bookings;
           this.totalPages = response.data.totalPages;
@@ -211,13 +237,78 @@ export default {
         Swal.fire("Lỗi", "Không thể kết nối đến server.", "error");
       }
     },
+    async fetchHotels() {
+      try {
+        const response = await axiosClient.get("/hotels/getAllHotels");
+        this.hotels = response.data.data;
+
+        // Nếu người dùng là nhân viên, đặt khách sạn mặc định
+        if (!this.isAdmin && this.userHotelId) {
+          this.selectedHotelId = this.userHotelId;
+        }
+      } catch (error) {
+        console.error("Error fetching hotels:", error);
+      }
+    },
+    async cancelBooking(bookingId) {
+      // Hiển thị hộp thoại xác nhận
+      const result = await Swal.fire({
+        title: "Xác nhận",
+        text: "Bạn có chắc chắn muốn hủy đặt phòng này không?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        confirmButtonText: "Có, hủy đặt phòng!",
+        cancelButtonText: "Không",
+      });
+
+      // Nếu người dùng xác nhận hủy đặt phòng
+      if (result.isConfirmed) {
+        try {
+          // Gửi yêu cầu hủy đặt phòng
+          const response = await axiosClient.put(`/bookings/cancelBooking/${bookingId}`);
+          
+          if (response.data.success) {
+            Swal.fire("Thành công", "Đặt phòng đã được hủy thành công.", "success");
+
+            // Cập nhật danh sách đặt phòng sau khi hủy
+            this.fetchBookings();
+          } else {
+            Swal.fire("Lỗi", response.data.message || "Không thể hủy đặt phòng.", "error");
+          }
+        } catch (error) {
+          Swal.fire("Lỗi", "Không thể kết nối đến server.", "error");
+          console.error("Lỗi khi hủy đặt phòng:", error);
+        }
+      }
+    },
+    handleFilter() {
+      // Nếu là admin, cho phép chọn bất kỳ khách sạn nào
+      if (this.isAdmin) {
+        this.fetchBookings();
+        return;
+      }
+
+      // Nếu là nhân viên, kiểm tra quyền truy cập khách sạn
+      if (!this.isAdmin && this.selectedHotelId !== this.userHotelId) {
+        Swal.fire(
+          "Thông báo",
+          "Bạn chỉ có thể chọn khách sạn mà bạn được phân quyền.",
+          "warning"
+        );
+        this.selectedHotelId = this.userHotelId; // Reset về khách sạn của nhân viên
+      }
+
+      // Cập nhật kết quả đặt phòng
+      this.fetchBookings();
+    },
     extractHotelName(hotelName) {
       const index = hotelName.indexOf("ETHEREAL");
       if (index !== -1) {
-        // Trả về phần tên sau "ETHEREAL"
         return hotelName.substring(index + "ETHEREAL".length).trim();
       }
-      return hotelName; // Nếu không tìm thấy, trả về tên gốc
+      return hotelName;
     },
     // Xử lý phân trang
     prevPage() {
@@ -243,11 +334,7 @@ export default {
       this.currentPage = 1;
       this.fetchBookings();
     },
-    // Lọc đặt phòng
-    handleFilter() {
-      this.currentPage = 1;
-      this.fetchBookings();
-    },
+
     // Xem chi tiết đặt phòng
     viewBookingDetails(booking) {
       this.selectedBooking = booking;
@@ -299,6 +386,7 @@ export default {
   },
   mounted() {
     this.fetchBookings();
+    this.fetchHotels();
   },
 };
 </script>
@@ -423,16 +511,16 @@ button:hover {
   background: #fff;
   border-radius: 8px;
   padding: 20px;
-  width: 750px; /* Thay đổi chiều rộng modal */
-  max-width: 90%; /* Đảm bảo không vượt quá chiều rộng màn hình */
+  width: 750px;
+  max-width: 90%;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 .custom-modal-content h2 {
-    font-size: 1.5rem;
-    text-align: center;
-    margin-bottom: 20px;
-    color: #7274ff;
+  font-size: 1.5rem;
+  text-align: center;
+  margin-bottom: 20px;
+  color: #7274ff;
 }
 
 .info-group {

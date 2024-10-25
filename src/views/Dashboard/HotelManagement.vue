@@ -271,7 +271,7 @@ export default {
         const formData = new FormData();
         const isUpdate = this.isEditing;
 
-        // Nếu đang chỉnh sửa, lấy dữ liệu gốc từ server
+        // Lấy dữ liệu gốc từ server nếu đang chỉnh sửa
         let originalData = {};
         if (isUpdate) {
           const response = await axiosClient.get(
@@ -327,17 +327,24 @@ export default {
             formData.append("ADDRESS[COUNTRY]", this.newHotel.ADDRESS.COUNTRY);
           }
 
-          // Kiểm tra ảnh
-          if (
-            this.imageInputMethod === "url" &&
-            this.newHotel.IMAGES[0] !== originalData.IMAGES[0]
-          ) {
-            formData.append("IMAGES[]", this.newHotel.IMAGES[0]); // Nếu là URL
-          } else if (this.imageInputMethod === "file" && this.selectedFiles) {
-            formData.delete("IMAGES[]"); // Xóa ảnh cũ
-            for (let i = 0; i < this.selectedFiles.length; i++) {
-              formData.append("IMAGES[]", this.selectedFiles[i]); // Thêm ảnh từ máy
+          // Kiểm tra và thêm hình ảnh
+          if (this.imageInputMethod === "url") {
+            if (this.newHotel.IMAGES[0] !== originalData.IMAGES[0]) {
+              formData.append("IMAGES[]", this.newHotel.IMAGES[0]); // Nếu là URL mới
+            } else {
+              originalData.IMAGES.forEach((img) => {
+                formData.append("IMAGES[]", img); // Giữ nguyên hình ảnh hiện có
+              });
             }
+          } else if (this.imageInputMethod === "file" && this.selectedFiles) {
+            for (let i = 0; i < this.selectedFiles.length; i++) {
+              formData.append("IMAGES[]", this.selectedFiles[i]); // Thêm ảnh từ file
+            }
+          } else {
+            // Nếu không thay đổi hình ảnh, giữ lại hình ảnh hiện có
+            originalData.IMAGES.forEach((img) => {
+              formData.append("IMAGES[]", img);
+            });
           }
         } else {
           // Nếu thêm mới khách sạn
@@ -376,9 +383,7 @@ export default {
           const response = await axiosClient.post(
             "/hotels/createHotel",
             formData,
-            {
-              headers: { "Content-Type": "multipart/form-data" },
-            }
+            { headers: { "Content-Type": "multipart/form-data" } }
           );
           if (response.data.success) {
             this.hotels.push(response.data.data);
@@ -394,20 +399,7 @@ export default {
         this.isAddHotelModalOpen = false;
         this.resetForm();
       } catch (error) {
-        // Kiểm tra lỗi từ API và thông báo quyền truy cập
-        if (
-          error.response &&
-          error.response.data.message ===
-            "Access denied. Insufficient permissions."
-        ) {
-          Swal.fire(
-            "Thông báo",
-            "Bạn không có quyền thực hiện hành động này.",
-            "warning"
-          );
-        } else {
-          Swal.fire("Lỗi", "Không thể thêm/chỉnh sửa khách sạn.", "error");
-        }
+        Swal.fire("Lỗi", "Không thể thêm/chỉnh sửa khách sạn.", "error");
       }
     },
     async deleteHotel(hotelId) {

@@ -284,4 +284,8 @@ h2.text-center {
   position: relative; /* Đảm bảo không thiết lập overflow hidden nếu không cần thiết */
 }
 
-  
+.error-message {
+  color: red;
+  font-weight: bold;
+  margin-top: 10px;
+}

@@ -113,9 +113,6 @@ export default {
     handleSearch() {
       this.fetchUsers(this.selectedUserStatus);
     },
-    editUser(user) {
-      // Chỉnh sửa thông tin người dùng
-    },
     async fetchUsers(status) {
       try {
         const response = await axiosClient.get("/users/getUsers", {

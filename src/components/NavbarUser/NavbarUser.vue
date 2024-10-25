@@ -48,11 +48,18 @@
 
             <div class="auth-links group-navbar">
               <template v-if="isLoggedIn">
-                <span class="user-name">{{
-                  userInfo?.FULLNAME || "User"
-                }}</span>
+                <span
+                  class="user-name"
+                  @click="goToProfile"
+                  style="cursor: pointer"
+                  >{{ userInfo?.FULLNAME || "User" }}</span
+                >
                 <a class="btn auth-btn logout-btn" @click="logout">Đăng xuất</a>
-                <a href="/cart" class="cart-icon" :data-count="checkCartItemCount">
+                <a
+                  href="/cart"
+                  class="cart-icon"
+                  :data-count="checkCartItemCount"
+                >
                   <i class="fas fa-shopping-cart"></i>
                 </a>
               </template>
@@ -100,6 +107,9 @@ export default {
     ...mapActions(["logout", "fetchCart"]),
     toggleNavbar() {
       this.isNavbarOpen = !this.isNavbarOpen;
+    },
+    goToProfile() {
+      this.$router.push("/profile");
     },
   },
   async mounted() {

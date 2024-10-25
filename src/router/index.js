@@ -7,6 +7,7 @@ import Login from '../views/Login/Login.vue'
 import LoginLayout from '../layouts/Login/LoginLayout.vue'
 import RegisterUser from '../views/RegisterUser/RegisterUser.vue'
 import HomeUser from '../views/User/HomeUser/HomeUser.vue'
+import Profile from '../views/Profile/Profile.vue'
 
 // Hotels
 import HotelDetail from '../views/HotelDetail/HotelDetail.vue'
@@ -15,6 +16,7 @@ import BookingPage from '../views/Booking/BookingPage.vue'
 import CartPage from '../views/Cart/CartPage.vue'
 import PaymentPage from '../views/Payment/PaymentPage.vue'
 import BookingHistory from '../views/BookingHistory/BookingHistory.vue'
+import RoomDetail from '../views/RoomDetail/RoomDetail.vue'
 
 // dashboard
 import RegisterStaff from '../views/RegisterStaff/RegisterStaff.vue'
@@ -24,6 +26,7 @@ import HotelManagement from '../views/Dashboard/HotelManagement.vue'
 import HotelDetailDashboard from '../views/Dashboard/HotelDetailDashboard.vue'
 import BookingManagement from '../views/Dashboard/BookingManagement.vue'
 import UserManagement from '../views/Dashboard/UserManagement.vue'
+import RevenuesPage from '../views/Dashboard/RevenuesPage.vue'
 // Page Organization
 import store from "@/store"
  
@@ -59,6 +62,13 @@ const routes = [
 		}
 	},
 	{
+		path: "/profile",
+		component: Profile,
+		meta: {
+			layout: UserLayout,
+		}
+	},
+	{
 		path: "/danh-sach-khach-san",
 		component: ListHotels,
 		meta: {
@@ -69,6 +79,15 @@ const routes = [
 		path: "/home/hotel/:id",
 		name: "HotelDetail",
 		component: HotelDetail,
+		meta: {
+			layout: UserLayout,
+		},
+		props: true,
+	},
+	{
+		path: "/room/:id",
+		name: "RoomDetail",
+		component: RoomDetail,
 		meta: {
 			layout: UserLayout,
 		},
@@ -155,6 +174,15 @@ const routes = [
 		path: "/dashboard/users",
 		name: "users",
 		component: UserManagement,
+		meta: {
+			layout: AdminLayout,
+		},
+		props: true,
+	},
+	{
+		path: "/dashboard/revenues",
+		name: "revenue",
+		component: RevenuesPage,
 		meta: {
 			layout: AdminLayout,
 		},

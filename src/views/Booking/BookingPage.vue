@@ -210,12 +210,13 @@
           <p class="hotel-name-booking">{{ hotel.NAME }}</p>
 
           <!-- Ngày nhận và trả phòng -->
-          <p class="time">
+          <p class="time" v-if="startDate && endDate">
             {{ formattedStartDate }} - {{ formattedEndDate }} ({{
               nightsCount + 1
             }}
-            ngày {{ nightsCount > 1 ? nightsCount + " đêm" : "1 đêm" }})
+            ngày)
           </p>
+          <p class="error-message" v-else>Bạn chưa chọn ngày nhận/trả phòng.</p>
 
           <h4>Thông tin phòng</h4>
           <div v-if="selectedRoom">
@@ -247,8 +248,10 @@
           <!-- Nút đặt ngay -->
           <button
             class="confirm-booking-btn"
-            :disabled="!selectedRoom"
-            :class="{ 'disabled-btn': !selectedRoom }"
+            :disabled="!selectedRoom || !checkInDate || !checkOutDate"
+            :class="{
+              'disabled-btn': !selectedRoom || !checkInDate || !checkOutDate,
+            }"
             @click="confirmBooking"
           >
             Đặt ngay
@@ -294,18 +297,28 @@ export default {
     };
   },
   mounted() {
-    const { hotelId, checkInDate, checkOutDate, startDate, endDate } =
-      this.$route.query;
+    const {
+      hotelId,
+      checkInDate,
+      checkOutDate,
+      startDate,
+      endDate,
+      numberOfRooms,
+    } = this.$route.query;
 
     // Nếu dữ liệu từ thanh tìm kiếm
-    if (hotelId && checkInDate && checkOutDate) {
+    if (hotelId) {
       this.hotelId = hotelId;
-      this.checkInDate = checkInDate;
-      this.checkOutDate = checkOutDate;
-      this.numberOfRooms = this.$route.query.numberOfRooms;
-      this.startDate = checkInDate; // Đồng bộ ngày check-in
-      this.endDate = checkOutDate;
-      this.fetchAvailableRoomsSearch(); // Gọi hàm lấy danh sách phòng từ tìm kiếm
+      if (checkInDate && checkOutDate) {
+        this.checkInDate = checkInDate;
+        this.checkOutDate = checkOutDate;
+        this.startDate = checkInDate; // Đồng bộ ngày nhận phòng
+        this.endDate = checkOutDate; // Đồng bộ ngày trả phòng
+        this.rooms = Number(numberOfRooms) || 1;
+        this.fetchAvailableRoomsSearch();
+      } else {
+        this.fetchAllRoomsByHotel();
+      }
     }
 
     // Kiểm tra nếu query có giá trị từ nút "Đặt phòng"
@@ -315,6 +328,7 @@ export default {
       this.endDate = endDate;
       this.checkInDate = startDate; // Đồng bộ ngày check-in
       this.checkOutDate = endDate;
+      this.rooms = Number(numberOfRooms) || 1;
 
       console.log("Calling fetchAvailableRooms...");
       this.fetchAvailableRooms(); // Gọi hàm lấy danh sách phòng từ modal lịch
@@ -355,6 +369,21 @@ export default {
     },
   },
   methods: {
+    async fetchAllRoomsByHotel() {
+      try {
+        const response = await axiosClient.get(
+          `/rooms/getAllRoomsInHotel/${this.hotelId}`
+        );
+        if (response.data.success) {
+          this.availableRooms = response.data.rooms;
+        } else {
+          this.$toast.error("Không thể lấy danh sách phòng.");
+        }
+      } catch (error) {
+        console.error("Lỗi khi gọi API lấy tất cả phòng:", error);
+        this.$toast.error("Lỗi xảy ra khi lấy danh sách phòng.");
+      }
+    },
     updateCheckOutMinDate() {
       if (this.checkInDate) {
         // Cập nhật ngày trả phòng phải lớn hơn ngày nhận phòng ít nhất 1 ngày
@@ -365,7 +394,6 @@ export default {
     },
     confirmBooking() {
       if (this.selectedRoom) {
-        console.log("Lưu thông tin booking vào Vuex Store...");
         // Lưu thông tin đặt phòng vào Vuex Store
         this.$store.commit("SET_BOOKING_DETAIL", {
           hotel: this.hotel,
@@ -397,10 +425,7 @@ export default {
         );
         this.hotel = response.data.data;
 
-        const hotelName = this.hotel.NAME.replace(
-          "Khách sạn ETHEREAL",
-          ""
-        ).trim();
+        const hotelName = this.hotel.NAME.replace("ETHEREAL", "").trim();
         this.destination = hotelName;
       } catch (error) {
         console.error("Lỗi khi lấy dữ liệu khách sạn:", error);
@@ -441,13 +466,14 @@ export default {
             "Calling API with:",
             this.hotelId,
             this.checkInDate,
-            this.checkOutDate
+            this.checkOutDate,
+            this.rooms
           );
           const response = await axiosClient.post("/rooms/searchRooms", {
             hotelId: this.hotelId,
             checkInDate: this.checkInDate,
             checkOutDate: this.checkOutDate,
-            numberOfRooms: this.numberOfRooms,
+            numberOfRooms: this.rooms,
           });
 
           // Kiểm tra nếu response thành công và có dữ liệu
@@ -492,7 +518,7 @@ export default {
     },
 
     filterHotelNames() {
-      const hotelPrefix = "Khách sạn ETHEREAL"; // Chuỗi cố định để tìm kiếm và cắt bỏ
+      const hotelPrefix = "ETHEREAL"; // Chuỗi cố định để tìm kiếm và cắt bỏ
 
       const normalizedInput = deburr(this.destination.toLowerCase()); // Loại bỏ dấu và chuyển thành chữ thường
 
@@ -528,7 +554,7 @@ export default {
     },
 
     selectHotel(name) {
-      const hotelPrefix = "Khách sạn ETHEREAL";
+      const hotelPrefix = "ETHEREAL";
       let fullHotelName = `${hotelPrefix} ${name}`; // Tạo lại tên đầy đủ của khách sạn
 
       const selectedHotel = this.hotelNames.find(
@@ -583,7 +609,6 @@ export default {
 
           this.startDate = this.checkInDate;
           this.endDate = this.checkOutDate;
-
         } else {
           this.$toast.error("Không thể tìm thấy phòng phù hợp.", {
             position: "top-right",

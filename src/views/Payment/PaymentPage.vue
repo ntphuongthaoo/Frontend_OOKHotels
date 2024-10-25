@@ -3,6 +3,21 @@
     <!-- Thông tin khách hàng bên trái -->
     <div class="customer-info">
       <h2>Thông tin người đặt phòng</h2>
+
+      <!-- Dịch vụ đưa rước sân bay -->
+      <div class="service-option">
+  <label class="service-label">
+    <input
+      type="checkbox"
+      v-model="airportPickup"
+      @change="updateTotalPrice"
+    />
+    <span>Dịch vụ đưa rước sân bay (+ 200,000 VND)</span>
+  </label>
+</div>
+
+
+      <!-- Form thông tin khách hàng -->
       <form @submit.prevent="processPayment">
         <!-- Thông tin khách hàng -->
         <div class="form-group">
@@ -56,6 +71,22 @@
           </div>
         </div>
       </form>
+
+      <!-- Chính sách đặt phòng -->
+      <div class="booking-policy">
+        <h3>Chính sách đặt phòng</h3>
+        <ul>
+          <li>
+            <strong>Hủy:</strong> Nếu hủy, thay đổi hoặc không đến, khách sẽ trả toàn bộ giá trị tiền đặt phòng.
+          </li>
+          <li>
+            <strong>Thanh toán:</strong> Thanh toán toàn bộ giá trị tiền đặt phòng.
+          </li>
+          <li>
+            <strong>Đã bao gồm:</strong> Ăn sáng.
+          </li>
+        </ul>
+      </div>
     </div>
 
     <!-- Thông tin phòng đã chọn bên phải -->
@@ -72,11 +103,9 @@
           >
             <p class="hotel-name-booking">{{ room.hotelName }}</p>
             <p class="time">
-              {{ formatDate(room.startDate) }} -
-              {{ formatDate(room.endDate) }} ({{
-                calculateTotalDays(room.startDate, room.endDate)
-              }}
-              ngày, {{ calculateNights(room.startDate, room.endDate) }} đêm)
+              {{ formatDate(room.startDate) }} - {{ formatDate(room.endDate) }} (
+              {{ calculateTotalDays(room.startDate, room.endDate) }} ngày,
+              {{ calculateNights(room.startDate, room.endDate) }} đêm)
             </p>
             <h4>Thông tin phòng</h4>
             <p>
@@ -95,17 +124,9 @@
         <div v-else-if="selectedRoom">
           <p class="hotel-name-booking">{{ hotel.NAME }}</p>
           <p class="time">
-            {{ formattedStartDate }} - {{ formattedEndDate }} ({{
-              calculateTotalDays(
-                bookingDetails.startDate,
-                bookingDetails.endDate
-              )
-            }}
-            ngày,
-            {{
-              calculateNights(bookingDetails.startDate, bookingDetails.endDate)
-            }}
-            đêm)
+            {{ formattedStartDate }} - {{ formattedEndDate }} (
+            {{ calculateTotalDays(bookingDetails.startDate, bookingDetails.endDate) }} ngày,
+            {{ calculateNights(bookingDetails.startDate, bookingDetails.endDate) }} đêm)
           </p>
           <h4>Thông tin phòng</h4>
           <p>
@@ -139,6 +160,7 @@
   </div>
 </template>
 
+
 <script>
 import axiosClient from "../../api/axiosClient";
 
@@ -149,6 +171,8 @@ export default {
       customerPhone: "",
       citizenId: "",
       selectedRooms: [],
+      airportPickup: false, // Thêm biến để theo dõi dịch vụ đưa rước sân bay
+    airportPickupPrice: 200000,
       errors: {
         customerName: "",
         customerPhone: "",
@@ -224,6 +248,10 @@ export default {
         total += this.selectedRoom.PRICE_PERNIGHT * nights;
       }
 
+      if (this.airportPickup) {
+      total += this.airportPickupPrice;
+    }
+
       return total;
     },
     isLoggedIn() {
@@ -232,6 +260,10 @@ export default {
   },
 
   methods: {
+    updateTotalPrice() {
+    // Chỉ cần tính lại tổng giá khi có sự thay đổi trong dịch vụ đưa rước sân bay
+    this.totalPrice = this.totalPrice; // Kích hoạt tính toán lại computed property
+  },
     calculateTotalDays(startDate, endDate) {
       const start = new Date(startDate);
       const end = new Date(endDate);
@@ -252,13 +284,18 @@ export default {
 
     validateInput() {
       // Kiểm tra các trường hợp bắt buộc
-      this.errors.customerName = this.customerName ? "" : "Vui lòng nhập tên khách hàng.";
-      this.errors.customerPhone = this.customerPhone ? "" : "Vui lòng nhập số điện thoại.";
+      this.errors.customerName = this.customerName
+        ? ""
+        : "Vui lòng nhập tên khách hàng.";
+      this.errors.customerPhone = this.customerPhone
+        ? ""
+        : "Vui lòng nhập số điện thoại.";
       this.errors.citizenId = this.citizenId ? "" : "Vui lòng nhập số CCCD.";
-      
+
       // Kiểm tra định dạng số điện thoại
       if (this.customerPhone && !/^\d{10}$/.test(this.customerPhone)) {
-        this.errors.customerPhone = "Số điện thoại không hợp lệ. Vui lòng nhập số có 10 chữ số.";
+        this.errors.customerPhone =
+          "Số điện thoại không hợp lệ. Vui lòng nhập số có 10 chữ số.";
       }
     },
 
@@ -305,6 +342,7 @@ export default {
             startDate: room.startDate,
             endDate: room.endDate,
           })),
+          airportPickup: this.airportPickup,
         };
       } else if (this.selectedRoom) {
         paymentData = {
@@ -316,6 +354,7 @@ export default {
             startDate: this.bookingDetails.startDate,
             endDate: this.bookingDetails.endDate,
           },
+          airportPickup: this.airportPickup,
         };
       }
 
@@ -338,6 +377,7 @@ export default {
           );
 
           if (paymentResponse.data && paymentResponse.data.data.url) {
+            localStorage.setItem('vnpayUrl', paymentResponse.data.data.url);
             window.open(paymentResponse.data.data.url, "_blank");
           } else {
             this.$toast.error("Không thể tạo liên kết thanh toán VNPAY.");
@@ -493,7 +533,6 @@ export default {
   position: relative; /* Đặt vị trí tương đối cho nhóm để có thể dễ dàng xử lý */
 }
 
-
 .form-control {
   height: 45px;
   background: #ffffff;
@@ -509,5 +548,51 @@ export default {
 .is-invalid {
   border-color: #dc3545; /* Đỏ cho trường hợp lỗi */
 }
+
+.booking-policy {
+  margin-top: 20px;
+  padding: 15px;
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+.booking-policy h3 {
+  font-weight: bold;
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+
+.booking-policy ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.booking-policy li {
+  margin-bottom: 5px;
+  font-size: 14px;
+}
+
+.service-option {
+  margin-top: 15px;
+  display: flex;
+  align-items: center;
+}
+
+.service-label {
+  display: flex;
+  align-items: center;
+  font-size: 16px;
+}
+
+.service-label input {
+  margin-right: 8px; /* Khoảng cách giữa checkbox và văn bản */
+}
+
+.service-label span {
+  font-size: 16px;
+}
+
+
 
 </style>

@@ -234,3 +234,31 @@
   padding: 30px;
   border-radius: 8px;
 }
+
+.otp-button {
+  border: #000 1px solid;
+  padding: 5px;
+  border-radius: 5px;
+  background-color: #8d6e63;
+  color: #fff;
+  margin-right: 10px;
+}
+
+.otp-button:hover {
+  background-color: #d9c7b8; /* Màu nền khi hover */
+  color: #3e2723;
+}
+
+.resend-otp-button {
+  border: #000 1px solid;
+  padding: 5px;
+  border-radius: 5px;
+  background-color: #8d6e63;
+  color: #fff;
+  margin-right: 10px;
+}
+
+.resend-otp-button:hover {
+  background-color: #d9c7b8; /* Màu nền khi hover */
+  color: #3e2723;
+}

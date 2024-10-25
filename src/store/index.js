@@ -68,18 +68,7 @@ const store = createStore({
 
           const userInfo = await dispatch("checkToken"); // Lấy thông tin người dùng sau khi login thành công
           if (userInfo) {
-            const roles = userInfo.ROLE;
-    
-            // Kiểm tra vai trò và điều hướng dựa trên role
-            if (roles.ADMIN) {
-              router.push("/dashboard"); // Điều hướng admin đến Dashboard
-            } else if (roles.BRANCH_MANAGER) {
-              router.push("/branch_dashboard"); // Điều hướng quản lý chi nhánh
-            } else if (roles.STAFF) {
-              router.push("/staff_dashboard"); // Điều hướng nhân viên
-            } else {
-              router.push("/home"); // Điều hướng người dùng thông thường
-            }
+            commit("SET_USER_INFO", userInfo);
           }
         }
       } catch (error) {
@@ -142,6 +131,13 @@ const store = createStore({
   getters: {
     isLoggedIn: (state) => state.isLoggedIn,
     userInfo: (state) => state.userInfo,
+    isAdmin: (state) => {
+      return state.userInfo?.ROLE?.ADMIN === true;
+    },    
+
+    getHotelId: (state) => {
+      return state.userInfo?.HOTEL_ID || null;
+    },
     cartItemCount: (state) => {
       if (state.cart && Array.isArray(state.cart.HOTELS)) {
         // Lọc các phòng có TOTAL_PRICE_FOR_ROOM khác null, sau đó đếm số phòng

@@ -262,6 +262,9 @@ export default {
     this.fetchFeaturedHotels();
     this.fetchHotelNames();
     this.startCarousel();
+    if (this.hotelId) {
+      this.fetchHotelDetails();
+    }
   },
   methods: {
     updateCheckOutMinDate() {
@@ -304,7 +307,7 @@ export default {
     },
 
     filterHotelNames() {
-      const hotelPrefix = "Khách sạn ETHEREAL"; // Chuỗi cố định để tìm kiếm và cắt bỏ
+      const hotelPrefix = "ETHEREAL"; // Chuỗi cố định để tìm kiếm và cắt bỏ
 
       const normalizedInput = deburr(this.destination.toLowerCase()); // Loại bỏ dấu và chuyển thành chữ thường
 
@@ -340,7 +343,7 @@ export default {
       this.showHotelSuggestions = true; // Hiển thị gợi ý
     },
     selectHotel(name) {
-      const hotelPrefix = "Khách sạn ETHEREAL";
+      const hotelPrefix = "ETHEREAL";
       let fullHotelName = `${hotelPrefix} ${name}`; // Tạo lại tên đầy đủ của khách sạn
 
       // Tìm khách sạn dựa trên tên đầy đủ
@@ -365,7 +368,19 @@ export default {
     goToHotel(hotelId) {
       this.$router.push({ name: "HotelDetail", params: { id: hotelId } });
     },
-    searchRooms() {
+    async fetchHotelDetails() {
+      try {
+        const response = await axiosClient.get(
+          `/hotels/getHotelById/${this.hotelId}`
+        );
+        this.hotel = response.data.data;
+      } catch (error) {
+        console.error("Lỗi khi lấy dữ liệu khách sạn:", error);
+      }
+    },
+    async searchRooms() {
+      const hotelIdToUse = this.selectedHotelId || this.hotelId;
+
       if (!this.destination) {
         this.$toast.warning("Bạn chưa chọn địa điểm.", {
           position: "top-right",
@@ -374,49 +389,52 @@ export default {
         return;
       }
 
-      if (!this.checkInDate) {
-        this.$toast.warning("Bạn chưa chọn ngày nhận phòng.", {
-          position: "top-right",
-          duration: 3000,
-        });
-        return;
-      }
-
-      if (!this.checkOutDate) {
-        this.$toast.warning("Bạn chưa chọn ngày trả phòng.", {
-          position: "top-right",
-          duration: 5000,
-        });
-        return;
-      }
-
-      if (new Date(this.checkOutDate) <= new Date(this.checkInDate)) {
-        this.$toast.warning(
-          "Ngày trả phòng phải lớn hơn ngày nhận phòng ít nhất 1 ngày.",
-          {
-            position: "top-right",
-            duration: 5000,
-          }
-        );
-        return;
-      }
-
-      if (!this.selectedHotelId) {
+      if (!hotelIdToUse) {
         console.error("Hotel ID is not selected.");
         return;
       }
-      console.log("Hotel ID:", this.selectedHotelId);
 
-      // Điều hướng đến trang Booking và truyền các tham số tìm kiếm qua URL
-      this.$router.push({
-        name: "BookingPage",
-        query: {
-          hotelId: this.selectedHotelId, // ID khách sạn
-          checkInDate: this.checkInDate, // Ngày nhận phòng
-          checkOutDate: this.checkOutDate, // Ngày trả phòng
-          numberOfRooms: this.rooms, // Số phòng
-        },
-      });
+      // Khi chỉ tìm theo địa điểm
+      if (!this.checkInDate && !this.checkOutDate) {
+        this.$router.push({
+          name: "BookingPage",
+          query: { hotelId: hotelIdToUse },
+        });
+        return;
+      }
+
+      // Khi tìm kiếm với địa điểm và thời gian
+      try {
+        const response = await axiosClient.post("/rooms/searchRooms", {
+          hotelId: hotelIdToUse,
+          checkInDate: this.checkInDate,
+          checkOutDate: this.checkOutDate,
+          numberOfRooms: this.rooms,
+        });
+
+        if (response.data.success) {
+          this.availableRooms = response.data.data;
+          this.hotelId = hotelIdToUse;
+          this.startDate = this.checkInDate;
+          this.endDate = this.checkOutDate;
+
+          // Chuyển hướng đến trang BookingPage với đầy đủ tham số
+          this.$router.push({
+            name: "BookingPage",
+            query: {
+              hotelId: hotelIdToUse,
+              checkInDate: this.checkInDate,
+              checkOutDate: this.checkOutDate,
+              numberOfRooms: this.rooms,
+            },
+          });
+        } else {
+          this.$toast.error("Không thể tìm thấy phòng phù hợp.");
+        }
+      } catch (error) {
+        console.error("Lỗi khi tìm phòng:", error);
+        this.$toast.error("Đã xảy ra lỗi trong quá trình tìm kiếm.");
+      }
     },
   },
   computed: {

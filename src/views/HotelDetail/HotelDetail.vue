@@ -129,6 +129,12 @@
                 Phòng {{ selectedRoom.TYPE }} -
                 {{ selectedRoom.CUSTOM_ATTRIBUTES.bedType }}
               </h3>
+              <button
+                @click="goToRoomDetail(selectedRoom._id)"
+                class="detail-button"
+              >
+                Xem chi tiết phòng
+              </button>
               <hr />
               <p>{{ selectedRoom.DESCRIPTION }}</p>
               <h4>Tiện nghi của phòng</h4>
@@ -278,6 +284,9 @@ export default {
     this.destination = this.hotel.NAME;
   },
   methods: {
+    goToRoomDetail(roomId) {
+      this.$router.push({ name: "RoomDetail", params: { id: roomId } });
+    },
     formatDateRange(startDate, endDate) {
       if (!startDate || !endDate) return "";
       const start = startDate.toLocaleDateString("vi-VN");
@@ -365,9 +374,20 @@ export default {
     },
 
     async addToCart(room, startDate, endDate) {
+      console.log("Dữ liệu gửi đi:", {
+        roomId: room._id,
+        startDate: startDate,
+        endDate: endDate,
+      });
       try {
         // Gửi yêu cầu thêm phòng vào giỏ hàng
         const response = await axiosClient.post("/carts/addRoomToCart", {
+          roomId: room._id,
+          startDate: startDate,
+          endDate: endDate,
+        });
+
+        console.log("Dữ liệu gửi đi:", {
           roomId: room._id,
           startDate: startDate,
           endDate: endDate,
@@ -634,13 +654,16 @@ export default {
 
       if (!this.selectedStartDate || this.selectedEndDate) {
         // Nếu chưa chọn ngày bắt đầu hoặc đã chọn cả hai ngày, bắt đầu lại
-        this.selectedStartDate = day.date;
+        this.selectedStartDate = new Date(day.date);
+        this.selectedStartDate.setHours(0, 0, 0, 0); // Đặt giờ về 0h
         this.selectedEndDate = null;
       } else {
         if (day.date >= this.selectedStartDate) {
-          this.selectedEndDate = day.date;
+          this.selectedEndDate = new Date(day.date);
+          this.selectedEndDate.setHours(0, 0, 0, 0); // Đặt giờ về 0h
         } else {
-          this.selectedStartDate = day.date;
+          this.selectedStartDate = new Date(day.date);
+          this.selectedStartDate.setHours(0, 0, 0, 0); // Đặt giờ về 0h
           this.selectedEndDate = null;
         }
       }
@@ -654,6 +677,7 @@ export default {
         });
         return;
       }
+      console.log("Query gửi đi:", queryParams);
 
       this.$router.push({
         name: "BookingPage",

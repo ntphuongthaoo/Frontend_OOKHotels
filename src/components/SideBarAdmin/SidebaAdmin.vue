@@ -47,12 +47,18 @@
           <i class="fas fa-users"></i> 
           <span>Người Dùng</span>
         </li>
+
+        <li class="logout" @click="logout">
+          <i class="fas fa-sign-out-alt"></i>
+          <span>Đăng Xuất</span>
+        </li>
       </ul>
     </nav>
   </aside>
 </template>
 
 <script>
+import { mapActions } from 'vuex';
 export default {
   name: "Sidebar",
   props: {
@@ -69,6 +75,7 @@ export default {
     }
   },
   methods: {
+    ...mapActions(["logout"]),
     navigate(page) {
       this.$emit('navigate', page); // Emit sự kiện để điều hướng
       this.$router.push({ name: page }); // Điều hướng router
@@ -148,7 +155,8 @@ export default {
 
 .sidebar nav ul li span {
   display: inline-block;
-  font-size: 16px;
+  font-size: 18px;
+  margin-left: 5px;
 }
 
 @media (max-width: 768px) {
