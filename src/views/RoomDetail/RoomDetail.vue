@@ -2,7 +2,7 @@
     <div class="room-detail-container" v-if="room && room.CUSTOM_ATTRIBUTES">
       <!-- Tiêu đề trang -->
       <h1 class="page-title">
-        Chi tiết phòng: {{ room.TYPE }} - {{ room.CUSTOM_ATTRIBUTES.bedType }}
+      {{ room.TYPE }} - {{ room.CUSTOM_ATTRIBUTES.bedType }}
       </h1>
   
       <!-- Phần hình ảnh của phòng -->

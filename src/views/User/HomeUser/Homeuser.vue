@@ -141,55 +141,136 @@
       </div>
     </div>
 
+    <!-- Lợi ích -->
+    <div class="benefits-section">
+      <div class="benefit-item">
+        <i class="fas fa-tags benefit-icon"></i>
+        <p class="benefit-text">Đảm bảo giá tốt nhất</p>
+      </div>
+      <div class="benefit-item">
+        <i class="fas fa-map benefit-icon"></i>
+        <p class="benefit-text">Đa dạng điểm đến lựa chọn tốt nhất</p>
+      </div>
+      <div class="benefit-item">
+        <i class="fas fa-star benefit-icon"></i>
+        <p class="benefit-text">Đảm bảo chất lượng phục vụ tốt nhất</p>
+      </div>
+      <div class="benefit-item">
+        <i class="fas fa-headset benefit-icon"></i>
+        <p class="benefit-text">Hỗ trợ khách hàng nhanh nhất</p>
+      </div>
+    </div>
+
     <!-- Khách sạn nổi bật -->
     <div class="container featured-hotels">
-      <h2 class="text-center">KHÁCH SẠN CỦA CHÚNG TÔI</h2>
+      <h2 class="text-center title-our-hotels">KHÁCH SẠN CỦA CHÚNG TÔI</h2>
       <div id="featuredCarousel" class="carousel slide" data-bs-ride="carousel">
         <div class="carousel-inner">
           <div
-            class="carousel-item"
-            :class="{ active: index === 0 }"
             v-for="(chunk, index) in chunkedHotels"
             :key="index"
+            class="carousel-item"
+            :class="{ active: index === 0 }"
           >
-            <div class="row gx-0">
-              <!-- Hai tấm bên trái -->
-              <div
-                class="col-md-4 d-flex flex-column group-card"
-                style="height: 600px"
-              >
+            <!-- Slide đầu tiên: 2 ảnh nhỏ, 1 ảnh lớn, 2 ảnh nhỏ -->
+            <div v-if="chunk.type === 'first'" class="row gx-0">
+              <div class="col-md-4 d-flex flex-column group-card">
                 <div
                   class="small-card flex-fill"
-                  v-for="hotel in chunk.left"
-                  :key="hotel._id"
+                  v-for="(hotel, idx) in chunk.left"
+                  :key="idx"
                   @click="goToHotel(hotel._id)"
                 >
                   <img :src="hotel.IMAGES" class="card-img" :alt="hotel.NAME" />
                   <h5 class="card-title">{{ hotel.NAME }}</h5>
                 </div>
               </div>
-
-              <!-- Tấm lớn ở giữa -->
               <div class="col-md-4 big-card group-card">
                 <div class="big-card" @click="goToHotel(chunk.middle._id)">
                   <img
                     :src="chunk.middle.IMAGES"
-                    class="card-img big-img h-100"
+                    class="card-img big-img"
                     :alt="chunk.middle.NAME"
                   />
                   <h5 class="card-title">{{ chunk.middle.NAME }}</h5>
                 </div>
               </div>
-
-              <!-- Hai tấm bên phải -->
-              <div
-                class="col-md-4 d-flex flex-column group-card"
-                style="height: 600px"
-              >
+              <div class="col-md-4 d-flex flex-column group-card">
                 <div
                   class="small-card flex-fill"
-                  v-for="hotel in chunk.right"
-                  :key="hotel._id"
+                  v-for="(hotel, idx) in chunk.right"
+                  :key="idx"
+                  @click="goToHotel(hotel._id)"
+                >
+                  <img :src="hotel.IMAGES" class="card-img" :alt="hotel.NAME" />
+                  <h5 class="card-title">{{ hotel.NAME }}</h5>
+                </div>
+              </div>
+            </div>
+
+            <!-- Slide thứ hai: 1 ảnh lớn từ slide trước, 2 ảnh nhỏ từ slide trước, 1 ảnh lớn mới -->
+            <div v-else-if="chunk.type === 'second'" class="row gx-0">
+              <div class="col-md-4 big-card group-card">
+                <div class="big-card" @click="goToHotel(chunk.middle._id)">
+                  <img
+                    :src="chunk.middle.IMAGES"
+                    class="card-img big-img"
+                    :alt="chunk.middle.NAME"
+                  />
+                  <h5 class="card-title">{{ chunk.middle.NAME }}</h5>
+                </div>
+              </div>
+              <div class="col-md-4 d-flex flex-column group-card">
+                <div
+                  class="small-card flex-fill"
+                  v-for="(hotel, idx) in chunk.left"
+                  :key="idx"
+                  @click="goToHotel(hotel._id)"
+                >
+                  <img :src="hotel.IMAGES" class="card-img" :alt="hotel.NAME" />
+                  <h5 class="card-title">{{ hotel.NAME }}</h5>
+                </div>
+              </div>
+              <div class="col-md-4 big-card group-card">
+                <div class="big-card" @click="goToHotel(chunk.right[0]._id)">
+                  <img
+                    :src="chunk.right[0].IMAGES"
+                    class="card-img big-img"
+                    :alt="chunk.right[0].NAME"
+                  />
+                  <h5 class="card-title">{{ chunk.right[0].NAME }}</h5>
+                </div>
+              </div>
+            </div>
+
+            <!-- Slide thứ ba: 2 ảnh nhỏ từ slide trước, 1 ảnh lớn từ slide trước, 2 ảnh nhỏ mới -->
+            <div v-else-if="chunk.type === 'third'" class="row gx-0">
+              <div class="col-md-4 d-flex flex-column group-card">
+                <div
+                  class="small-card flex-fill"
+                  v-for="(hotel, idx) in chunk.left"
+                  :key="idx"
+                  @click="goToHotel(hotel._id)"
+                >
+                  <img :src="hotel.IMAGES" class="card-img" :alt="hotel.NAME" />
+                  <h5 class="card-title">{{ hotel.NAME }}</h5>
+                </div>
+              </div>
+              <div class="col-md-4 big-card group-card">
+                <div class="big-card" @click="goToHotel(chunk.middle._id)">
+                  <img
+                    :src="chunk.middle.IMAGES"
+                    class="card-img big-img"
+                    :alt="chunk.middle.NAME"
+                  />
+                  <h5 class="card-title">{{ chunk.middle.NAME }}</h5>
+                </div>
+              </div>
+              <div class="col-md-4 d-flex flex-column group-card">
+                <div
+                  class="small-card flex-fill"
+                  v-for="(hotel, idx) in chunk.right"
+                  :key="idx"
                   @click="goToHotel(hotel._id)"
                 >
                   <img :src="hotel.IMAGES" class="card-img" :alt="hotel.NAME" />
@@ -439,18 +520,73 @@ export default {
   },
   computed: {
     chunkedHotels() {
-      if (!Array.isArray(this.featuredHotels)) {
-        return []; // Trả về mảng rỗng nếu không phải là mảng
+      if (
+        !Array.isArray(this.featuredHotels) ||
+        this.featuredHotels.length < 5
+      ) {
+        return [];
       }
 
       const chunks = [];
-      for (let i = 0; i < this.featuredHotels.length; i += 5) {
-        chunks.push({
-          left: this.featuredHotels.slice(i, i + 2),
-          middle: this.featuredHotels[i + 2] || {},
-          right: this.featuredHotels.slice(i + 3, i + 5),
-        });
+      let startIndex = 0;
+
+      // Slide đầu tiên: 2 ảnh nhỏ, 1 ảnh lớn, 2 ảnh nhỏ
+      while (startIndex < this.featuredHotels.length) {
+        if (chunks.length === 0) {
+          // Slide đầu tiên
+          const left = this.featuredHotels.slice(startIndex, startIndex + 2); // 2 ảnh nhỏ
+          const middle = this.featuredHotels[startIndex + 2]; // 1 ảnh lớn
+          const right = this.featuredHotels.slice(
+            startIndex + 3,
+            startIndex + 5
+          ); // 2 ảnh nhỏ
+
+          if (left.length === 2 && middle && right.length === 2) {
+            chunks.push({ type: "first", left, middle, right });
+            startIndex += 5; // Đã sử dụng 5 ảnh
+          } else {
+            break;
+          }
+        } else if (chunks.length % 2 !== 0) {
+          // Slide thứ hai: 1 ảnh lớn từ slide trước, 2 ảnh nhỏ từ slide trước, 1 ảnh lớn mới
+          const prevMiddle = chunks[chunks.length - 1].middle; // 1 ảnh lớn từ slide trước
+          const prevRight = chunks[chunks.length - 1].right; // 2 ảnh nhỏ từ slide trước
+          const newMiddle = this.featuredHotels[startIndex]; // 1 ảnh lớn mới
+
+          if (prevMiddle && prevRight.length === 2 && newMiddle) {
+            chunks.push({
+              type: "second",
+              middle: prevMiddle,
+              left: prevRight,
+              right: [newMiddle],
+            });
+            startIndex += 1; // Đã sử dụng thêm 1 ảnh
+          } else {
+            break;
+          }
+        } else {
+          // Slide thứ ba: 2 ảnh nhỏ từ slide trước, 1 ảnh lớn từ slide trước, 2 ảnh nhỏ mới
+          const prevLeft = chunks[chunks.length - 1].left; // 2 ảnh nhỏ từ slide trước
+          const prevMiddle = chunks[chunks.length - 1].right[0]; // 1 ảnh lớn từ slide trước
+          const newRight = this.featuredHotels.slice(
+            startIndex,
+            startIndex + 2
+          ); // 2 ảnh nhỏ mới
+
+          if (prevLeft.length === 2 && prevMiddle && newRight.length === 2) {
+            chunks.push({
+              type: "third",
+              left: prevLeft,
+              middle: prevMiddle,
+              right: newRight,
+            });
+            startIndex += 2; // Đã sử dụng thêm 2 ảnh
+          } else {
+            break;
+          }
+        }
       }
+
       return chunks;
     },
   },

@@ -83,6 +83,7 @@
           <tr>
             <th>Số Phòng</th>
             <th>Loại Phòng</th>
+            <th>Loại Giường</th>
             <th>Giá/Đêm (VND)</th>
             <th>Diện Tích (m²)</th>
             <th>Tầm Nhìn</th>
@@ -95,6 +96,7 @@
           <tr v-for="room in paginatedRooms" :key="room._id">
             <td>{{ room.ROOM_NUMBER }}</td>
             <td>{{ room.TYPE }}</td>
+            <td>{{ room.CUSTOM_ATTRIBUTES.bedType }}</td>
             <td>{{ formatCurrency(room.PRICE_PERNIGHT) }}</td>
             <td>{{ room.CUSTOM_ATTRIBUTES.area }}</td>
             <td>{{ room.CUSTOM_ATTRIBUTES.view }}</td>
@@ -200,11 +202,17 @@
 
         <div class="form-group">
           <label>Loại Giường (Bed Type):</label>
-          <input
+          <select v-model="currentRoom.CUSTOM_ATTRIBUTES.bedType" required>
+            <option value="Twin">Twin</option>
+            <option value="Double ">Double</option>
+            <option value="Triple ">Triple</option>
+            <option value="King">King</option>
+          </select>
+          <!-- <input
             v-model="currentRoom.CUSTOM_ATTRIBUTES.bedType"
             type="text"
             placeholder="Nhập loại giường"
-          />
+          /> -->
         </div>
 
         <div class="form-group">
@@ -690,115 +698,88 @@ export default {
       }
     },
     async updateRoom() {
-      try {
-        console.log("updateRoom called");
-        this.isSubmitting = true;
-        const formData = new FormData();
-        const roomId = this.currentRoom._id;
+  try {
+    console.log("updateRoom called");
+    this.isSubmitting = true;
+    const roomId = this.currentRoom._id;
 
-        console.log("currentRoom:", this.currentRoom);
+    // Lấy dữ liệu gốc từ server
+    const response = await axiosClient.get(`/rooms/getRoomById/${roomId}`);
+    const originalData = response.data.room;
 
-        // Lấy dữ liệu gốc từ server để so sánh và thêm những trường đã thay đổi
-        const response = await axiosClient.get(`/rooms/getRoomById/${roomId}`);
-        const originalData = response.data.room;
+    console.log("originalData:", originalData);
 
-        console.log("originalData:", originalData);
+    // Giữ lại các trường trong CUSTOM_ATTRIBUTES không thay đổi
+    const updatedCustomAttributes = {
+      ...originalData.CUSTOM_ATTRIBUTES, // Giữ nguyên các trường cũ
+      ...this.currentRoom.CUSTOM_ATTRIBUTES, // Ghi đè bằng các trường đã chỉnh sửa
+    };
 
-        // Chỉ thêm các trường đã thay đổi vào formData
-        if (this.currentRoom.FLOOR !== originalData.FLOOR) {
-          formData.append("FLOOR", this.currentRoom.FLOOR);
-        }
-        if (this.currentRoom.TYPE !== originalData.TYPE) {
-          formData.append("TYPE", this.currentRoom.TYPE);
-        }
-        if (this.currentRoom.PRICE_PERNIGHT !== originalData.PRICE_PERNIGHT) {
-          formData.append("PRICE_PERNIGHT", this.currentRoom.PRICE_PERNIGHT);
-        }
-        if (this.currentRoom.DESCRIPTION !== originalData.DESCRIPTION) {
-          formData.append("DESCRIPTION", this.currentRoom.DESCRIPTION);
-        }
+    // Chuẩn bị dữ liệu cập nhật
+    const formData = new FormData();
 
-        // Kiểm tra các trường trong CUSTOM_ATTRIBUTES
-        if (
-          this.currentRoom.CUSTOM_ATTRIBUTES.bedType !==
-          originalData.CUSTOM_ATTRIBUTES.bedType
-        ) {
-          formData.append(
-            "CUSTOM_ATTRIBUTES[bedType]",
-            this.currentRoom.CUSTOM_ATTRIBUTES.bedType
-          );
-        }
-        if (
-          this.currentRoom.CUSTOM_ATTRIBUTES.area !==
-          originalData.CUSTOM_ATTRIBUTES.area
-        ) {
-          formData.append(
-            "CUSTOM_ATTRIBUTES[area]",
-            this.currentRoom.CUSTOM_ATTRIBUTES.area
-          );
-        }
-        if (
-          this.currentRoom.CUSTOM_ATTRIBUTES.view !==
-          originalData.CUSTOM_ATTRIBUTES.view
-        ) {
-          formData.append(
-            "CUSTOM_ATTRIBUTES[view]",
-            this.currentRoom.CUSTOM_ATTRIBUTES.view
-          );
-        }
-        if (
-          this.currentRoom.CUSTOM_ATTRIBUTES.amenities !==
-          originalData.CUSTOM_ATTRIBUTES.amenities
-        ) {
-          formData.append(
-            "CUSTOM_ATTRIBUTES[amenities]",
-            this.currentRoom.CUSTOM_ATTRIBUTES.amenities
-          );
-        }
+    // Kiểm tra các trường chính
+    if (this.currentRoom.FLOOR !== originalData.FLOOR) {
+      formData.append("FLOOR", this.currentRoom.FLOOR);
+    }
+    if (this.currentRoom.TYPE !== originalData.TYPE) {
+      formData.append("TYPE", this.currentRoom.TYPE);
+    }
+    if (this.currentRoom.PRICE_PERNIGHT !== originalData.PRICE_PERNIGHT) {
+      formData.append("PRICE_PERNIGHT", this.currentRoom.PRICE_PERNIGHT);
+    }
+    if (this.currentRoom.DESCRIPTION !== originalData.DESCRIPTION) {
+      formData.append("DESCRIPTION", this.currentRoom.DESCRIPTION);
+    }
 
-        // Kiểm tra và xử lý ảnh
-        // Kiểm tra và xử lý ảnh
-        if (
-          this.imageInputMethod === "url" &&
-          this.currentRoom.IMAGES &&
-          this.currentRoom.IMAGES[0] !== originalData.IMAGES[0]
-        ) {
-          formData.append("IMAGES[]", this.currentRoom.IMAGES[0]); // Nếu là URL
-        } else if (this.imageInputMethod === "file" && this.selectedRoomFiles) {
-          for (let i = 0; i < this.selectedRoomFiles.length; i++) {
-            formData.append("IMAGES[]", this.selectedRoomFiles[i]); // Thêm ảnh từ máy
-          }
-        }
-        // Nếu không có thay đổi về hình ảnh, không thêm trường IMAGES vào formData
+    // Cập nhật CUSTOM_ATTRIBUTES
+    formData.append(
+      "CUSTOM_ATTRIBUTES[bedType]",
+      updatedCustomAttributes.bedType
+    );
+    formData.append("CUSTOM_ATTRIBUTES[area]", updatedCustomAttributes.area);
+    formData.append("CUSTOM_ATTRIBUTES[view]", updatedCustomAttributes.view);
+    formData.append(
+      "CUSTOM_ATTRIBUTES[amenities]",
+      updatedCustomAttributes.amenities
+    );
 
-        // Kiểm tra xem formData có dữ liệu hay không
-        if ([...formData.keys()].length === 0) {
-          Swal.fire("Thông báo", "Không có thay đổi nào để cập nhật.", "info");
-          this.isSubmitting = false;
-          return;
-        }
-
-        for (let key of formData.keys()) {
-          console.log("formData key:", key);
-        }
-
-        // Gửi request cập nhật phòng
-        await axiosClient.put(`/rooms/updateRoom/${roomId}`, formData, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
-
-        Swal.fire("Thành công", "Chỉnh sửa phòng thành công.", "success");
-
-        // Làm mới danh sách phòng sau khi cập nhật
-        await this.fetchRooms();
-        this.isRoomModalOpen = false;
-        this.resetRoomForm();
-      } catch (error) {
-        Swal.fire("Lỗi", "Không thể chỉnh sửa phòng.", "error");
-      } finally {
-        this.isSubmitting = false;
+    // Kiểm tra và xử lý ảnh
+    if (
+      this.imageInputMethod === "url" &&
+      this.currentRoom.IMAGES[0] !== originalData.IMAGES[0]
+    ) {
+      formData.append("IMAGES[]", this.currentRoom.IMAGES[0]);
+    } else if (this.imageInputMethod === "file" && this.selectedRoomFiles) {
+      for (let i = 0; i < this.selectedRoomFiles.length; i++) {
+        formData.append("IMAGES[]", this.selectedRoomFiles[i]);
       }
-    },
+    }
+
+    // Kiểm tra xem có thay đổi nào không
+    if ([...formData.keys()].length === 0) {
+      Swal.fire("Thông báo", "Không có thay đổi nào để cập nhật.", "info");
+      this.isSubmitting = false;
+      return;
+    }
+
+    // Gửi request cập nhật phòng
+    await axiosClient.put(`/rooms/updateRoom/${roomId}`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+
+    Swal.fire("Thành công", "Chỉnh sửa phòng thành công.", "success");
+
+    // Cập nhật danh sách phòng và đóng modal
+    await this.fetchRooms();
+    this.isRoomModalOpen = false;
+    this.resetRoomForm();
+  } catch (error) {
+    Swal.fire("Lỗi", "Không thể chỉnh sửa phòng.", "error");
+  } finally {
+    this.isSubmitting = false;
+  }
+},
 
     async addOrUpdateRoom() {
       const isEditingRoom = this.isEditingRoom; // Lưu trữ giá trị
@@ -884,60 +865,67 @@ export default {
     },
     // Initialize Calendar
     initializeCalendar() {
-    this.currentMonthIndex = new Date().getMonth();
-    this.currentYear = new Date().getFullYear();
-    this.generateCalendar();
-  },
+      this.currentMonthIndex = new Date().getMonth();
+      this.currentYear = new Date().getFullYear();
+      this.generateCalendar();
+    },
 
     // Generate Calendar Data
     generateCalendar() {
-  this.calendar = [];
-  const firstDayOfMonth = new Date(this.currentYear, this.currentMonthIndex, 1);
-  const startingDay = firstDayOfMonth.getDay(); // CN = 0, T2 = 1, ..., T7 = 6
-  const daysInMonth = new Date(this.currentYear, this.currentMonthIndex + 1, 0).getDate();
+      this.calendar = [];
+      const firstDayOfMonth = new Date(
+        this.currentYear,
+        this.currentMonthIndex,
+        1
+      );
+      const startingDay = firstDayOfMonth.getDay(); // CN = 0, T2 = 1, ..., T7 = 6
+      const daysInMonth = new Date(
+        this.currentYear,
+        this.currentMonthIndex + 1,
+        0
+      ).getDate();
 
-  let week = [];
-  // Điền các ô trống cho ngày của tháng trước
-  for (let i = 0; i < startingDay; i++) {
-    week.push({ label: '', isEmpty: true });
-  }
+      let week = [];
+      // Điền các ô trống cho ngày của tháng trước
+      for (let i = 0; i < startingDay; i++) {
+        week.push({ label: "", isEmpty: true });
+      }
 
-  // Điền các ngày của tháng hiện tại
-  for (let day = 1; day <= daysInMonth; day++) {
-    const date = new Date(this.currentYear, this.currentMonthIndex, day);
-    const dateStr = date.toISOString().split('T')[0];
+      // Điền các ngày của tháng hiện tại
+      for (let day = 1; day <= daysInMonth; day++) {
+        const date = new Date(this.currentYear, this.currentMonthIndex, day);
+        const dateStr = date.toISOString().split("T")[0];
 
-    week.push({
-      label: day,
-      date: dateStr,
-      isEmpty: false,
-      isBooked: this.isBookedDate(dateStr), // Kiểm tra xem ngày có được đặt không
-      isOtherMonth: false,
-    });
+        week.push({
+          label: day,
+          date: dateStr,
+          isEmpty: false,
+          isBooked: this.isBookedDate(dateStr), // Kiểm tra xem ngày có được đặt không
+          isOtherMonth: false,
+        });
 
-    if (week.length === 7) {
-      this.calendar.push([...week]);
-      week = [];
-    }
-  }
+        if (week.length === 7) {
+          this.calendar.push([...week]);
+          week = [];
+        }
+      }
 
-  // Điền các ô trống cho ngày của tháng sau
-  if (week.length > 0) {
-    while (week.length < 7) {
-      week.push({ label: '', isEmpty: true });
-    }
-    this.calendar.push([...week]);
-  }
-},
+      // Điền các ô trống cho ngày của tháng sau
+      if (week.length > 0) {
+        while (week.length < 7) {
+          week.push({ label: "", isEmpty: true });
+        }
+        this.calendar.push([...week]);
+      }
+    },
 
-// Kiểm tra xem ngày có được đặt hay không
-isBookedDate(dateStr) {
-  if (!this.selectedRoom || !this.selectedRoom.AVAILABILITY) return false;
-  return this.selectedRoom.AVAILABILITY.some((item) => 
-    item.DATE.startsWith(dateStr) && !item.AVAILABLE
-  );
-},
-
+    // Kiểm tra xem ngày có được đặt hay không
+    isBookedDate(dateStr) {
+      if (!this.selectedRoom || !this.selectedRoom.AVAILABILITY) return false;
+      return this.selectedRoom.AVAILABILITY.some(
+        (item) => item.DATE.startsWith(dateStr) && !item.AVAILABLE
+      );
+    },
 
     // Check if a date is available
     checkAvailability(dateStr) {
@@ -1457,7 +1445,6 @@ isBookedDate(dateStr) {
   background-color: #7274ff;
   color: #fff;
 }
-
 
 .selected-dates p {
   margin: 5px 0;
