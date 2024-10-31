@@ -648,24 +648,20 @@ export default {
 
     // Chọn ngày
     selectDate(day) {
-      if (day.isPast || !day.date || !day.isAvailable) {
-        return; // Không cho chọn ngày trong quá khứ hoặc ô trống
-      }
+      if (day.isPast || !day.date || !day.isAvailable) return;
+
+      // Đặt giờ về 0h để tránh sự thay đổi múi giờ
+      const selectedDate = new Date(day.date);
+      selectedDate.setHours(0, 0, 0, 0);
 
       if (!this.selectedStartDate || this.selectedEndDate) {
-        // Nếu chưa chọn ngày bắt đầu hoặc đã chọn cả hai ngày, bắt đầu lại
-        this.selectedStartDate = new Date(day.date);
-        this.selectedStartDate.setHours(0, 0, 0, 0); // Đặt giờ về 0h
+        this.selectedStartDate = selectedDate;
         this.selectedEndDate = null;
+      } else if (selectedDate >= this.selectedStartDate) {
+        this.selectedEndDate = selectedDate;
       } else {
-        if (day.date >= this.selectedStartDate) {
-          this.selectedEndDate = new Date(day.date);
-          this.selectedEndDate.setHours(0, 0, 0, 0); // Đặt giờ về 0h
-        } else {
-          this.selectedStartDate = new Date(day.date);
-          this.selectedStartDate.setHours(0, 0, 0, 0); // Đặt giờ về 0h
-          this.selectedEndDate = null;
-        }
+        this.selectedStartDate = selectedDate;
+        this.selectedEndDate = null;
       }
     },
     bookNow(startDate, endDate) {
@@ -712,8 +708,11 @@ export default {
       }
 
       // Chuyển đổi ngày thành chuỗi định dạng YYYY-MM-DD
-      const startDate = this.selectedStartDate.toISOString().split("T")[0];
-      const endDate = this.selectedEndDate.toISOString().split("T")[0];
+      const startDate = new Date(this.selectedStartDate);
+      startDate.setHours(0, 0, 0, 0);
+
+      const endDate = new Date(this.selectedEndDate);
+      endDate.setHours(0, 0, 0, 0);
 
       switch (this.currentAction) {
         case "addToCart":

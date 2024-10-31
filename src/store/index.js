@@ -89,6 +89,8 @@ const store = createStore({
           const response = await axios.get("/users/profile");
           if (response.status >= 200 && response.status < 300) {
             const userInfo = response.data;
+
+            console.log("userInfo: ", userInfo);
             
             commit("SET_USER_INFO", userInfo);
             // const roles = userInfo.ROLE;

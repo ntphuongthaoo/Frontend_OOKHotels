@@ -18,6 +18,8 @@ import PaymentPage from '../views/Payment/PaymentPage.vue'
 import BookingHistory from '../views/BookingHistory/BookingHistory.vue'
 import RoomDetail from '../views/RoomDetail/RoomDetail.vue'
 
+import Chat from '../components/Chat/Chat.vue'
+
 // dashboard
 import RegisterStaff from '../views/RegisterStaff/RegisterStaff.vue'
 import AdminLayout from '../layouts/AdminLayout/AdminLayout.vue'
@@ -40,6 +42,13 @@ const routes = [
 			layout: LoginLayout,
 		}
 	},
+	{
+		path: "/chat",
+		component: Chat,
+		meta: {
+		  layout: UserLayout,
+		},
+	  },
 	{
 		path: "/register",
 		component: RegisterUser,

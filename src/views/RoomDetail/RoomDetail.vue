@@ -43,7 +43,7 @@
         <div v-if="reviews.length > 0" class="reviews-list">
           <div v-for="review in reviews" :key="review._id" class="review-item">
             <div class="review-header">
-              <span class="review-user">Người đánh giá: {{ review.USER_ID.FULLNAME }}</span>
+              <span class="review-user">{{ review.USER_ID.FULLNAME }}</span>
               <span class="review-rating">
                 <i v-for="star in 5" :key="star" class="fa fa-star" :class="{ 'active-star': star <= review.RATING }"></i>
               </span>

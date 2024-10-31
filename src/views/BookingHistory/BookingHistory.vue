@@ -358,12 +358,13 @@ export default {
         }
       });
     },
-    async checkExistingReview(roomId) {
+    async checkExistingReview(roomId, bookingId) {
       try {
         const response = await axiosClient.post(
           "/reviews/getReviewByUserAndRoom",
           {
             roomId: roomId,
+            bookingId: bookingId
           }
         );
         if (response.data.success) {
