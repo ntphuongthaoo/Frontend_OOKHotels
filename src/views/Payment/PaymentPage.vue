@@ -6,16 +6,15 @@
 
       <!-- Dịch vụ đưa rước sân bay -->
       <div class="service-option">
-  <label class="service-label">
-    <input
-      type="checkbox"
-      v-model="airportPickup"
-      @change="updateTotalPrice"
-    />
-    <span>Dịch vụ đưa rước sân bay (+ 200,000 VND)</span>
-  </label>
-</div>
-
+        <label class="service-label">
+          <input
+            type="checkbox"
+            v-model="airportPickup"
+            @change="updateTotalPrice"
+          />
+          <span>Dịch vụ đưa rước sân bay (+ 200,000 VND)</span>
+        </label>
+      </div>
 
       <!-- Form thông tin khách hàng -->
       <form @submit.prevent="processPayment">
@@ -77,14 +76,14 @@
         <h3>Chính sách đặt phòng</h3>
         <ul>
           <li>
-            <strong>Hủy:</strong> Nếu hủy, thay đổi hoặc không đến, khách sẽ trả toàn bộ giá trị tiền đặt phòng.
+            <strong>Hủy:</strong> Nếu hủy, thay đổi hoặc không đến, khách sẽ trả
+            toàn bộ giá trị tiền đặt phòng.
           </li>
           <li>
-            <strong>Thanh toán:</strong> Thanh toán toàn bộ giá trị tiền đặt phòng.
+            <strong>Thanh toán:</strong> Thanh toán toàn bộ giá trị tiền đặt
+            phòng.
           </li>
-          <li>
-            <strong>Đã bao gồm:</strong> Ăn sáng.
-          </li>
+          <li><strong>Đã bao gồm:</strong> Ăn sáng.</li>
         </ul>
       </div>
     </div>
@@ -103,7 +102,8 @@
           >
             <p class="hotel-name-booking">{{ room.hotelName }}</p>
             <p class="time">
-              {{ formatDate(room.startDate) }} - {{ formatDate(room.endDate) }} (
+              {{ formatDate(room.startDate) }} -
+              {{ formatDate(room.endDate) }} (
               {{ calculateTotalDays(room.startDate, room.endDate) }} ngày,
               {{ calculateNights(room.startDate, room.endDate) }} đêm)
             </p>
@@ -125,8 +125,17 @@
           <p class="hotel-name-booking">{{ hotel.NAME }}</p>
           <p class="time">
             {{ formattedStartDate }} - {{ formattedEndDate }} (
-            {{ calculateTotalDays(bookingDetails.startDate, bookingDetails.endDate) }} ngày,
-            {{ calculateNights(bookingDetails.startDate, bookingDetails.endDate) }} đêm)
+            {{
+              calculateTotalDays(
+                bookingDetails.startDate,
+                bookingDetails.endDate
+              )
+            }}
+            ngày,
+            {{
+              calculateNights(bookingDetails.startDate, bookingDetails.endDate)
+            }}
+            đêm)
           </p>
           <h4>Thông tin phòng</h4>
           <p>
@@ -160,7 +169,6 @@
   </div>
 </template>
 
-
 <script>
 import axiosClient from "../../api/axiosClient";
 
@@ -172,7 +180,7 @@ export default {
       citizenId: "",
       selectedRooms: [],
       airportPickup: false, // Thêm biến để theo dõi dịch vụ đưa rước sân bay
-    airportPickupPrice: 200000,
+      airportPickupPrice: 200000,
       errors: {
         customerName: "",
         customerPhone: "",
@@ -182,15 +190,24 @@ export default {
   },
   created() {
     this.selectedRooms = this.$store.getters.getSelectedRoomsCart;
-    // if (
-    //   (!this.selectedRooms || this.selectedRooms.length === 0) &&
-    //   !this.bookingDetails.room
-    // ) {
-    //   this.$toast.error(
-    //     "Không có phòng nào được chọn. Vui lòng quay lại và chọn phòng."
-    //   );
-    //   this.$router.push({ name: "CartPage" });
-    // }
+    this.bookingDetails = this.$store.getters.getBookingDetails;
+
+    // Kiểm tra nếu không có phòng nào được chọn
+    if (
+      (!this.selectedRooms || this.selectedRooms.length === 0) &&
+      (!this.bookingDetails || !this.bookingDetails.room)
+    ) {
+      // Kiểm tra nếu có bookingDetails và bookingDetails.hotel
+      if (this.bookingDetails && this.bookingDetails.hotel) {
+        this.$router.push({
+          name: "HotelDetail",
+          params: { id: this.bookingDetails.hotel._id },
+        });
+      } else {
+        // Nếu không có bookingDetails.hotel, chuyển hướng về trang chủ
+        this.$router.push({ path: "/home" });
+      }
+    }
   },
   computed: {
     bookingDetails() {
@@ -249,8 +266,8 @@ export default {
       }
 
       if (this.airportPickup) {
-      total += this.airportPickupPrice;
-    }
+        total += this.airportPickupPrice;
+      }
 
       return total;
     },
@@ -261,9 +278,9 @@ export default {
 
   methods: {
     updateTotalPrice() {
-    // Chỉ cần tính lại tổng giá khi có sự thay đổi trong dịch vụ đưa rước sân bay
-    this.totalPrice = this.totalPrice; // Kích hoạt tính toán lại computed property
-  },
+      // Chỉ cần tính lại tổng giá khi có sự thay đổi trong dịch vụ đưa rước sân bay
+      this.totalPrice = this.totalPrice; // Kích hoạt tính toán lại computed property
+    },
     calculateTotalDays(startDate, endDate) {
       const start = new Date(startDate);
       const end = new Date(endDate);
@@ -314,13 +331,12 @@ export default {
 
       this.validateInput();
 
-      // Nếu có lỗi, dừng lại và hiển thị lỗi
       if (
         this.errors.customerName ||
         this.errors.customerPhone ||
         this.errors.citizenId
       ) {
-        return; // Không tiếp tục nếu có lỗi
+        return; // Dừng lại nếu có lỗi
       }
 
       if (!this.selectedRoom && this.selectedRooms.length === 0) {
@@ -334,25 +350,38 @@ export default {
 
       if (this.selectedRooms.length > 0) {
         paymentData = {
-          roomsDetails: this.selectedRooms.map((room) => ({
-            ROOM_ID: room.roomId || room.ROOM_ID,
-            CUSTOMER_PHONE: this.customerPhone,
-            CUSTOMER_NAME: this.customerName,
-            CITIZEN_ID: this.citizenId,
-            startDate: room.startDate,
-            endDate: room.endDate,
-          })),
+          roomsDetails: this.selectedRooms.map((room) => {
+            // Sao chép và cộng thêm 1 ngày vào startDate và endDate
+            const startDate = new Date(room.startDate);
+            startDate.setDate(startDate.getDate() + 1);
+            const endDate = new Date(room.endDate);
+            endDate.setDate(endDate.getDate() + 1);
+
+            return {
+              ROOM_ID: room.roomId || room.ROOM_ID,
+              CUSTOMER_PHONE: this.customerPhone,
+              CUSTOMER_NAME: this.customerName,
+              CITIZEN_ID: this.citizenId,
+              startDate: startDate.toISOString().split("T")[0], // Định dạng lại ngày nếu cần
+              endDate: endDate.toISOString().split("T")[0],
+            };
+          }),
           airportPickup: this.airportPickup,
         };
       } else if (this.selectedRoom) {
+        const startDate = new Date(this.bookingDetails.startDate);
+        startDate.setDate(startDate.getDate() + 1);
+        const endDate = new Date(this.bookingDetails.endDate);
+        endDate.setDate(endDate.getDate() + 1);
+
         paymentData = {
           roomDetails: {
             ROOM_ID: this.selectedRoom._id,
             CUSTOMER_PHONE: this.customerPhone,
             CUSTOMER_NAME: this.customerName,
             CITIZEN_ID: this.citizenId,
-            startDate: this.bookingDetails.startDate,
-            endDate: this.bookingDetails.endDate,
+            startDate: startDate.toISOString().split("T")[0],
+            endDate: endDate.toISOString().split("T")[0],
           },
           airportPickup: this.airportPickup,
         };
@@ -367,7 +396,7 @@ export default {
         );
 
         if (response.data.success) {
-          // Sau khi đặt phòng thành công, tạo URL thanh toán VNPAY
+          // Tạo URL thanh toán VNPAY
           const paymentResponse = await axiosClient.post(
             "/payments/create_payment_url",
             {
@@ -377,7 +406,7 @@ export default {
           );
 
           if (paymentResponse.data && paymentResponse.data.data.url) {
-            localStorage.setItem('vnpayUrl', paymentResponse.data.data.url);
+            localStorage.setItem("vnpayUrl", paymentResponse.data.data.url);
             window.open(paymentResponse.data.data.url, "_blank");
           } else {
             this.$toast.error("Không thể tạo liên kết thanh toán VNPAY.");
@@ -592,7 +621,4 @@ export default {
 .service-label span {
   font-size: 16px;
 }
-
-
-
 </style>

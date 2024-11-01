@@ -1,14 +1,33 @@
 <script setup>
 import "vue3-toastify/dist/index.css";
+import ChatLayout from './layouts/ChatLayout/ChatLayout.vue';
+import UserLayout from './layouts/UserLayout/UserLayout.vue';
+import AdminLayout from './layouts/AdminLayout/AdminLayout.vue';
+import LoginLayout from './layouts/Login/LoginLayout.vue';
+
+import { computed } from "vue";
+import { useRoute } from "vue-router";
+
+const route = useRoute();
+const layout = computed(() => {
+  // Kiểm tra `meta.layout` và trả về component trực tiếp nếu đã import đúng
+  if (route.meta.layout === ChatLayout) return ChatLayout;
+  if (route.meta.layout === AdminLayout) return AdminLayout;
+  if (route.meta.layout === UserLayout) return UserLayout;
+  if (route.meta.layout === LoginLayout) return LoginLayout;
+  return UserLayout; // Layout mặc định
+});
 </script>
 
 <template>
-	<div>
-		<component :is="$route.meta.layout">
-			<router-view />
-		</component>
-	</div>
+  <div>
+    <!-- Hiển thị layout dựa trên giá trị layout -->
+    <component :is="layout">
+      <router-view />
+    </component>
+  </div>
 </template>
+
 
 <style lang="scss">
 :root {

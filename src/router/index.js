@@ -18,6 +18,7 @@ import PaymentPage from '../views/Payment/PaymentPage.vue'
 import BookingHistory from '../views/BookingHistory/BookingHistory.vue'
 import RoomDetail from '../views/RoomDetail/RoomDetail.vue'
 
+import ChatLayout from '../layouts/ChatLayout/ChatLayout.vue'
 import Chat from '../components/Chat/Chat.vue'
 
 // dashboard
@@ -46,7 +47,7 @@ const routes = [
 		path: "/chat",
 		component: Chat,
 		meta: {
-		  layout: UserLayout,
+		  layout: ChatLayout,
 		},
 	  },
 	{

@@ -219,7 +219,9 @@ export default {
       try {
         const response = await axiosClient.get("/bookings/getBookingHistory");
         if (response.data.success) {
-          this.bookings = response.data.formattedBookings;
+          this.bookings = response.data.formattedBookings.sort((a, b) => {
+            return new Date(b.createdAt) - new Date(a.createdAt);
+          });
 
           // Thiết lập thời gian thanh toán cho mỗi đơn đặt phòng
           this.bookings.forEach((booking) => {
@@ -338,7 +340,7 @@ export default {
       this.showReviewModal = true;
       this.review.rating = null;
       this.review.comment = "";
-      this.checkExistingReview(room.ROOM_ID._id); // Kiểm tra đánh giá hiện tại
+      this.checkExistingReview(room.ROOM_ID._id, bookingId); // Kiểm tra đánh giá hiện tại
     },
     closeReviewModal() {
       this.showReviewModal = false;
@@ -364,7 +366,7 @@ export default {
           "/reviews/getReviewByUserAndRoom",
           {
             roomId: roomId,
-            bookingId: bookingId
+            bookingId: bookingId,
           }
         );
         if (response.data.success) {
