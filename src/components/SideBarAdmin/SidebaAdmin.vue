@@ -13,7 +13,7 @@
           @click="navigate('dashboard')"
         >
           <i class="fas fa-tachometer-alt"></i>
-          <span>Dashboard</span>
+          <span>Tổng quan</span>
         </li>
 
         <li 

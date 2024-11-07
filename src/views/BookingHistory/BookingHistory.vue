@@ -123,7 +123,7 @@
               </p>
 
               <!-- Hiển thị nút đánh giá nếu ngày trả phòng đã đến -->
-              <div v-if="new Date(room.END_DATE) <= new Date()">
+              <div v-if="new Date(room.END_DATE) <= new Date() && booking.STATUS === 'Booked'">
                 <button @click="openReviewModal(room, booking._id)">
                   Đánh giá
                 </button>

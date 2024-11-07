@@ -15,7 +15,8 @@ export default defineConfig({
     },
   },
   server: {
-    hmr: true // Đảm bảo rằng HMR được bật
+    hmr: true, // Đảm bảo rằng HMR được bật
+    port: 3001,
   }
 })
 

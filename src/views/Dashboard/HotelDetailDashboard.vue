@@ -11,7 +11,6 @@
       />
       <img
         v-else
-        src="path/to/default-hotel-image.jpg"
         alt="default-hotel-image"
         class="hotel-main-image"
       />
@@ -84,6 +83,7 @@
             <th>Số Phòng</th>
             <th>Loại Phòng</th>
             <th>Loại Giường</th>
+            <th>Số người</th>
             <th>Giá/Đêm (VND)</th>
             <th>Diện Tích (m²)</th>
             <th>Tầm Nhìn</th>
@@ -97,6 +97,7 @@
             <td>{{ room.ROOM_NUMBER }}</td>
             <td>{{ room.TYPE }}</td>
             <td>{{ room.CUSTOM_ATTRIBUTES.bedType }}</td>
+            <td>{{ room.CUSTOM_ATTRIBUTES.number_of_people }}</td>
             <td>{{ formatCurrency(room.PRICE_PERNIGHT) }}</td>
             <td>{{ room.CUSTOM_ATTRIBUTES.area }}</td>
             <td>{{ room.CUSTOM_ATTRIBUTES.view }}</td>
@@ -192,7 +193,7 @@
 
         <div class="form-group">
           <label>Số Lượng Phòng:</label>
-          <input v-model.number="quantity" type="number" min="1" required />
+          <input v-model.number="quantity" type="number" min="1" :disabled="isEditingRoom" required />
         </div>
 
         <div class="form-group">
@@ -239,6 +240,16 @@
             v-model="currentRoom.CUSTOM_ATTRIBUTES.amenities"
             type="text"
             placeholder="Nhập tiện nghi"
+          />
+        </div>
+
+        <div class="form-group">
+          <label>Số người tối đa:</label>
+          <input
+            v-model.number="currentRoom.CUSTOM_ATTRIBUTES.number_of_people"
+            type="number"
+            min="1"
+            required
           />
         </div>
 
@@ -355,6 +366,7 @@ export default {
           area: 0,
           view: "",
           amenities: "",
+          number_of_people: "",
         },
       },
       selectedRoomFiles: null,
@@ -611,6 +623,7 @@ export default {
           area: 0,
           view: "",
           amenities: "",
+          number_of_people: "",
         },
         IMAGES: [],
       };
@@ -651,6 +664,7 @@ export default {
             area: this.currentRoom.CUSTOM_ATTRIBUTES.area,
             view: String(this.currentRoom.CUSTOM_ATTRIBUTES.view),
             amenities: this.currentRoom.CUSTOM_ATTRIBUTES.amenities,
+            number_of_people: this.currentRoom.CUSTOM_ATTRIBUTES.number_of_people,
           },
           IMAGES: [], // Sẽ xử lý ảnh dưới đây
         };
@@ -698,88 +712,98 @@ export default {
       }
     },
     async updateRoom() {
-  try {
-    console.log("updateRoom called");
-    this.isSubmitting = true;
-    const roomId = this.currentRoom._id;
+      try {
+        console.log("updateRoom called");
+        this.isSubmitting = true;
+        const roomId = this.currentRoom._id;
 
-    // Lấy dữ liệu gốc từ server
-    const response = await axiosClient.get(`/rooms/getRoomById/${roomId}`);
-    const originalData = response.data.room;
+        // Lấy dữ liệu gốc từ server
+        const response = await axiosClient.get(`/rooms/getRoomById/${roomId}`);
+        const originalData = response.data.room;
 
-    console.log("originalData:", originalData);
+        console.log("originalData:", originalData);
 
-    // Giữ lại các trường trong CUSTOM_ATTRIBUTES không thay đổi
-    const updatedCustomAttributes = {
-      ...originalData.CUSTOM_ATTRIBUTES, // Giữ nguyên các trường cũ
-      ...this.currentRoom.CUSTOM_ATTRIBUTES, // Ghi đè bằng các trường đã chỉnh sửa
-    };
+        // Giữ lại các trường trong CUSTOM_ATTRIBUTES không thay đổi
+        const updatedCustomAttributes = {
+          ...originalData.CUSTOM_ATTRIBUTES, // Giữ nguyên các trường cũ
+          ...this.currentRoom.CUSTOM_ATTRIBUTES, // Ghi đè bằng các trường đã chỉnh sửa
+        };
 
-    // Chuẩn bị dữ liệu cập nhật
-    const formData = new FormData();
+        // Chuẩn bị dữ liệu cập nhật
+        const formData = new FormData();
 
-    // Kiểm tra các trường chính
-    if (this.currentRoom.FLOOR !== originalData.FLOOR) {
-      formData.append("FLOOR", this.currentRoom.FLOOR);
-    }
-    if (this.currentRoom.TYPE !== originalData.TYPE) {
-      formData.append("TYPE", this.currentRoom.TYPE);
-    }
-    if (this.currentRoom.PRICE_PERNIGHT !== originalData.PRICE_PERNIGHT) {
-      formData.append("PRICE_PERNIGHT", this.currentRoom.PRICE_PERNIGHT);
-    }
-    if (this.currentRoom.DESCRIPTION !== originalData.DESCRIPTION) {
-      formData.append("DESCRIPTION", this.currentRoom.DESCRIPTION);
-    }
+        // Kiểm tra các trường chính
+        if (this.currentRoom.FLOOR !== originalData.FLOOR) {
+          formData.append("FLOOR", this.currentRoom.FLOOR);
+        }
+        if (this.currentRoom.TYPE !== originalData.TYPE) {
+          formData.append("TYPE", this.currentRoom.TYPE);
+        }
+        if (this.currentRoom.PRICE_PERNIGHT !== originalData.PRICE_PERNIGHT) {
+          formData.append("PRICE_PERNIGHT", this.currentRoom.PRICE_PERNIGHT);
+        }
+        if (this.currentRoom.DESCRIPTION !== originalData.DESCRIPTION) {
+          formData.append("DESCRIPTION", this.currentRoom.DESCRIPTION);
+        }
 
-    // Cập nhật CUSTOM_ATTRIBUTES
-    formData.append(
-      "CUSTOM_ATTRIBUTES[bedType]",
-      updatedCustomAttributes.bedType
-    );
-    formData.append("CUSTOM_ATTRIBUTES[area]", updatedCustomAttributes.area);
-    formData.append("CUSTOM_ATTRIBUTES[view]", updatedCustomAttributes.view);
-    formData.append(
-      "CUSTOM_ATTRIBUTES[amenities]",
-      updatedCustomAttributes.amenities
-    );
+        // Cập nhật CUSTOM_ATTRIBUTES
+        formData.append(
+          "CUSTOM_ATTRIBUTES[bedType]",
+          updatedCustomAttributes.bedType
+        );
+        formData.append(
+          "CUSTOM_ATTRIBUTES[area]",
+          updatedCustomAttributes.area
+        );
+        formData.append(
+          "CUSTOM_ATTRIBUTES[view]",
+          updatedCustomAttributes.view
+        );
+        formData.append(
+          "CUSTOM_ATTRIBUTES[amenities]",
+          updatedCustomAttributes.amenities
+        );
+        formData.append(
+          "CUSTOM_ATTRIBUTES[number_of_people]",
+          updatedCustomAttributes.number_of_people
+        );
 
-    // Kiểm tra và xử lý ảnh
-    if (
-      this.imageInputMethod === "url" &&
-      this.currentRoom.IMAGES[0] !== originalData.IMAGES[0]
-    ) {
-      formData.append("IMAGES[]", this.currentRoom.IMAGES[0]);
-    } else if (this.imageInputMethod === "file" && this.selectedRoomFiles) {
-      for (let i = 0; i < this.selectedRoomFiles.length; i++) {
-        formData.append("IMAGES[]", this.selectedRoomFiles[i]);
+        // Kiểm tra và xử lý ảnh
+        if (
+          this.imageInputMethod === "url" &&
+          this.currentRoom.IMAGES[0] !== originalData.IMAGES[0]
+        ) {
+          formData.append("IMAGES[]", this.currentRoom.IMAGES[0]);
+        } else if (this.imageInputMethod === "file" && this.selectedRoomFiles) {
+          for (let i = 0; i < this.selectedRoomFiles.length; i++) {
+            formData.append("IMAGES[]", this.selectedRoomFiles[i]);
+          }
+        }
+
+        // Kiểm tra xem có thay đổi nào không
+        if ([...formData.keys()].length === 0) {
+          Swal.fire("Thông báo", "Không có thay đổi nào để cập nhật.", "info");
+          this.isSubmitting = false;
+          return;
+        }
+
+        // Gửi request cập nhật phòng
+        await axiosClient.put(`/rooms/updateRoom/${roomId}`, formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+
+        Swal.fire("Thành công", "Chỉnh sửa phòng thành công.", "success");
+
+        // Cập nhật danh sách phòng và đóng modal
+        await this.fetchRooms();
+        this.isRoomModalOpen = false;
+        this.resetRoomForm();
+      } catch (error) {
+        Swal.fire("Lỗi", "Không thể chỉnh sửa phòng.", "error");
+      } finally {
+        this.isSubmitting = false;
       }
-    }
-
-    // Kiểm tra xem có thay đổi nào không
-    if ([...formData.keys()].length === 0) {
-      Swal.fire("Thông báo", "Không có thay đổi nào để cập nhật.", "info");
-      this.isSubmitting = false;
-      return;
-    }
-
-    // Gửi request cập nhật phòng
-    await axiosClient.put(`/rooms/updateRoom/${roomId}`, formData, {
-      headers: { "Content-Type": "multipart/form-data" },
-    });
-
-    Swal.fire("Thành công", "Chỉnh sửa phòng thành công.", "success");
-
-    // Cập nhật danh sách phòng và đóng modal
-    await this.fetchRooms();
-    this.isRoomModalOpen = false;
-    this.resetRoomForm();
-  } catch (error) {
-    Swal.fire("Lỗi", "Không thể chỉnh sửa phòng.", "error");
-  } finally {
-    this.isSubmitting = false;
-  }
-},
+    },
 
     async addOrUpdateRoom() {
       const isEditingRoom = this.isEditingRoom; // Lưu trữ giá trị

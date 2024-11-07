@@ -161,10 +161,46 @@
       </div>
     </div>
 
-    <!-- Khách sạn nổi bật -->
-    <div class="container featured-hotels">
-      <h2 class="text-center title-our-hotels">KHÁCH SẠN CỦA CHÚNG TÔI</h2>
-      <div id="featuredCarousel" class="carousel slide" data-bs-ride="carousel">
+    <div class="highlighted-hotels">
+      <h2 class="section-title">KHÁCH SẠN NỔI BẬT</h2>
+      <div class="hotel-grid">
+        <div
+          v-for="hotel in topBookedHotels"
+          :key="hotel._id"
+          class="hotel-card"
+          @click="goToHotel(hotel._id)"
+        >
+          <div
+            class="hotel-background"
+            :style="{ backgroundImage: `url(${hotel.IMAGES[0]})` }"
+          ></div>
+          <div class="hotel-info-card">
+            <img
+              :src="hotel.IMAGES[0]"
+              alt="Hotel Image"
+              class="hotel-thumbnail"
+            />
+            <div class="info">
+              <h3 class="hotel-name">{{ hotel.NAME }}</h3>
+              <div class="rating">
+                <span
+                  v-for="index in 5"
+                  :key="index"
+                  class="star"
+                  :style="getStarStyle(index, hotel.RATING)"
+                  >⭐</span
+                >
+                <!-- <span class="rating-value">{{ hotel.RATING.toFixed(1) }}</span> -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hotel-carousel-container">
+      <h2 class="section-title">KHÁCH SẠN CỦA CHÚNG TÔI</h2>
+      <div id="hotelCarousel" class="carousel slide" data-bs-ride="carousel">
         <div class="carousel-inner">
           <div
             v-for="(chunk, index) in chunkedHotels"
@@ -172,109 +208,33 @@
             class="carousel-item"
             :class="{ active: index === 0 }"
           >
-            <!-- Slide đầu tiên: 2 ảnh nhỏ, 1 ảnh lớn, 2 ảnh nhỏ -->
-            <div v-if="chunk.type === 'first'" class="row gx-0">
-              <div class="col-md-4 d-flex flex-column group-card">
-                <div
-                  class="small-card flex-fill"
-                  v-for="(hotel, idx) in chunk.left"
-                  :key="idx"
-                  @click="goToHotel(hotel._id)"
-                >
-                  <img :src="hotel.IMAGES" class="card-img" :alt="hotel.NAME" />
-                  <h5 class="card-title">{{ hotel.NAME }}</h5>
-                </div>
-              </div>
-              <div class="col-md-4 big-card group-card">
-                <div class="big-card" @click="goToHotel(chunk.middle._id)">
-                  <img
-                    :src="chunk.middle.IMAGES"
-                    class="card-img big-img"
-                    :alt="chunk.middle.NAME"
-                  />
-                  <h5 class="card-title">{{ chunk.middle.NAME }}</h5>
-                </div>
-              </div>
-              <div class="col-md-4 d-flex flex-column group-card">
-                <div
-                  class="small-card flex-fill"
-                  v-for="(hotel, idx) in chunk.right"
-                  :key="idx"
-                  @click="goToHotel(hotel._id)"
-                >
-                  <img :src="hotel.IMAGES" class="card-img" :alt="hotel.NAME" />
-                  <h5 class="card-title">{{ hotel.NAME }}</h5>
-                </div>
-              </div>
-            </div>
-
-            <!-- Slide thứ hai: 1 ảnh lớn từ slide trước, 2 ảnh nhỏ từ slide trước, 1 ảnh lớn mới -->
-            <div v-else-if="chunk.type === 'second'" class="row gx-0">
-              <div class="col-md-4 big-card group-card">
-                <div class="big-card" @click="goToHotel(chunk.middle._id)">
-                  <img
-                    :src="chunk.middle.IMAGES"
-                    class="card-img big-img"
-                    :alt="chunk.middle.NAME"
-                  />
-                  <h5 class="card-title">{{ chunk.middle.NAME }}</h5>
-                </div>
-              </div>
-              <div class="col-md-4 d-flex flex-column group-card">
-                <div
-                  class="small-card flex-fill"
-                  v-for="(hotel, idx) in chunk.left"
-                  :key="idx"
-                  @click="goToHotel(hotel._id)"
-                >
-                  <img :src="hotel.IMAGES" class="card-img" :alt="hotel.NAME" />
-                  <h5 class="card-title">{{ hotel.NAME }}</h5>
-                </div>
-              </div>
-              <div class="col-md-4 big-card group-card">
-                <div class="big-card" @click="goToHotel(chunk.right[0]._id)">
-                  <img
-                    :src="chunk.right[0].IMAGES"
-                    class="card-img big-img"
-                    :alt="chunk.right[0].NAME"
-                  />
-                  <h5 class="card-title">{{ chunk.right[0].NAME }}</h5>
-                </div>
-              </div>
-            </div>
-
-            <!-- Slide thứ ba: 2 ảnh nhỏ từ slide trước, 1 ảnh lớn từ slide trước, 2 ảnh nhỏ mới -->
-            <div v-else-if="chunk.type === 'third'" class="row gx-0">
-              <div class="col-md-4 d-flex flex-column group-card">
-                <div
-                  class="small-card flex-fill"
-                  v-for="(hotel, idx) in chunk.left"
-                  :key="idx"
-                  @click="goToHotel(hotel._id)"
-                >
-                  <img :src="hotel.IMAGES" class="card-img" :alt="hotel.NAME" />
-                  <h5 class="card-title">{{ hotel.NAME }}</h5>
-                </div>
-              </div>
-              <div class="col-md-4 big-card group-card">
-                <div class="big-card" @click="goToHotel(chunk.middle._id)">
-                  <img
-                    :src="chunk.middle.IMAGES"
-                    class="card-img big-img"
-                    :alt="chunk.middle.NAME"
-                  />
-                  <h5 class="card-title">{{ chunk.middle.NAME }}</h5>
-                </div>
-              </div>
-              <div class="col-md-4 d-flex flex-column group-card">
-                <div
-                  class="small-card flex-fill"
-                  v-for="(hotel, idx) in chunk.right"
-                  :key="idx"
-                  @click="goToHotel(hotel._id)"
-                >
-                  <img :src="hotel.IMAGES" class="card-img" :alt="hotel.NAME" />
-                  <h5 class="card-title">{{ hotel.NAME }}</h5>
+            <div class="hotel-grid">
+              <div
+                v-for="hotel in chunk"
+                :key="hotel._id"
+                class="hotel-card"
+                @click="goToHotel(hotel._id)"
+              >
+                <img
+                  :src="hotel.IMAGES[0]"
+                  class="carousel-image"
+                  alt="Hotel Image"
+                />
+                <div class="overlay">
+                  <h2 class="hotel-name">{{ hotel.NAME }}</h2>
+                  <p class="hotel-location">
+                    <i class="fas fa-map-marker-alt"></i>
+                    {{ hotel.ADDRESS.CITY }}
+                  </p>
+                  <div class="rating">
+                    <span
+                      v-for="index in 5"
+                      :key="index"
+                      class="star"
+                      :style="getStarStyle(index, hotel.RATING)"
+                      >⭐</span
+                    >
+                  </div>
                 </div>
               </div>
             </div>
@@ -285,7 +245,7 @@
         <button
           class="carousel-control-prev"
           type="button"
-          data-bs-target="#featuredCarousel"
+          data-bs-target="#hotelCarousel"
           data-bs-slide="prev"
         >
           <span class="carousel-control-prev-icon" aria-hidden="true"></span>
@@ -294,7 +254,7 @@
         <button
           class="carousel-control-next"
           type="button"
-          data-bs-target="#featuredCarousel"
+          data-bs-target="#hotelCarousel"
           data-bs-slide="next"
         >
           <span class="carousel-control-next-icon" aria-hidden="true"></span>
@@ -308,9 +268,9 @@
 <script>
 import axiosClient from "../../../api/axiosClient";
 import { deburr } from "lodash";
-import bannerProduct from "@/assets/bg_1.jpg";
-import bannerProduct1 from "@/assets/bg_2.jpg";
-import bannerProduct2 from "@/assets/bg_3.jpg";
+import bannerProduct from "@/assets/pexels-ernesto-6178937.jpg";
+import bannerProduct1 from "@/assets/pexels-pavel-danilyuk-9119786.jpg";
+import bannerProduct2 from "@/assets/pexels-picasjoe-11363037.jpg";
 import DatePicker from "vue-datepicker-next";
 import "vue-datepicker-next/index.css";
 
@@ -340,6 +300,7 @@ export default {
     };
   },
   mounted() {
+    this.fetchTopBookedHotels();
     this.fetchFeaturedHotels();
     this.fetchHotelNames();
     this.startCarousel();
@@ -348,6 +309,31 @@ export default {
     }
   },
   methods: {
+    async fetchTopBookedHotels() {
+      try {
+        const response = await axiosClient.get("/hotels/getTopBookedHotels"); // API để lấy danh sách khách sạn được đặt nhiều nhất
+        this.topBookedHotels = response.data.data.slice(0, 3); // Chỉ lấy 3 khách sạn hàng đầu
+      } catch (error) {
+        console.error("Lỗi khi lấy khách sạn được đặt nhiều nhất:", error);
+      }
+    },
+    getStarStyle(index, rating) {
+      const isFullStar = index <= Math.floor(rating);
+      const isPartialStar = index === Math.ceil(rating) && !isFullStar;
+
+      if (isFullStar) {
+        return { color: "gold" };
+      } else if (isPartialStar) {
+        const percentage = (rating % 1) * 100 + "%";
+        return {
+          background: `linear-gradient(to right, gold ${percentage}, #ccc ${percentage})`,
+          "-webkit-background-clip": "text",
+          "-webkit-text-fill-color": "transparent",
+        };
+      } else {
+        return { color: "#ccc" };
+      }
+    },
     updateCheckOutMinDate() {
       if (this.checkInDate) {
         // Cập nhật ngày trả phòng phải lớn hơn ngày nhận phòng ít nhất 1 ngày
@@ -371,12 +357,22 @@ export default {
     async fetchFeaturedHotels() {
       try {
         const response = await axiosClient.get("/hotels/getAllHotels");
-        console.log("Dữ liệu khách sạn:", response.data);
         this.featuredHotels = response.data.data;
+        console.log("Dữ liệu khách sạn mới :", this.featuredHotels);
       } catch (error) {
         console.error("Lỗi khi lấy dữ liệu khách sạn:", error);
       }
     },
+
+    // async fetchFeaturedHotels() {
+    //   try {
+    //     const response = await axiosClient.get("/hotels/getAllHotels");
+    //     this.featuredHotels = this.shuffleArray(response.data.data); // Trộn ngẫu nhiên danh sách khách sạn
+    //   } catch (error) {
+    //     console.error("Lỗi khi lấy dữ liệu khách sạn:", error);
+    //   }
+    // },
+
     async fetchHotelNames() {
       try {
         const response = await axiosClient.get("/hotels/getHotelsName");
@@ -449,6 +445,15 @@ export default {
     goToHotel(hotelId) {
       this.$router.push({ name: "HotelDetail", params: { id: hotelId } });
     },
+
+    shuffleArray(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]]; // Đổi chỗ các phần tử
+      }
+      return array;
+    },
+
     async fetchHotelDetails() {
       try {
         const response = await axiosClient.get(
@@ -520,73 +525,12 @@ export default {
   },
   computed: {
     chunkedHotels() {
-      if (
-        !Array.isArray(this.featuredHotels) ||
-        this.featuredHotels.length < 5
-      ) {
-        return [];
-      }
-
+      // Chia danh sách khách sạn đã trộn ngẫu nhiên thành các nhóm 6 khách sạn
+      const chunkSize = 6;
       const chunks = [];
-      let startIndex = 0;
-
-      // Slide đầu tiên: 2 ảnh nhỏ, 1 ảnh lớn, 2 ảnh nhỏ
-      while (startIndex < this.featuredHotels.length) {
-        if (chunks.length === 0) {
-          // Slide đầu tiên
-          const left = this.featuredHotels.slice(startIndex, startIndex + 2); // 2 ảnh nhỏ
-          const middle = this.featuredHotels[startIndex + 2]; // 1 ảnh lớn
-          const right = this.featuredHotels.slice(
-            startIndex + 3,
-            startIndex + 5
-          ); // 2 ảnh nhỏ
-
-          if (left.length === 2 && middle && right.length === 2) {
-            chunks.push({ type: "first", left, middle, right });
-            startIndex += 5; // Đã sử dụng 5 ảnh
-          } else {
-            break;
-          }
-        } else if (chunks.length % 2 !== 0) {
-          // Slide thứ hai: 1 ảnh lớn từ slide trước, 2 ảnh nhỏ từ slide trước, 1 ảnh lớn mới
-          const prevMiddle = chunks[chunks.length - 1].middle; // 1 ảnh lớn từ slide trước
-          const prevRight = chunks[chunks.length - 1].right; // 2 ảnh nhỏ từ slide trước
-          const newMiddle = this.featuredHotels[startIndex]; // 1 ảnh lớn mới
-
-          if (prevMiddle && prevRight.length === 2 && newMiddle) {
-            chunks.push({
-              type: "second",
-              middle: prevMiddle,
-              left: prevRight,
-              right: [newMiddle],
-            });
-            startIndex += 1; // Đã sử dụng thêm 1 ảnh
-          } else {
-            break;
-          }
-        } else {
-          // Slide thứ ba: 2 ảnh nhỏ từ slide trước, 1 ảnh lớn từ slide trước, 2 ảnh nhỏ mới
-          const prevLeft = chunks[chunks.length - 1].left; // 2 ảnh nhỏ từ slide trước
-          const prevMiddle = chunks[chunks.length - 1].right[0]; // 1 ảnh lớn từ slide trước
-          const newRight = this.featuredHotels.slice(
-            startIndex,
-            startIndex + 2
-          ); // 2 ảnh nhỏ mới
-
-          if (prevLeft.length === 2 && prevMiddle && newRight.length === 2) {
-            chunks.push({
-              type: "third",
-              left: prevLeft,
-              middle: prevMiddle,
-              right: newRight,
-            });
-            startIndex += 2; // Đã sử dụng thêm 2 ảnh
-          } else {
-            break;
-          }
-        }
+      for (let i = 0; i < this.featuredHotels.length; i += chunkSize) {
+        chunks.push(this.featuredHotels.slice(i, i + chunkSize));
       }
-
       return chunks;
     },
   },

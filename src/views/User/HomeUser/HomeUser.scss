@@ -159,110 +159,119 @@
 
 
 /* CSS cho khách sạn nổi bật */
-.featured-hotels .carousel-item {
-  cursor: pointer;
-}
-
-/* Thiết lập chung cho ảnh nhỏ và ảnh lớn */
-.small-card, .big-card {
-  overflow: hidden;
+.hotel-carousel-container {
   position: relative;
-}
-
-.small-card{
-  margin: 0;
-  background-color: #f9f9f9;
-  text-align: center;
-  position: relative;
-}
-
-.small-card {
-  flex: 1;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  height: 50%; /* Set height to 50% to make them of equal height */
-  max-height: 50%; /* Ensure the height does not exceed half of the total height */
-}
-
-
-.card-img {
   width: 100%;
-  height: 100%;
-  object-fit: cover; /* Cover the entire space without distortion */
+  max-width: 1200px;
+  margin: auto;
+  padding: 20px;
 }
 
-
-
-.big-img {
-  height: 100%;
-  object-fit: cover;
-}
-
-.row.gx-0 {
-  row-gap: 0; /* Eliminate row gaps */
-}
-
-.col-md-4.d-flex {
-  display: flex;
-  flex-direction: column;
-  gap: 0; /* Ensure no gaps between small cards */
-  height: 100%; /* Set full height to match the height of the big card */
-}
-
-
-.big-card{
-  height: 560px;
-  position: relative;
+.section-title {
   text-align: center;
-  margin-top: 2px;
-}
-.col-md-4 .small-card,
-.col-md-4 .big-card {
-  flex: 1; /* Allow the items to take equal space */
-}
-
-.col-md-4:first-child .small-card,
-.col-md-4:last-child .small-card {
-  height: 50%; 
-}
-
-.col-md-4 .big-card {
-  height: 100%;
-}
-
-.card-title {
-  font-size: 18px;
+  font-size: 2.5rem;
   font-weight: bold;
-  color: white;
+  color: #333;
+  margin-bottom: 40px;
+  position: relative;
+  color: #6d4c41; /* Nâu sang trọng */
+  background: linear-gradient(to right, #6d4c41, #7274FF); /* Gradient từ nâu sang tím */
+  -webkit-background-clip: text;
+  color: transparent; /* Chỉ hiển thị gradient bên trong chữ */
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); 
+}
+
+.section-title::after {
+  content: "";
   position: absolute;
-  bottom: 10px;
+  bottom: -10px;
   left: 50%;
   transform: translateX(-50%);
-  background: rgba(0, 0, 0, 0.5);
-  padding: 5px 10px;
-  border-radius: 5px;
+  width: 150px;
+  height: 3px;
+  background-color: #6d4c41; /* Dải màu nâu bên dưới */
+  border-radius: 2px;
+}
+
+.hotel-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* 3 cột đều nhau trong mỗi slide */
+  gap: 20px; /* Khoảng cách giữa các mục */
+}
+
+.hotel-card {
+  position: relative;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+  overflow: hidden;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.hotel-card:hover {
+  transform: scale(1.02);
+}
+
+.carousel-image {
+  width: 100%;
+  height: 300px;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+.overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  color: white;
+  background: rgba(0, 0, 0, 0.6);
+  padding: 15px;
+  border-radius: 0 0 10px 10px;
+}
+
+.hotel-name {
+  font-size: 1.2rem;
+  font-weight: bold;
   margin: 0;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
 }
 
-h2.text-center {
-  margin-bottom: 30px;
-  margin-top: 50px;
-  color: #6d4c41;
-  font-family: "Lato";
-    font-weight: 300;
-    font-size: 40px;
-    line-height: 48px;
-    text-transform: uppercase;
-}
-.group-card{
-  padding: 0 5px;
-}
-.small-card {
-  padding: 5px 0;
+.hotel-location {
+  font-size: 1rem;
+  margin: 5px 0;
 }
 
+.rating .star {
+  font-size: 1.2rem;
+  margin-right: 2px;
+}
+
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+  background-color: rgba(0, 0, 0, 0.5);
+  border-radius: 50%;
+}
+
+.carousel-control-prev-icon:after,
+.carousel-control-next-icon:after {
+  color: #fff;
+  font-size: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .hotel-grid {
+    grid-template-columns: 1fr; 
+  }
+  .carousel-image {
+    height: 250px;
+  }
+  .hotel-name {
+    font-size: 1.2rem;
+  }
+  .hotel-location {
+    font-size: 0.9rem;
+  }
+}
 /* Style cho gợi ý tìm kiếm */
 .suggestions-list {
   list-style-type: none;
@@ -274,8 +283,8 @@ h2.text-center {
   position: absolute;
   background: #fff;
   width: 16%;
-  z-index: 1000; /* Tăng z-index để đảm bảo nằm trên cùng */
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Thêm đổ bóng để nổi bật */
+  z-index: 1000;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); 
   top: 92px; 
 }
 
@@ -289,7 +298,7 @@ h2.text-center {
 }
 
 .group-card, .product-page, .carousel {
-  position: relative; /* Đảm bảo không thiết lập overflow hidden nếu không cần thiết */
+  position: relative;
 }
 
 .error-message {
@@ -368,4 +377,79 @@ h2.text-center {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+.highlighted-hotels {
+  padding: 40px;
+  text-align: center;
+  background-color: #f9f9f9;
+}
+
+
+
+.hotel-card {
+  position: relative;
+  height: 250px;
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.hotel-card:hover {
+  transform: translateY(-5px);
+}
+
+.hotel-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-size: cover;
+  background-position: center;
+  filter: blur(8px);
+  z-index: 1;
+  opacity: 0.7;
+}
+
+.hotel-info-card {
+  position: relative;
+  z-index: 2;
+  margin: 0 auto;
+  border-radius: 8px;
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  transform: translateY(29%);
+}
+
+.hotel-thumbnail {
+  width: 50%;
+  height: 120px; /* Tăng chiều cao để hình ảnh lớn hơn */
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Thêm bóng mờ */
+  border: 2px solid rgba(255, 255, 255, 0.8); /* Đường viền trắng mờ */
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.hotel-thumbnail:hover {
+  transform: scale(1.05); /* Phóng to nhẹ khi di chuột vào */
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3); /* Tăng bóng mờ khi hover */
+}
+
+.hotel-name {
+  font-size: 16px;
+  color: #fff;
+  margin: 5px 0;
+}
+
+.star {
+  font-size: 14px;
+}
+
+.rating-value {
+  font-size: 14px;
+  color: #7274ff;
 }

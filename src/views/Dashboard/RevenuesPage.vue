@@ -1,6 +1,6 @@
 <template>
   <AdminLayout>
-    <!-- Card Tổng Doanh Thu nằm riêng ở trên cùng -->
+    <!-- Card Tổng Doanh Thu -->
     <section class="total-revenue-section">
       <div class="stat-card total-revenue-card">
         <h3>Tổng Doanh Thu</h3>
@@ -12,7 +12,7 @@
     <section class="hotel-revenue-section">
       <div
         v-for="hotel in hotelRevenues"
-        :key="hotel.hotel"
+        :key="hotel.hotelId"
         class="stat-card hotel-revenue-card"
       >
         <h3>{{ hotel.hotelName }}</h3>
@@ -31,7 +31,7 @@ export default {
     return {
       totalRevenue: 0,
       hotelRevenues: [],
-      currentMonth: new Date().getMonth() + 1, // Tháng hiện tại
+      currentMonth: new Date().getMonth() + 1, // Tháng hiện tại (1-12)
     };
   },
   computed: {
@@ -50,8 +50,8 @@ export default {
     },
     async fetchRevenueData() {
       try {
-        const response = await axiosClient.get("/bookings/getMonthlyRevenue", {
-          params: { year: new Date().getFullYear() },
+        const response = await axiosClient.get("/bookings/getRevenue", {
+          params: { timeFrame: "month", selectedYear: new Date().getFullYear() },
         });
 
         if (response.data) {
