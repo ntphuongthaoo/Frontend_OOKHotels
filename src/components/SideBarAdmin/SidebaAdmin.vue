@@ -8,44 +8,58 @@
     <!-- Danh sách điều hướng -->
     <nav>
       <ul>
-        <li 
-          :class="{ active: activePage === 'dashboard' }" 
+        <li
+          :class="{ active: activePage === 'dashboard' }"
           @click="navigate('dashboard')"
         >
           <i class="fas fa-tachometer-alt"></i>
           <span>Tổng quan</span>
         </li>
 
-        <li 
-          :class="{ active: activePage === 'hotels' }" 
+        <li
+          :class="{ active: activePage === 'hotels' }"
           @click="navigate('hotels')"
         >
-          <i class="fas fa-hotel"></i> 
+          <i class="fas fa-hotel"></i>
           <span>Khách Sạn</span>
         </li>
 
-        <li 
-          :class="{ active: activePage === 'bookings' }" 
+        <li
+          :class="{ active: activePage === 'bookings' }"
           @click="navigate('bookings')"
         >
-          <i class="fas fa-book"></i> 
+          <i class="fas fa-book"></i>
           <span>Đặt Phòng</span>
         </li>
 
-        <li 
-          :class="{ active: activePage === 'revenue' }" 
+        <li
+          :class="{ active: activePage === 'revenue' }"
           @click="navigate('revenue')"
         >
-          <i class="fas fa-chart-line"></i> 
+          <i class="fas fa-chart-line"></i>
           <span>Doanh Thu</span>
         </li>
 
-        <li 
-          :class="{ active: activePage === 'users' }" 
+        <li
+          :class="{ active: activePage === 'users' }"
           @click="navigate('users')"
         >
-          <i class="fas fa-users"></i> 
+          <i class="fas fa-users"></i>
           <span>Người Dùng</span>
+        </li>
+        <li
+          :class="{ active: activePage === 'reviews' }"
+          @click="navigate('reviews')"
+        >
+          <i class="fa fa-star" aria-hidden="true"></i>
+          <span>Đánh giá</span>
+        </li>
+        <li
+          :class="{ active: activePage === 'chats' }"
+          @click="navigate('chats')"
+        >
+          <i class="fa fa-comments" aria-hidden="true"></i>
+          <span>CSKH</span>
         </li>
 
         <li class="logout" @click="logout">
@@ -58,7 +72,7 @@
 </template>
 
 <script>
-import { mapActions } from 'vuex';
+import { mapActions } from "vuex";
 export default {
   name: "Sidebar",
   props: {
@@ -69,17 +83,17 @@ export default {
   },
   mounted() {
     // Lấy trang hoạt động từ localStorage
-    const storedPage = localStorage.getItem('activePage');
+    const storedPage = localStorage.getItem("activePage");
     if (storedPage) {
-      this.$emit('navigate', storedPage); // Emit để điều hướng nếu có trang lưu trữ
+      this.$emit("navigate", storedPage); // Emit để điều hướng nếu có trang lưu trữ
     }
   },
   methods: {
     ...mapActions(["logout"]),
     navigate(page) {
-      this.$emit('navigate', page); // Emit sự kiện để điều hướng
+      this.$emit("navigate", page); // Emit sự kiện để điều hướng
       this.$router.push({ name: page }); // Điều hướng router
-      localStorage.setItem('activePage', page); // Lưu trang đang hoạt động vào localStorage
+      localStorage.setItem("activePage", page); // Lưu trang đang hoạt động vào localStorage
     },
   },
 };
@@ -89,7 +103,7 @@ export default {
 .sidebar {
   width: 250px;
   background-color: #f0f2f5; /* Nền màu xám sáng */
-  color: #7274FF; /* Màu chữ chính */
+  color: #7274ff; /* Màu chữ chính */
   height: 100vh;
   position: fixed;
   left: 0;
@@ -106,13 +120,13 @@ export default {
   text-align: center;
   font-weight: bold;
   font-size: 24px;
-  color: #7274FF;
+  color: #7274ff;
   border-bottom: 1px solid #d3d4e5;
 }
 
 .sidebar-header h2 {
   margin: 0;
-  font-family: 'Poppins', sans-serif;
+  font-family: "Poppins", sans-serif;
 }
 
 .sidebar nav ul {
@@ -129,7 +143,7 @@ export default {
   cursor: pointer;
   display: flex;
   align-items: center;
-  color: #7274FF;
+  color: #7274ff;
   font-size: 16px;
   transition: all 0.3s ease;
   border-left: 4px solid transparent;
@@ -137,7 +151,7 @@ export default {
 
 .sidebar nav ul li:hover {
   color: #ffffff; /* Màu chữ khi hover */
-  background-color: #7274FF; /* Màu nền khi hover */
+  background-color: #7274ff; /* Màu nền khi hover */
   border-left: 4px solid #ffffff; /* Đường viền trái trắng khi hover */
 }
 

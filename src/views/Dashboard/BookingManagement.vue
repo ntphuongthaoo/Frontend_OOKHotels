@@ -60,13 +60,32 @@
           </td>
           <td>
             <button @click="viewBookingDetails(booking)">Xem chi tiết</button>
-            <button
-              v-if="booking.STATUS !== 'Canceled'"
-              @click="cancelBooking(booking._id)"
-            >
-              Hủy đặt phòng
+            <button @click="toggleStatusModal(booking)">
+              Cập nhật trạng thái
             </button>
           </td>
+
+          <div v-if="isUpdateModalOpen" class="status-modal-overlay">
+            <div class="status-modal-content">
+              <h2>Cập Nhật Trạng Thái Đặt Phòng</h2>
+              <select v-model="newStatus" class="status-select">
+                <option value="CheckedIn">Đã nhận phòng</option>
+                <option value="CheckedOut">Đã trả phòng</option>
+                <option value="Canceled">Đã hủy</option>
+              </select>
+              <div class="modal-footer">
+                <button
+                  class="update-button"
+                  @click="updateBookingStatus(selectedBooking)"
+                >
+                  Xác nhận
+                </button>
+                <button class="close-button" @click="closeUpdateModal">
+                  Hủy bỏ
+                </button>
+              </div>
+            </div>
+          </div>
         </tr>
       </tbody>
     </table>
@@ -181,6 +200,8 @@ export default {
       currentPage: 1,
       pageSize: 10,
       totalPages: 0,
+      isUpdateModalOpen: false,
+      newStatus: "",
     };
   },
   computed: {
@@ -250,38 +271,32 @@ export default {
         console.error("Error fetching hotels:", error);
       }
     },
-    async cancelBooking(bookingId) {
-      // Hiển thị hộp thoại xác nhận
-      const result = await Swal.fire({
-        title: "Xác nhận",
-        text: "Bạn có chắc chắn muốn hủy đặt phòng này không?",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonColor: "#d33",
-        cancelButtonColor: "#3085d6",
-        confirmButtonText: "Có, hủy đặt phòng!",
-        cancelButtonText: "Không",
-      });
-
-      // Nếu người dùng xác nhận hủy đặt phòng
-      if (result.isConfirmed) {
-        try {
-          // Gửi yêu cầu hủy đặt phòng
-          const response = await axiosClient.put(`/bookings/cancelBooking/${bookingId}`);
-          
-          if (response.data.success) {
-            Swal.fire("Thành công", "Đặt phòng đã được hủy thành công.", "success");
-
-            // Cập nhật danh sách đặt phòng sau khi hủy
-            this.fetchBookings();
-          } else {
-            Swal.fire("Lỗi", response.data.message || "Không thể hủy đặt phòng.", "error");
-          }
-        } catch (error) {
-          Swal.fire("Lỗi", "Không thể kết nối đến server.", "error");
-          console.error("Lỗi khi hủy đặt phòng:", error);
+    toggleStatusModal(booking) {
+      this.selectedBooking = booking;
+      this.newStatus = booking.STATUS; // Lưu trạng thái hiện tại
+      this.isUpdateModalOpen = true;
+    },
+    closeUpdateModal() {
+      this.isUpdateModalOpen = false;
+      this.selectedBooking = null;
+    },
+    async updateBookingStatus(booking) {
+      if (!this.newStatus) return; // Nếu không chọn trạng thái, không làm gì
+      try {
+        const response = await axiosClient.put(
+          `/bookings/updateStatus/${booking._id}`,
+          { status: this.newStatus }
+        );
+        if (response.data.success) {
+          Swal.fire("Thành công", "Trạng thái đã được cập nhật.", "success");
+          this.fetchBookings();
+        } else {
+          Swal.fire("Lỗi", "Không thể cập nhật trạng thái.", "error");
         }
+      } catch (error) {
+        Swal.fire("Lỗi", "Không thể kết nối đến server.", "error");
       }
+      this.closeUpdateModal();
     },
     handleFilter() {
       // Nếu là admin, cho phép chọn bất kỳ khách sạn nào
@@ -589,7 +604,126 @@ button:hover {
   margin-top: 20px;
 }
 
-.close-button:hover {
-  background-color: #5b5ed7;
+/* Nền overlay với hiệu ứng sáng nhẹ */
+.status-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  backdrop-filter: blur(1px); /* Làm mờ nền phía sau */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
 }
+
+/* Nội dung modal với thiết kế sang trọng */
+.status-modal-content {
+  background: linear-gradient(145deg, #ffffff, #f8f8f8); /* Gradient sáng */
+  border-radius: 15px;
+  padding: 30px;
+  width: 400px;
+  max-width: 90%;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15); /* Bóng mềm mại */
+  text-align: center;
+  animation: fadeIn 0.4s ease; /* Hiệu ứng mờ dần */
+}
+
+/* Tiêu đề modal */
+.status-modal-content h2 {
+  font-size: 1.6rem;
+  color: #333;
+  font-weight: 600;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #7274ff;
+  padding-bottom: 10px;
+}
+
+/* Các lựa chọn trạng thái */
+.status-options label {
+  display: flex;
+  align-items: center;
+  margin: 12px 0;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #555;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+  transition: background-color 0.3s;
+}
+
+.status-options label:hover {
+  background-color: #f1f3f5;
+}
+
+.status-options input[type="radio"] {
+  margin-right: 10px;
+  accent-color: #7274ff; /* Màu cho radio button */
+}
+
+/* Nút cập nhật và đóng */
+.update-button,
+.close-button {
+  padding: 12px 28px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.3s;
+  margin: 10px 5px;
+}
+
+/* Nút cập nhật */
+.update-button {
+  background: linear-gradient(145deg, #7274ff, #5a5ccf); /* Gradient */
+  color: white;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Bóng nhẹ */
+  transition: background 0.3s ease; /* Thêm transition cho nền */
+}
+
+.update-button:hover {
+  background: linear-gradient(145deg, #6d4c41, #5a3e36); /* Chuyển màu gradient khi hover */
+}
+
+
+.status-select {
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  width: 100%;
+  margin-bottom: 20px;
+  font-size: 1rem;
+  color: #555;
+  background-color: #f9f9f9;
+  transition: background-color 0.3s;
+}
+
+.status-select:hover {
+  background-color: #f0f0f0;
+}
+
+/* Nút đóng */
+.close-button {
+  background-color: #e0e0e0;
+  color: #333;
+}
+
+.close-button:hover {
+  background-color: #b0b0b0;
+}
+
+/* Hiệu ứng mở modal */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
 </style>

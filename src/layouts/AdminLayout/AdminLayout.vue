@@ -39,6 +39,8 @@ export default {
           return "Quản lý doanh thu";
         case "users":
           return "Quản lý người dùng";
+        case "reviews":
+          return "Quản lý đánh giá";
         default:
           return "Dashboard quản lý";
       }

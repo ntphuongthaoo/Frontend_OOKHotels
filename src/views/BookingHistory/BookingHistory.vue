@@ -122,12 +122,17 @@
                 {{ new Date(room.END_DATE).toLocaleDateString() }}
               </p>
 
-              <!-- Hiển thị nút đánh giá nếu ngày trả phòng đã đến -->
-              <div v-if="new Date(room.END_DATE) <= new Date() && booking.STATUS === 'Booked'">
-                <button @click="openReviewModal(room, booking._id)">
-                  Đánh giá
-                </button>
-              </div>
+              <button v-if="room.hasReview" @click="viewReview(room, booking._id)">
+                Xem đánh giá
+              </button>
+
+              <!-- Hiển thị nút Đánh giá nếu chưa có đánh giá và ngày trả phòng đã đến -->
+              <button
+                v-else-if="new Date(room.END_DATE) <= new Date()"
+                @click="openReviewModal(room, booking._id)"
+              >
+                Đánh giá
+              </button>
             </div>
           </div>
         </div>
@@ -215,6 +220,14 @@ export default {
     this.checkPaymentStatus();
   },
   methods: {
+    viewReview(room, bookingId) {
+      this.$router.push({
+        name: "RoomDetail",
+        params: { id: room.ROOM_ID._id },
+        query: { roomId: room.ROOM_ID._id, bookingId: bookingId },
+      });
+    },
+
     async fetchBookings() {
       try {
         const response = await axiosClient.get("/bookings/getBookingHistory");
@@ -223,6 +236,36 @@ export default {
             return new Date(b.createdAt) - new Date(a.createdAt);
           });
 
+          // Mảng promises để chứa tất cả các yêu cầu kiểm tra đánh giá
+          const reviewPromises = [];
+
+          // Duyệt qua từng phòng và tạo yêu cầu kiểm tra đánh giá
+          for (const booking of this.bookings) {
+            for (const hotel of booking.hotels) {
+              for (const room of hotel.rooms) {
+                const reviewPromise = axiosClient
+                  .post("/reviews/getReviewByUserAndRoom", {
+                    roomId: room.ROOM_ID._id,
+                    bookingId: booking._id,
+                  })
+                  .then((reviewResponse) => {
+                    room.hasReview =
+                      reviewResponse.data.success && reviewResponse.data.review
+                        ? true
+                        : false;
+                  })
+                  .catch((error) => {
+                    console.error("Lỗi khi kiểm tra đánh giá:", error);
+                    room.hasReview = false;
+                  });
+                reviewPromises.push(reviewPromise);
+              }
+            }
+          }
+
+          // Chờ tất cả các yêu cầu kiểm tra đánh giá hoàn tất
+          await Promise.all(reviewPromises);
+
           // Thiết lập thời gian thanh toán cho mỗi đơn đặt phòng
           this.bookings.forEach((booking) => {
             // Kiểm tra xem CREATED_AT có tồn tại và không null
@@ -230,11 +273,6 @@ export default {
               // Chuyển đổi createdAt thành đối tượng Date
               const createdAt = new Date(booking.createdAt).getTime(); // Lưu ý: đã chuyển đổi đúng
               const currentTime = new Date().getTime();
-
-              // Debugging
-              console.log("Created At:", createdAt);
-              console.log("Current Time:", currentTime);
-              console.log("Time Difference:", currentTime - createdAt);
 
               // Kiểm tra nếu đã qua 20 phút (1200000 milliseconds)
               if (currentTime - createdAt > 20 * 60 * 1000) {
@@ -336,7 +374,6 @@ export default {
       this.review.room = room;
       this.review.bookingId = bookingId; // Gán bookingId khi mở modal đánh giá
       this.review.roomId = room.ROOM_ID._id; // Sử dụng ROOM_ID từ LIST_ROOMS
-      this.review.editing = false; // Reset chế độ chỉnh sửa
       this.showReviewModal = true;
       this.review.rating = null;
       this.review.comment = "";
@@ -374,6 +411,9 @@ export default {
           this.review.rating = reviewData.RATING;
           this.review.comment = reviewData.COMMENT;
           this.review.editing = true; // Bật chế độ chỉnh sửa nếu đã có đánh giá
+          this.review.exists = true;
+        } else {
+          this.review.exists = false;
         }
       } catch (error) {
         console.error("Lỗi khi kiểm tra đánh giá:", error);

@@ -30,7 +30,7 @@ import HotelDetailDashboard from '../views/Dashboard/HotelDetailDashboard.vue'
 import BookingManagement from '../views/Dashboard/BookingManagement.vue'
 import UserManagement from '../views/Dashboard/UserManagement.vue'
 import RevenuesPage from '../views/Dashboard/RevenuesPage.vue'
-// Page Organization
+import ReviewsManagement from '../views/Dashboard/ReviewsManagement.vue'
 import store from "@/store"
  
 
@@ -45,6 +45,7 @@ const routes = [
 	},
 	{
 		path: "/chat",
+		name: "chats",
 		component: Chat,
 		meta: {
 		  layout: ChatLayout,
@@ -193,6 +194,15 @@ const routes = [
 		path: "/dashboard/revenues",
 		name: "revenue",
 		component: RevenuesPage,
+		meta: {
+			layout: AdminLayout,
+		},
+		props: true,
+	},
+	{
+		path: "/dashboard/reviews",
+		name: "reviews",
+		component: ReviewsManagement,
 		meta: {
 			layout: AdminLayout,
 		},
