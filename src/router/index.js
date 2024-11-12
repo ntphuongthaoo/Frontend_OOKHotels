@@ -17,6 +17,7 @@ import CartPage from '../views/Cart/CartPage.vue'
 import PaymentPage from '../views/Payment/PaymentPage.vue'
 import BookingHistory from '../views/BookingHistory/BookingHistory.vue'
 import RoomDetail from '../views/RoomDetail/RoomDetail.vue'
+import AllVouchersPage from '../views/Voucher/AllVouchersPage.vue'
 
 import ChatLayout from '../layouts/ChatLayout/ChatLayout.vue'
 import Chat from '../components/Chat/Chat.vue'
@@ -80,8 +81,9 @@ const routes = [
 		}
 	},
 	{
-		path: "/danh-sach-khach-san",
-		component: ListHotels,
+		path: "/vouchers",
+		name: "AllVouchersPage",
+		component: AllVouchersPage,
 		meta: {
 			layout: UserLayout,
 		}

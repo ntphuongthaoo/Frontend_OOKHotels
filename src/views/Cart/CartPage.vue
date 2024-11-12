@@ -679,13 +679,16 @@ export default {
           if (room.isSelected) {
             selectedRooms.push({
               roomId: room.ROOM_ID,
+              hotelId: hotel.HOTEL_ID, // Thêm hotelId ở đây
               startDate: room.startDate,
               endDate: room.endDate,
               pricePerNight: room.pricePerNight,
               totalPrice: room.totalPrice,
               roomNumber: room.roomNumber,
-              people: room.people,
               hotelName: hotel.HOTEL_NAME,
+              type: room.type || room.TYPE,
+              bedType: room.CUSTOM_ATTRIBUTES?.bedType || "",
+              number_of_people: room.CUSTOM_ATTRIBUTES?.number_of_people || 1,
             });
           }
         });
@@ -696,6 +699,7 @@ export default {
 
     async checkout() {
       const selectedRooms = this.getSelectedRooms();
+      console.log("Dữ liệu phòng đã chọn:", selectedRooms); // Kiểm tra dữ liệu
 
       this.$store.commit("SET_SELECTEDROOMS_CART", selectedRooms);
 

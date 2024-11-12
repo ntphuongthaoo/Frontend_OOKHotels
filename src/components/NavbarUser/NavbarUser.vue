@@ -27,7 +27,7 @@
                   <a class="nav-link" href="/booking-history">Lịch sử</a>
                 </li>
                 <li class="nav-item">
-                  <a class="nav-link" href="gallery.html">Vị Trí</a>
+                  <a class="nav-link" href="/vouchers">Khuyến Mãi</a>
                 </li>
 
                 <li class="nav-item">

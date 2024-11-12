@@ -96,21 +96,25 @@
         <!-- Danh sách phòng -->
         <div v-if="selectedRooms && selectedRooms.length > 0">
           <div
-            v-for="(room, index) in selectedRooms"
+            v-for="(room, index) in formattedRooms"
             :key="index"
             class="room-section"
           >
             <p class="hotel-name-booking">{{ room.hotelName }}</p>
             <p class="time">
-              {{ formatDate(room.startDate) }} -
-              {{ formatDate(room.endDate) }} (
-              {{ calculateTotalDays(room.startDate, room.endDate) }} ngày,
+              Nhận phòng: Từ 14h00 {{ room.formattedStartDate }}<br />
+              Trả phòng: 12h00 {{ room.formattedEndDate }}<br />
+              ({{ calculateTotalDays(room.startDate, room.endDate) }} ngày,
               {{ calculateNights(room.startDate, room.endDate) }} đêm)
             </p>
             <h4>Thông tin phòng</h4>
             <p>
-              <b>Phòng:</b> {{ room.type }} - Số phòng: {{ room.roomNumber }}
+              <b>Phòng:</b> {{ room.type }} 
             </p>
+            <p>
+              <b>Số phòng:</b> {{ room.roomNumber }}              
+            </p>
+            <p><b>Số người:</b> {{ room.number_of_people }}</p>
             <div class="price-cancle">
               <p class="price">
                 {{ room.pricePerNight.toLocaleString() }} VND / đêm
@@ -124,8 +128,11 @@
         <div v-else-if="selectedRoom">
           <p class="hotel-name-booking">{{ hotel.NAME }}</p>
           <p class="time">
-            {{ formattedStartDate }} - {{ formattedEndDate }} (
-            {{
+            Nhận phòng: Từ 14h00 {{ formatCheckInDate(bookingDetails.startDate)
+            }}<br />
+            Trả phòng: 12h00 {{ formatCheckOutDate(bookingDetails.endDate)
+            }}<br />
+            ({{
               calculateTotalDays(
                 bookingDetails.startDate,
                 bookingDetails.endDate
@@ -137,6 +144,7 @@
             }}
             đêm)
           </p>
+
           <h4>Thông tin phòng</h4>
           <p>
             <b>Phòng:</b> {{ selectedRoom.TYPE }}
@@ -149,9 +157,41 @@
           </div>
         </div>
 
+        <!-- Áp dụng mã voucher -->
+        <div class="form-group voucher">
+          <label for="voucherCode">Mã khuyến mãi</label>
+          <div class="input-group">
+            <input
+              id="voucherCode"
+              type="text"
+              v-model="voucherCode"
+              class="form-control"
+              placeholder="Nhập mã khuyến mãi"
+            />
+            <button @click="applyVoucher" class="apply-voucher-btn">
+              Áp dụng
+            </button>
+          </div>
+          <div v-if="voucherMessage" class="voucher-feedback">
+            {{ voucherMessage }}
+          </div>
+        </div>
+
         <div class="total-info-book">
+          <div>Tổng tiền phòng:</div>
+          <div>{{ totalPrice.toLocaleString() }} VNĐ</div>
+        </div>
+
+        <div class="voucher-info-book" v-if="voucherDiscount > 0">
+          <div>Giảm giá mã {{ voucherCode }}:</div>
+          <div>-{{ voucherDiscount.toLocaleString() }} VNĐ</div>
+        </div>
+
+        <div class="total-info-book final">
           <div>Tổng cộng:</div>
-          <div class="total-book">{{ totalPrice.toLocaleString() }} VNĐ</div>
+          <div class="total-book">
+            {{ finalTotalPrice.toLocaleString() }} VNĐ
+          </div>
         </div>
 
         <!-- Nút xác nhận thanh toán -->
@@ -186,10 +226,17 @@ export default {
         customerPhone: "",
         citizenId: "",
       },
+      voucherCode: "", // Mã giảm giá
+      voucherDiscount: 0,
+      voucherMessage: "",
     };
   },
   created() {
     this.selectedRooms = this.$store.getters.getSelectedRoomsCart;
+    console.log(
+      "Dữ liệu phòng từ Store trong PaymentPage:",
+      this.selectedRooms
+    );
     this.bookingDetails = this.$store.getters.getBookingDetails;
 
     // Kiểm tra nếu không có phòng nào được chọn
@@ -210,6 +257,18 @@ export default {
     }
   },
   computed: {
+    selectedRooms() {
+      return this.$store.getters.getSelectedRoomsCart;
+    },
+    formattedRooms() {
+      return this.selectedRooms.map((room) => ({
+        ...room,
+        formattedStartDate: this.formatDate(room.startDate),
+        formattedEndDate: this.formatDate(room.endDate),
+        totalDays: this.calculateTotalDays(room.startDate, room.endDate),
+        nights: this.calculateNights(room.startDate, room.endDate),
+      }));
+    },
     bookingDetails() {
       const details = this.$store.getters.getBookingDetails;
       console.log("Dữ liệu từ Vuex Store trong PaymentPage:", details);
@@ -246,17 +305,14 @@ export default {
       return this.nightsCount + 1;
     },
     totalPrice() {
+      // Tính tổng tiền trước khi áp dụng voucher
       let total = 0;
-
-      // Tính tổng giá cho các phòng từ selectedRooms (giỏ hàng)
       if (this.selectedRooms.length > 0) {
         total += this.selectedRooms.reduce((sum, room) => {
           const nights = this.calculateNights(room.startDate, room.endDate);
           return sum + room.pricePerNight * nights;
         }, 0);
       }
-
-      // Tính tổng giá cho phòng đặt ngay từ bookingDetails
       if (this.selectedRoom && this.selectedRoom._id) {
         const nights = this.calculateNights(
           this.bookingDetails.startDate,
@@ -264,12 +320,14 @@ export default {
         );
         total += this.selectedRoom.PRICE_PERNIGHT * nights;
       }
-
       if (this.airportPickup) {
         total += this.airportPickupPrice;
       }
-
-      return total;
+      return total; // Tổng tiền chưa áp dụng voucher
+    },
+    finalTotalPrice() {
+      // Tính tổng cộng sau khi áp dụng voucher
+      return this.totalPrice - this.voucherDiscount;
     },
     isLoggedIn() {
       return this.$store.getters.isLoggedIn;
@@ -277,26 +335,102 @@ export default {
   },
 
   methods: {
+    async applyVoucher() {
+      if (!this.voucherCode) {
+        this.voucherMessage = "Vui lòng nhập mã khuyến mãi.";
+        return;
+      }
+
+      let totalNights = 0;
+
+      // Kiểm tra nếu có nhiều phòng được chọn từ giỏ hàng
+      if (this.selectedRooms && this.selectedRooms.length > 0) {
+        // Tính tổng số đêm cho từng phòng trong giỏ hàng
+        totalNights = this.selectedRooms.reduce((sum, room) => {
+          const nights = this.calculateNights(room.startDate, room.endDate);
+          return sum + nights;
+        }, 0);
+      } else if (
+        this.bookingDetails &&
+        this.bookingDetails.startDate &&
+        this.bookingDetails.endDate
+      ) {
+        // Trường hợp đặt một phòng từ RoomDetail hoặc Booking
+        totalNights = this.calculateNights(
+          this.bookingDetails.startDate,
+          this.bookingDetails.endDate
+        );
+      }
+
+      // Tạo đối tượng `bookingDetails` để gửi đi với tổng số đêm chính xác
+      const bookingDetails = {
+        nights: totalNights,
+        totalPrice: this.totalPrice,
+        roomType: this.selectedRoom.TYPE,
+        hotelId: this.hotel._id,
+      };
+
+      try {
+        const response = await axiosClient.post("/vouchers/apply", {
+          code: this.voucherCode,
+          bookingDetails,
+        });
+        if (response.data && response.data.discountAmount) {
+          this.voucherDiscount = response.data.discountAmount;
+          this.voucherMessage = "Voucher áp dụng thành công!";
+        }
+      } catch (error) {
+        console.error("Error:", error.response?.data?.error || error.message);
+        this.voucherMessage =
+          error.response?.data?.error || "Lỗi khi áp dụng voucher.";
+      }
+    },
+
     updateTotalPrice() {
       // Chỉ cần tính lại tổng giá khi có sự thay đổi trong dịch vụ đưa rước sân bay
       this.totalPrice = this.totalPrice; // Kích hoạt tính toán lại computed property
     },
+    formatCheckInDate(date) {
+      const d = new Date(date);
+      const dayOfWeek = d.toLocaleDateString("vi-VN", { weekday: "long" });
+      const formattedDate = d.toLocaleDateString("vi-VN");
+      return `${dayOfWeek}, ${formattedDate}`;
+    },
+
+    // Định dạng ngày trả phòng
+    formatCheckOutDate(date) {
+      const d = new Date(date);
+      const dayOfWeek = d.toLocaleDateString("vi-VN", { weekday: "long" });
+      const formattedDate = d.toLocaleDateString("vi-VN");
+      return `${dayOfWeek}, ${formattedDate}`;
+    },
     calculateTotalDays(startDate, endDate) {
       const start = new Date(startDate);
       const end = new Date(endDate);
-      // Thêm 1 vào kết quả để tính luôn ngày bắt đầu
-      return Math.floor((end - start) / (1000 * 60 * 60 * 24)) + 1;
+      return Math.floor((end - start) / (1000 * 60 * 60 * 24)) + 1; // Tính cả ngày bắt đầu và ngày kết thúc
+    },
+    // calculateNights(startDate, endDate) {
+    //   return this.calculateTotalDays(startDate, endDate) - 1; // Đêm = ngày - 1
+    // },
+    calculateNights(startDate, endDate) {
+      if (!startDate || !endDate) return 0; // Trường hợp không có ngày bắt đầu/kết thúc
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+      return Math.max(0, Math.floor((end - start) / (1000 * 60 * 60 * 24))); // Tính số đêm
     },
 
-    calculateNights(startDate, endDate) {
-      const totalDays = this.calculateTotalDays(startDate, endDate);
-      // Số đêm sẽ là số ngày trừ đi 1
-      return totalDays - 1;
-    },
+    // formatDate(date) {
+    //   const d = new Date(date);
+    //   return d.toLocaleDateString();
+    // },
 
     formatDate(date) {
       const d = new Date(date);
-      return d.toLocaleDateString();
+      return d.toLocaleDateString("vi-VN", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      });
     },
 
     validateInput() {
@@ -331,12 +465,13 @@ export default {
 
       this.validateInput();
 
+      // Nếu có lỗi, dừng lại và hiển thị lỗi
       if (
         this.errors.customerName ||
         this.errors.customerPhone ||
         this.errors.citizenId
       ) {
-        return; // Dừng lại nếu có lỗi
+        return; // Không tiếp tục nếu có lỗi
       }
 
       if (!this.selectedRoom && this.selectedRooms.length === 0) {
@@ -350,40 +485,37 @@ export default {
 
       if (this.selectedRooms.length > 0) {
         paymentData = {
-          roomsDetails: this.selectedRooms.map((room) => {
-            // Sao chép và cộng thêm 1 ngày vào startDate và endDate
-            const startDate = new Date(room.startDate);
-            startDate.setDate(startDate.getDate() + 1);
-            const endDate = new Date(room.endDate);
-            endDate.setDate(endDate.getDate() + 1);
-
-            return {
-              ROOM_ID: room.roomId || room.ROOM_ID,
-              CUSTOMER_PHONE: this.customerPhone,
-              CUSTOMER_NAME: this.customerName,
-              CITIZEN_ID: this.citizenId,
-              startDate: startDate.toISOString().split("T")[0], // Định dạng lại ngày nếu cần
-              endDate: endDate.toISOString().split("T")[0],
-            };
-          }),
+          roomsDetails: this.selectedRooms.map((room) => ({
+            ROOM_ID: room.roomId || room.ROOM_ID,
+            CUSTOMER_PHONE: this.customerPhone,
+            CUSTOMER_NAME: this.customerName,
+            CITIZEN_ID: this.citizenId,
+            startDate: room.startDate,
+            endDate: room.endDate,
+          })),
           airportPickup: this.airportPickup,
+          TOTAL_PRICE: this.finalTotalPrice,
+          VOUCHER: {
+            VOUCHER_CODE: this.voucherCode || null,
+            DISCOUNT_AMOUNT: this.voucherDiscount || 0,
+          },
         };
       } else if (this.selectedRoom) {
-        const startDate = new Date(this.bookingDetails.startDate);
-        startDate.setDate(startDate.getDate() + 1);
-        const endDate = new Date(this.bookingDetails.endDate);
-        endDate.setDate(endDate.getDate() + 1);
-
         paymentData = {
           roomDetails: {
             ROOM_ID: this.selectedRoom._id,
             CUSTOMER_PHONE: this.customerPhone,
             CUSTOMER_NAME: this.customerName,
             CITIZEN_ID: this.citizenId,
-            startDate: startDate.toISOString().split("T")[0],
-            endDate: endDate.toISOString().split("T")[0],
+            startDate: this.bookingDetails.startDate,
+            endDate: this.bookingDetails.endDate,
           },
           airportPickup: this.airportPickup,
+          TOTAL_PRICE: this.finalTotalPrice,
+          VOUCHER: {
+            VOUCHER_CODE: this.voucherCode || null,
+            DISCOUNT_AMOUNT: this.voucherDiscount || 0,
+          },
         };
       }
 
@@ -396,17 +528,16 @@ export default {
         );
 
         if (response.data.success) {
-          // Tạo URL thanh toán VNPAY
+          // Sau khi đặt phòng thành công, tạo URL thanh toán VNPAY
           const paymentResponse = await axiosClient.post(
             "/payments/create_payment_url",
             {
               id: response.data.booking._id,
-              totalPrice: response.data.booking.TOTAL_PRICE,
+              totalPrice: this.finalTotalPrice,
             }
           );
 
           if (paymentResponse.data && paymentResponse.data.data.url) {
-            localStorage.setItem("vnpayUrl", paymentResponse.data.data.url);
             window.open(paymentResponse.data.data.url, "_blank");
           } else {
             this.$toast.error("Không thể tạo liên kết thanh toán VNPAY.");
@@ -504,11 +635,13 @@ export default {
   font-weight: 700;
   font-size: 18px;
   margin-bottom: 10px;
+  color: #a06e5c;
 }
 
 .time {
   border-bottom: 1px dashed #ddd;
   padding-bottom: 15px;
+  font-weight: 600;
 }
 
 .price {
@@ -620,5 +753,41 @@ export default {
 
 .service-label span {
   font-size: 16px;
+}
+
+.voucher {
+  margin-top: 20px;
+}
+
+.input-group {
+  display: flex;
+}
+
+.apply-voucher-btn {
+  background-color: #a06e5c;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  cursor: pointer;
+}
+
+.voucher-feedback {
+  color: green;
+  font-size: 14px;
+  margin-top: 5px;
+}
+
+.voucher-info-book {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+  font-weight: bold;
+  color: #6a2410;
+}
+
+.total-info-book.final {
+  font-size: 20px;
+  color: #6a2410;
 }
 </style>

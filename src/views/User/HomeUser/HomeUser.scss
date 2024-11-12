@@ -453,3 +453,186 @@
   font-size: 14px;
   color: #7274ff;
 }
+
+.voucher-section {
+  text-align: center;
+  padding: 30px 0;
+  background-color: #f4f4f9;
+  margin-bottom: 40px;
+}
+
+
+.voucher-list {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.voucher-card {
+  width: 350px;
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: transform 0.3s, box-shadow 0.3s;
+  position: relative;
+  overflow: hidden;
+}
+
+.voucher-card:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.voucher-header {
+  text-align: center;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #ddd;
+  width: 100%;
+}
+
+.voucher-code {
+  font-size: 20px;
+  font-weight: bold;
+  color: #6d4c41;
+  margin-bottom: 5px;
+}
+
+.discount {
+  font-size: 22px;
+  font-weight: 600;
+  color: #ff4d4d;
+}
+
+.voucher-details {
+  padding-top: 15px;
+  text-align: left;
+  width: 100%;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  padding: 15px;
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.1);
+  font-size: 14px;
+  color: #333;
+}
+
+.voucher-condition {
+  display: flex;
+  align-items: center;
+  font-size: 15px;
+  color: #333;
+  margin: 8px 0;
+  padding-left: 10px;
+  position: relative;
+}
+
+.voucher-condition:before {
+  content: "✔";
+  font-size: 16px;
+  color: #6d4c41;
+  margin-right: 8px;
+}
+
+.voucher-expiration {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  color: #ff4d4d;
+  margin-top: 15px;
+  font-style: italic;
+  text-align: center;
+}
+
+.voucher-expiration:before {
+  content: "⏳";
+  font-size: 18px;
+  color: #ff4d4d;
+  margin-right: 5px;
+}
+
+.voucher-hotels {
+  margin-top: 15px;
+  padding-top: 10px;
+  border-top: 1px solid #ddd;
+}
+
+.hotel-title {
+  font-size: 15px;
+  font-weight: bold;
+  color: #6d4c41;
+  margin-bottom: 5px;
+  cursor: grab;
+}
+
+.hotel-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.hotel-list li {
+  font-size: 14px;
+  color: #555;
+  margin: 4px 0;
+  padding-left: 15px;
+  position: relative;
+}
+
+.hotel-list li:before {
+  content: "🏨";
+  font-size: 12px;
+  color: #6d4c41;
+  margin-right: 6px;
+}
+
+.view-more-btn {
+  background: linear-gradient(to right, #6d4c41, #7274FF); /* Gradient từ nâu sang tím */
+  color: white;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 30px;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  width: 200px;
+  margin: 40px auto 0; /* Canh giữa và tạo khoảng cách */
+  display: block;
+  position: relative;
+  overflow: hidden;
+}
+
+.view-more-btn::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 200%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.1);
+  transform: skewX(-30deg);
+  transition: 0.4s;
+}
+
+.view-more-btn:hover::after {
+  left: 100%;
+}
+
+.view-more-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+  background: linear-gradient(to right, #5a3a34, #6161D4); /* Đậm hơn khi hover */
+}
+
+.voucher-conditions-title {
+  font-weight: bold;
+  font-size: 16px;
+  color: #6d4c41;
+  margin-bottom: 10px;
+}

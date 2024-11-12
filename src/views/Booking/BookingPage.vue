@@ -178,11 +178,12 @@
               </p>
               <a
                 href="#"
-                @click.prevent="viewRoomAmenities(room)"
+                @click.prevent="viewRoomAmenities(room._id)"
                 class="view-amenities"
               >
-                Xem tất cả tiện nghi
+                Xem chi tiết phòng
               </a>
+
               <div class="price-choose-room">
                 <p>
                   Giá:
@@ -223,6 +224,14 @@
             <p>
               <b>Phòng:</b> {{ selectedRoom.TYPE }}
               {{ selectedRoom.CUSTOM_ATTRIBUTES?.bedType || "" }}
+            </p>
+            <p>
+              <b>Diện tích:</b>
+              {{ selectedRoom.CUSTOM_ATTRIBUTES?.area || "N/A" }} m²
+            </p>
+            <p>
+              <b>Số người tối đa:</b>
+              {{ selectedRoom.CUSTOM_ATTRIBUTES?.number_of_people || "N/A" }}
             </p>
             <div class="price-cancle">
               <p class="price">
@@ -408,9 +417,8 @@ export default {
         this.$router.push({ name: "PaymentPage" });
       }
     },
-    viewRoomAmenities(room) {
-      // Logic hiển thị tiện nghi phòng, hoặc bạn có thể chỉ cần console log ra để kiểm tra
-      console.log("Hiển thị tiện nghi của phòng:", room);
+    viewRoomAmenities(roomId) {
+      this.$router.push({ name: "RoomDetail", params: { id: roomId } });
     },
     viewHotelDetails(hotelId) {
       // Điều hướng đến trang chi tiết khách sạn với ID

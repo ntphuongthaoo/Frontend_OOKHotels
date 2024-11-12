@@ -161,6 +161,51 @@
       </div>
     </div>
 
+    <div class="voucher-section">
+      <h2 class="section-title">ƯU ĐÃI MỚI NHẤT</h2>
+      <div class="voucher-list">
+        <div
+          v-for="voucher in latestVouchers"
+          :key="voucher._id"
+          class="voucher-card"
+        >
+          <div class="voucher-header">
+            <h3 class="voucher-code">{{ voucher.CODE }}</h3>
+            <p class="discount">Giảm {{ voucher.DISCOUNT_PERCENTAGE }}%</p>
+          </div>
+          <div class="voucher-details">
+            <h4 class="voucher-conditions-title">Điều kiện áp dụng:</h4>
+            <p class="voucher-condition" v-if="voucher.MIN_TOTAL_AMOUNT">
+              Áp dụng cho đơn từ
+              {{ voucher.MIN_TOTAL_AMOUNT.toLocaleString("vi-VN") }} VND
+            </p>
+            <p class="voucher-condition" v-if="voucher.MIN_NIGHTS">
+              Áp dụng cho từ {{ voucher.MIN_NIGHTS }} đêm
+            </p>
+            <p class="voucher-condition" v-if="voucher.ROOM_TYPES.length">
+              Phòng áp dụng: {{ voucher.ROOM_TYPES.join(", ") }}
+            </p>
+            <div class="voucher-hotels" v-if="voucher.APPLICABLE_HOTELS.length">
+              <p class="hotel-title" @click="toggleHotelList(voucher)">
+                Khách sạn áp dụng:
+                <span v-if="!voucher.showHotels">▼</span>
+                <span v-else>▲</span>
+              </p>
+              <ul class="hotel-list" v-show="voucher.showHotels">
+                <li v-for="hotel in voucher.APPLICABLE_HOTELS" :key="hotel._id">
+                  {{ hotel.NAME }}
+                </li>
+              </ul>
+            </div>
+            <p class="voucher-expiration">
+              Hạn sử dụng: {{ formatDate(voucher.EXPIRATION_DATE) }}
+            </p>
+          </div>
+        </div>
+      </div>
+      <button class="view-more-btn" @click="viewAllVouchers">Xem thêm</button>
+    </div>
+
     <div class="highlighted-hotels">
       <h2 class="section-title">KHÁCH SẠN NỔI BẬT</h2>
       <div class="hotel-grid">
@@ -297,6 +342,7 @@ export default {
       filteredHotelNames: [], // Danh sách khách sạn đã lọc
       showHotelSuggestions: false, // Trạng thái hiển thị gợi ý
       selectedHotelId: null,
+      latestVouchers: [],
     };
   },
   mounted() {
@@ -307,8 +353,30 @@ export default {
     if (this.hotelId) {
       this.fetchHotelDetails();
     }
+    this.fetchLatestVouchers();
   },
   methods: {
+    viewAllVouchers() {
+      this.$router.push({ name: "AllVouchersPage" });
+    },
+    toggleHotelList(voucher) {
+      voucher.showHotels = !voucher.showHotels;
+    },
+    async fetchLatestVouchers() {
+      try {
+        const response = await axiosClient.get("/vouchers/latest");
+        this.latestVouchers = response.data.map((voucher) => ({
+          ...voucher,
+          showHotels: false, // Khởi tạo trạng thái ẩn danh sách khách sạn
+        }));
+      } catch (error) {
+        console.error("Lỗi khi lấy voucher mới nhất:", error);
+      }
+    },
+    formatDate(date) {
+      const options = { year: "numeric", month: "2-digit", day: "2-digit" };
+      return new Date(date).toLocaleDateString("vi-VN", options);
+    },
     async fetchTopBookedHotels() {
       try {
         const response = await axiosClient.get("/hotels/getTopBookedHotels"); // API để lấy danh sách khách sạn được đặt nhiều nhất

@@ -182,6 +182,36 @@
         </div>
       </div>
     </div>
+    <div class="container vouchers-section" v-if="vouchers && vouchers.length">
+      <h2>Ưu Đãi Dành Riêng Cho Khách Sạn</h2>
+      <div class="voucher-list">
+        <div
+          v-for="voucher in vouchers"
+          :key="voucher._id"
+          class="voucher-card"
+        >
+          <div class="voucher-header">
+            <h3 class="voucher-code">{{ voucher.CODE }}</h3>
+            <p class="discount">Giảm {{ voucher.DISCOUNT_PERCENTAGE }}%</p>
+          </div>
+          <div class="voucher-details">
+            <p v-if="voucher.MIN_TOTAL_AMOUNT">
+              Áp dụng cho đơn từ
+              {{ voucher.MIN_TOTAL_AMOUNT.toLocaleString("vi-VN") }} VND
+            </p>
+            <p v-if="voucher.MIN_NIGHTS">
+              Áp dụng cho từ {{ voucher.MIN_NIGHTS }} đêm
+            </p>
+            <p v-if="voucher.ROOM_TYPES.length">
+              Phòng áp dụng: {{ voucher.ROOM_TYPES.join(", ") }}
+            </p>
+            <p class="voucher-expiration">
+              Hạn sử dụng: {{ formatDateVoucher(voucher.EXPIRATION_DATE) }}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
     <!-- Modal chọn ngày -->
     <div v-if="isCalendarModalVisible" class="calendar-modal">
       <div class="calendar-modal-content">
@@ -274,6 +304,7 @@ export default {
       selectedEndDate: "",
       currentDate: new Date(),
       currentAction: "",
+      vouchers: [],
     };
   },
   mounted() {
@@ -282,8 +313,19 @@ export default {
     this.fetchHotelNames();
     this.fetchRooms();
     this.destination = this.hotel.NAME;
+    this.fetchVouchersByHotelId(this.$route.params.id);
   },
   methods: {
+    async fetchVouchersByHotelId(hotelId) {
+      try {
+        const response = await axiosClient.get(
+          `/vouchers/getByHotel/${hotelId}`
+        );
+        this.vouchers = response.data.data; // Lưu danh sách voucher áp dụng
+      } catch (error) {
+        console.error("Lỗi khi lấy voucher:", error);
+      }
+    },
     goToRoomDetail(roomId) {
       this.$router.push({ name: "RoomDetail", params: { id: roomId } });
     },
@@ -369,28 +411,34 @@ export default {
       }
       this.currentAction = "book";
 
+      const today = new Date();
+      const endDate = new Date(today);
+      endDate.setDate(today.getDate() + 2); // 3 ngày 2 đêm
+
+      // Cập nhật ngày bắt đầu và kết thúc mặc định
+      this.selectedStartDate = today;
+      this.selectedEndDate = endDate;
+
       // Mở modal chọn ngày
       this.openCalendarModal();
     },
 
     async addToCart(room, startDate, endDate) {
-      console.log("Dữ liệu gửi đi:", {
-        roomId: room._id,
-        startDate: startDate,
-        endDate: endDate,
-      });
+      const adjustedStartDate = new Date(startDate);
+      const adjustedEndDate = new Date(endDate);
+      adjustedStartDate.setDate(adjustedStartDate.getDate() + 1);
+      adjustedEndDate.setDate(adjustedEndDate.getDate() + 1);
+
+      // Chuyển đổi thành chuỗi 'YYYY-MM-DD'
+      const formattedStartDate = adjustedStartDate.toISOString().split("T")[0];
+      const formattedEndDate = adjustedEndDate.toISOString().split("T")[0];
+
       try {
         // Gửi yêu cầu thêm phòng vào giỏ hàng
         const response = await axiosClient.post("/carts/addRoomToCart", {
           roomId: room._id,
-          startDate: startDate,
-          endDate: endDate,
-        });
-
-        console.log("Dữ liệu gửi đi:", {
-          roomId: room._id,
-          startDate: startDate,
-          endDate: endDate,
+          startDate: formattedStartDate,
+          endDate: formattedEndDate,
         });
 
         // Kiểm tra nếu thêm phòng thành công
@@ -772,6 +820,10 @@ export default {
     formatDate(date) {
       if (!date) return "";
       return date.toLocaleDateString("vi-VN");
+    },
+    formatDateVoucher(date) {
+      const options = { year: "numeric", month: "2-digit", day: "2-digit" };
+      return new Date(date).toLocaleDateString("vi-VN", options);
     },
   },
   computed: {
