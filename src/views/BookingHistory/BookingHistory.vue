@@ -48,9 +48,22 @@
         </div>
 
         <div class="total-price">
+          <div class="voucher-info" v-if="booking.VOUCHER">
+            <p v-if="booking.VOUCHER.VOUCHER_CODE">
+              <strong>Voucher:</strong> {{ booking.VOUCHER.VOUCHER_CODE }}
+            </p>
+            <p v-if="booking.VOUCHER.DISCOUNT_AMOUNT">
+              <strong>Giảm giá:</strong>
+              {{ booking.VOUCHER.DISCOUNT_AMOUNT.toLocaleString() }} VND
+            </p>
+          </div>
+          <div class="voucher-info" v-else>
+            <p><em>Không có voucher áp dụng</em></p>
+          </div>
+
           <p>
             <strong>Tổng giá:</strong>
-            {{ booking.TOTAL_PRICE.toLocaleString() }} VND
+            {{ (booking.TOTAL_PRICE - (booking.VOUCHER?.DISCOUNT_AMOUNT || 0)).toLocaleString() }} VND
           </p>
 
           <!-- Điều kiện hiển thị nút dựa trên trạng thái và thời gian đặt phòng -->
@@ -122,17 +135,34 @@
                 {{ new Date(room.END_DATE).toLocaleDateString() }}
               </p>
 
-              <button v-if="room.hasReview" @click="viewReview(room, booking._id)">
-                Xem đánh giá
-              </button>
+              <div class="review-buttons">
+                <!-- Nút Xem Đánh giá -->
+                <button
+                  class="review-button"
+                  v-if="
+                    room.hasReview &&
+                    (booking.STATUS === 'Booked' ||
+                      booking.STATUS === 'CheckedOut')
+                  "
+                  @click="viewReview(room, booking._id)"
+                >
+                  <i class="fa fa-eye" aria-hidden="true"></i> Xem đánh giá
+                </button>
 
-              <!-- Hiển thị nút Đánh giá nếu chưa có đánh giá và ngày trả phòng đã đến -->
-              <button
-                v-else-if="new Date(room.END_DATE) <= new Date()"
-                @click="openReviewModal(room, booking._id)"
-              >
-                Đánh giá
-              </button>
+                <!-- Nút Viết Đánh giá -->
+                <button
+                  class="review-button write-review"
+                  v-else-if="
+                    !room.hasReview &&
+                    new Date(room.END_DATE) <= new Date() &&
+                    (booking.STATUS === 'Booked' ||
+                      booking.STATUS === 'CheckedOut')
+                  "
+                  @click="openReviewModal(room, booking._id)"
+                >
+                  <i class="fa fa-star" aria-hidden="true"></i> Viết đánh giá
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -515,13 +545,13 @@ export default {
   margin-bottom: 20px;
   box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
   width: 48%;
+  position: relative;
 }
 
 .room-image {
   width: 250px;
-  height: 185px;
-  object-fit: cover;
-  border-radius: 8px 0 0 8px;
+  border-radius: 15px;
+  padding: 10px 10px;
 }
 
 .room-details {
@@ -571,6 +601,10 @@ export default {
   /* border-radius: 5px; */
 }
 
+.review {
+  display: flex;
+  justify-content: end;
+}
 .review-modal {
   background-color: #fff;
   width: 500px;
@@ -605,14 +639,6 @@ export default {
   display: flex;
   align-items: center;
   margin-bottom: 15px;
-}
-
-.room-image {
-  width: 100px;
-  height: 100px;
-  border-radius: 10px;
-  object-fit: cover;
-  margin-right: 15px;
 }
 
 .room-details p {
@@ -703,5 +729,51 @@ export default {
 .pay-now-button:hover {
   background-color: #6d4c41; /* Màu đỏ */
   color: rgb(231, 197, 113);
+}
+
+.review-buttons {
+  display: flex;
+  justify-content: center; /* Căn giữa các nút */
+  gap: 20px; /* Khoảng cách giữa các nút */
+  margin-top: 15px; /* Khoảng cách phía trên */
+}
+
+.review-button {
+  background: linear-gradient(90deg, #ff7e5f, #feb47b);
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 50px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: transform 0.3s, box-shadow 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px; /* Khoảng cách giữa icon và text */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.review-button i {
+  font-size: 16px;
+}
+
+.review-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.3);
+}
+
+.review-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.review-button.write-review {
+  background: linear-gradient(90deg, #43cea2, #185a9d);
+}
+
+.review-button.write-review:hover {
+  background: linear-gradient(90deg, #185a9d, #43cea2);
 }
 </style>

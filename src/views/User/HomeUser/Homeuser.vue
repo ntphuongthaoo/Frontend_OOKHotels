@@ -1,28 +1,13 @@
 <template>
   <div>
     <!-- Carousel với hình ảnh khách sạn -->
-    <div class="product-page">
-      <!-- Banner Section -->
-      <div class="carousel">
-        <div class="carousel-inner">
-          <div
-            v-for="(banner, index) in banners"
-            :key="index"
-            class="carousel-item"
-            :class="{ active: index === currentIndex }"
-          >
-            <img :src="banner" alt="Banner" />
-          </div>
-        </div>
-      </div>
-
-      <!-- Products Section -->
-      <div class="products">
-        <div v-for="product in products" :key="product.id" class="product-card">
-          <img :src="product.image" :alt="product.name" />
-          <h3>{{ product.name }}</h3>
-          <p>{{ product.price }}</p>
-        </div>
+    <div class="hero-banner">
+      <div class="hero-content">
+        <h1 class="hero-title">Tận Hưởng Kỳ Nghỉ Đáng Nhớ</h1>
+        <p class="hero-subtitle">
+          Đặt phòng khách sạn nhanh chóng với giá tốt nhất trên hệ thống
+        </p>
+        <button class="cta-button" @click="scrollToSearch">Tìm kiếm ngay</button>
       </div>
     </div>
 
@@ -197,9 +182,22 @@
                 </li>
               </ul>
             </div>
+            <div class="voucher-usage">
+              <p v-if="voucher.MAX_USAGE">
+                Lượt sử dụng còn lại:
+                <strong>{{ voucher.MAX_USAGE - voucher.USAGE_COUNT }}</strong>
+              </p>
+              <p v-else>Không giới hạn lượt sử dụng</p>
+            </div>
             <p class="voucher-expiration">
               Hạn sử dụng: {{ formatDate(voucher.EXPIRATION_DATE) }}
             </p>
+            <div class="copy-code">
+              <button class="copy-button" @click="copyToClipboard(voucher.CODE)">
+              Sao chép mã
+              </button>
+            </div>
+            
           </div>
         </div>
       </div>
@@ -356,6 +354,15 @@ export default {
     this.fetchLatestVouchers();
   },
   methods: {
+    async copyToClipboard(code) {
+      try {
+        await navigator.clipboard.writeText(code);
+        alert(`Đã sao chép mã: ${code}`);
+      } catch (error) {
+        console.error("Lỗi khi sao chép mã:", error);
+        alert("Không thể sao chép mã. Vui lòng thử lại!");
+      }
+    },
     viewAllVouchers() {
       this.$router.push({ name: "AllVouchersPage" });
     },

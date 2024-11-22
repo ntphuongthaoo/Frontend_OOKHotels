@@ -1,7 +1,7 @@
 <template>
     <div class="chat-layout">
       <header v-if="isAdminOrStaff" class="chat-header">
-        <h2>Admin Chat Dashboard</h2>
+        <h2>Khách sạn Ethereal</h2>
       </header>
       <main class="chat-content">
         <Chat />

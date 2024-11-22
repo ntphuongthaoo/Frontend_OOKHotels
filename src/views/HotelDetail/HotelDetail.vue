@@ -300,6 +300,7 @@ export default {
       mainImageIndex: 0,
       availableRooms: [],
       isCalendarModalVisible: false, // Trạng thái hiển thị modal lịch
+      isPopupVisible: false,
       selectedStartDate: "", // Ngày bắt đầu được chọn
       selectedEndDate: "",
       currentDate: new Date(),
@@ -578,10 +579,27 @@ export default {
     closeModal() {
       this.isModalVisible = false;
     },
+    closePopup() {
+      this.isPopupVisible = false; // Ẩn popup
+    },
 
     openCalendarModal() {
-      this.isCalendarModalVisible = true;
+      // this.isCalendarModalVisible = true;
+      this.isPopupVisible = true;
+      setTimeout(() => {
+        this.isCalendarModalVisible = true; // Sau đó mở modal lịch
+      }, 5000);
       this.currentDate = new Date(); // Đặt lại currentDate về ngày hiện tại
+
+      Swal.fire({
+        title: "Lưu ý!",
+        text: "Một số ngày có thể không khả dụng vì đã được đặt. Vui lòng chọn ngày khác.",
+        icon: "info",
+        confirmButtonText: "OK",
+        customClass: {
+          popup: "custom-swal-popup",
+        },
+      });
 
       // Mặc định chọn ngày hiện tại và 3 ngày sau
       const today = new Date();

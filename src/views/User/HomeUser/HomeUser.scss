@@ -1,37 +1,38 @@
-.carousel-inner {
-  max-height: 700px;
+.hero-banner {
+  background: url("../../../assets/pexels-ernesto-6178937.jpg") center/cover no-repeat;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   position: relative;
-}
-
-.carousel-item {
-  height: 80vh;
-  background-size: cover;
-  background-position: center;
-  position: relative; /* Đảm bảo các phần tử con có thể căn chỉnh chính xác */
-  /* display: flex;  */
-  align-items: center; /* Căn giữa theo chiều dọc */
-  /* justify-content: center; */
-}
-
-.carousel-item img {
-  width: 100%;
-  height: 100%; /* Đảm bảo hình ảnh lấp đầy phần chứa */
-  object-fit: cover; /* Đảm bảo hình ảnh không bị biến dạng */
-}
-
-.carousel-caption {
-  position: absolute; /* Đảm bảo caption nằm trên ảnh */
-  top: 50%; /* Đặt cách từ đỉnh carousel item */
-  left: 50%;
-  transform: translate(-50%, -50%); /* Căn giữa cả chiều ngang và dọc */
-  background-color: rgba(0, 0, 0, 0.5); /* Nền bán trong suốt */
-  padding: 10px;
-  border-radius: 5px;
+  text-align: center;
   color: white;
-  text-align: center; /* Căn giữa nội dung text */
-  width: 80%; /* Đặt chiều rộng để caption chiếm 80% chiều rộng của carousel-item */
-  height: 150px;
-  box-sizing: border-box; /* Đảm bảo padding không ảnh hưởng đến chiều rộng */
+}
+
+.hero-title {
+  font-size: 3rem;
+  font-weight: bold;
+  text-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.hero-subtitle {
+  font-size: 1.5rem;
+  margin: 20px 0;
+}
+
+.cta-button {
+  background: #6d4c41;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1.2rem;
+  transition: background-color 0.3s;
+}
+
+.cta-button:hover {
+  background: #3f0e00;
 }
 
 .search-bar {
@@ -635,4 +636,52 @@
   font-size: 16px;
   color: #6d4c41;
   margin-bottom: 10px;
+}
+
+.voucher-usage {
+  font-size: 16px;
+  font-weight: bold;
+  color: #6d4c41;
+  margin-top: 10px;
+  text-align: center;
+  background: #f9f9f9;
+  padding: 10px;
+  border: 1px dashed #7274ff;
+  border-radius: 8px;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.voucher-usage strong {
+  color: #ff4d4d;
+  font-size: 18px;
+}
+
+.voucher-usage p {
+  margin-bottom: 0;
+}
+.copy-code {
+  display: flex;
+  justify-content: center;
+}
+.copy-button {
+  background: linear-gradient(to right, #6d4c41, #7274ff);
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 8px 12px;
+  font-size: 14px;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: transform 0.3s, box-shadow 0.3s;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.copy-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+}
+
+.copy-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }

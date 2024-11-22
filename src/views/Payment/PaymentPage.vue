@@ -108,12 +108,8 @@
               {{ calculateNights(room.startDate, room.endDate) }} đêm)
             </p>
             <h4>Thông tin phòng</h4>
-            <p>
-              <b>Phòng:</b> {{ room.type }} 
-            </p>
-            <p>
-              <b>Số phòng:</b> {{ room.roomNumber }}              
-            </p>
+            <p><b>Phòng:</b> {{ room.TYPE }} {{ room.bedType }}</p>
+            <p><b>Số phòng:</b> {{ room.roomNumber }}</p>
             <p><b>Số người:</b> {{ room.number_of_people }}</p>
             <div class="price-cancle">
               <p class="price">
@@ -342,6 +338,7 @@ export default {
       }
 
       let totalNights = 0;
+      let bookingDetails = {};
 
       // Kiểm tra nếu có nhiều phòng được chọn từ giỏ hàng
       if (this.selectedRooms && this.selectedRooms.length > 0) {
@@ -350,6 +347,20 @@ export default {
           const nights = this.calculateNights(room.startDate, room.endDate);
           return sum + nights;
         }, 0);
+
+        // Tạo danh sách các phòng với thông tin chi tiết
+        const rooms = this.selectedRooms.map((room) => ({
+          roomType: room.TYPE,
+          hotelId: room.hotelId,
+          price: room.pricePerNight,
+          nights: this.calculateNights(room.startDate, room.endDate),
+        }));
+
+        bookingDetails = {
+          nights: totalNights,
+          totalPrice: this.totalPrice,
+          rooms: rooms,
+        };
       } else if (
         this.bookingDetails &&
         this.bookingDetails.startDate &&
@@ -360,15 +371,25 @@ export default {
           this.bookingDetails.startDate,
           this.bookingDetails.endDate
         );
-      }
 
-      // Tạo đối tượng `bookingDetails` để gửi đi với tổng số đêm chính xác
-      const bookingDetails = {
-        nights: totalNights,
-        totalPrice: this.totalPrice,
-        roomType: this.selectedRoom.TYPE,
-        hotelId: this.hotel._id,
-      };
+        bookingDetails = {
+          nights: totalNights,
+          totalPrice: this.totalPrice,
+          rooms: [
+            {
+              roomType: this.selectedRoom.TYPE,
+              hotelId: this.hotel._id,
+              price: this.selectedRoom.PRICE_PERNIGHT,
+              nights: totalNights,
+            },
+          ],
+        };
+      } else {
+        // Xử lý trường hợp không có phòng nào được chọn
+        this.voucherMessage =
+          "Không có phòng nào được chọn để áp dụng voucher.";
+        return;
+      }
 
       try {
         const response = await axiosClient.post("/vouchers/apply", {

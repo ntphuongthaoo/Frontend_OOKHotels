@@ -116,8 +116,8 @@ export default {
   data() {
     return {
       totalRevenue: 0,
-      totalBookings: 120,
-      activeHotels: 25,
+      totalBookings: 10,
+      activeHotels: 6,
       timeFrame: "month",
       year: new Date().getFullYear(),
       selectedDate: "",

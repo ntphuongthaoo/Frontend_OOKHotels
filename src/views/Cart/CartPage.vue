@@ -54,24 +54,26 @@
                   class="room-image"
                 />
               </td>
-              <td>{{ room.type }}</td>
-              <td>{{ room.pricePerNight?.toLocaleString() }} VND</td>
+              <td>{{ room.TYPE }}</td>
+              <td>{{ room.PRICE_PERNIGHT?.toLocaleString() }} VND</td>
               <td>
                 <p>
-                  {{ formatDate(room.startDate) }} -
-                  {{ formatDate(room.endDate) }}
+                  {{ formatDate(room.START_DATE) }} -
+                  {{ formatDate(room.END_DATE) }}
                 </p>
-                <p>{{ calculateStayDuration(room.startDate, room.endDate) }}</p>
+                <p>
+                  {{ calculateStayDuration(room.START_DATE, room.END_DATE) }}
+                </p>
               </td>
               <td>
                 <div class="room-number-box">
-                  {{ room.roomNumber }}
+                  {{ room.ROOM_NUMBER }}
                 </div>
               </td>
               <td>
-                <span>{{ room.people }}</span>
+                <span>{{ room.CUSTOM_ATTRIBUTES?.number_of_people }}</span>
               </td>
-              <td>{{ room.totalPrice?.toLocaleString() }} VND</td>
+              <td>{{ room.TOTAL_PRICE_FOR_ROOM?.toLocaleString() }} VND</td>
               <td>
                 <button class="edit-btn" @click="showUpdateModal(room)">
                   Chỉnh sửa
@@ -320,6 +322,13 @@ export default {
       const nextMonthDate = new Date(this.currentDate);
       nextMonthDate.setMonth(this.currentDate.getMonth() + 1);
       this.currentDate = nextMonthDate;
+    },
+
+    formatDateForAPI(date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0"); // Tháng bắt đầu từ 0
+      const day = String(date.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
     },
 
     openCalendarModalForRoom(room, action) {
@@ -679,27 +688,28 @@ export default {
           if (room.isSelected) {
             selectedRooms.push({
               roomId: room.ROOM_ID,
-              hotelId: hotel.HOTEL_ID, // Thêm hotelId ở đây
-              startDate: room.startDate,
-              endDate: room.endDate,
-              pricePerNight: room.pricePerNight,
-              totalPrice: room.totalPrice,
-              roomNumber: room.roomNumber,
+              hotelId: hotel.HOTEL_ID,
+              startDate: room.START_DATE,
+              endDate: room.END_DATE,
+              pricePerNight: room.PRICE_PERNIGHT,
+              totalPrice: room.TOTAL_PRICE_FOR_ROOM,
+              roomNumber: room.ROOM_NUMBER,
               hotelName: hotel.HOTEL_NAME,
-              type: room.type || room.TYPE,
-              bedType: room.CUSTOM_ATTRIBUTES?.bedType || "",
-              number_of_people: room.CUSTOM_ATTRIBUTES?.number_of_people || 1,
+              TYPE: room.TYPE,
+              bedType: room.CUSTOM_ATTRIBUTES?.bedType,
+              number_of_people: room.CUSTOM_ATTRIBUTES?.number_of_people,
             });
           }
         });
       });
 
+      console.log("Selected Rooms after mapping:", selectedRooms);
       return selectedRooms;
     },
 
     async checkout() {
       const selectedRooms = this.getSelectedRooms();
-      console.log("Dữ liệu phòng đã chọn:", selectedRooms); // Kiểm tra dữ liệu
+      console.log("Rooms data sent to PaymentPage:", selectedRooms); // Kiểm tra dữ liệu
 
       this.$store.commit("SET_SELECTEDROOMS_CART", selectedRooms);
 
@@ -711,43 +721,34 @@ export default {
         const response = await axiosClient.post("/carts/getCartByUserId");
         console.log("Cart Data:", response.data);
 
-        // Kiểm tra nếu có giỏ hàng và giỏ hàng chứa danh sách khách sạn
         if (response.data.cart && Array.isArray(response.data.cart.HOTELS)) {
           this.hotels = response.data.cart.HOTELS.map((hotel) => ({
             HOTEL_NAME: hotel.HOTEL_NAME,
             HOTEL_ID: hotel.HOTEL_ID,
-            // Lọc bỏ các phòng không hợp lệ (phòng có TOTAL_PRICE_FOR_ROOM là null)
             ROOMS: Array.isArray(hotel.ROOMS)
               ? hotel.ROOMS.filter(
                   (room) => room.TOTAL_PRICE_FOR_ROOM !== null
                 ).map((room) => ({
-                  imageUrl: room.IMAGES && room.IMAGES[0],
-                  type: `${room.TYPE} ${room.CUSTOM_ATTRIBUTES?.bedType || ""}`,
-                  pricePerNight: room.PRICE_PERNIGHT,
-                  roomNumber: room.ROOM_NUMBER,
-                  startDate: room.START_DATE,
-                  endDate: room.END_DATE,
-                  people: room.CUSTOM_ATTRIBUTES?.number_of_people || 1,
-                  totalPrice: room.TOTAL_PRICE_FOR_ROOM,
                   ROOM_ID: room.ROOM_ID,
-                  IS_IN_CART: room.IS_IN_CART,
+                  HOTEL_ID: room.HOTEL_ID,
+                  START_DATE: room.START_DATE,
+                  END_DATE: room.END_DATE,
+                  PRICE_PERNIGHT: room.PRICE_PERNIGHT,
+                  TOTAL_PRICE_FOR_ROOM: room.TOTAL_PRICE_FOR_ROOM,
+                  ROOM_NUMBER: room.ROOM_NUMBER,
+                  TYPE: room.TYPE,
+                  CUSTOM_ATTRIBUTES: room.CUSTOM_ATTRIBUTES,
                   AVAILABILITY: room.AVAILABILITY,
-                  isSelected: false,
+                  imageUrl: room.IMAGES && room.IMAGES[0],
+                  isSelected: false, // Thêm thuộc tính isSelected
                 }))
-              : [], // Nếu không có phòng nào thì gán mảng rỗng
-          })).filter((hotel) => hotel.ROOMS.length > 0); // Lọc những khách sạn không có phòng
-
-          // Nếu sau khi lọc mà không còn khách sạn nào có phòng thì giỏ hàng trống
-          if (this.hotels.length === 0) {
-            console.log("Giỏ hàng trống.");
-          }
+              : [],
+          })).filter((hotel) => hotel.ROOMS.length > 0);
         } else {
-          // Nếu không có giỏ hàng hoặc giỏ hàng không chứa khách sạn thì gán giá trị trống
           this.hotels = [];
           console.log("Giỏ hàng trống.");
         }
 
-        // Tính lại tổng số phòng và tổng giá trị giỏ hàng
         this.calculateTotal();
       } catch (error) {
         console.error("Error fetching cart data:", error);
@@ -762,7 +763,16 @@ export default {
         hotel.ROOMS.forEach((room) => {
           if (room.isSelected) {
             totalRooms += 1;
-            totalPrice += room.totalPrice;
+
+            const roomTotalPrice = Number(room.TOTAL_PRICE_FOR_ROOM);
+            if (!isNaN(roomTotalPrice)) {
+              totalPrice += roomTotalPrice;
+            } else {
+              console.warn(
+                `Giá trị TOTAL_PRICE_FOR_ROOM của phòng ${room.ROOM_ID} không hợp lệ:`,
+                room.TOTAL_PRICE_FOR_ROOM
+              );
+            }
           }
         });
       });
@@ -850,8 +860,11 @@ export default {
       // Sao chép toàn bộ đối tượng phòng
       this.selectedRoom = { ...room };
       // Thêm thuộc tính newStartDate và newEndDate nếu cần
-      this.selectedRoom.newStartDate = room.startDate.split("T")[0];
-      this.selectedRoom.newEndDate = room.endDate.split("T")[0];
+      const startDate = new Date(room.START_DATE);
+      const endDate = new Date(room.END_DATE);
+      // Định dạng ngày theo múi giờ địa phương
+      this.selectedRoom.newStartDate = this.formatDateForAPI(startDate);
+      this.selectedRoom.newEndDate = this.formatDateForAPI(endDate);
       this.openCalendarModal(); // Mở modal lịch
     },
 
@@ -886,8 +899,8 @@ export default {
       try {
         await axiosClient.post("/carts/updateRoomInCart", {
           roomId: this.selectedRoom.ROOM_ID, // Thay đổi ở đây
-          newStartDate: this.selectedStartDate.toISOString().split("T")[0],
-          newEndDate: this.selectedEndDate.toISOString().split("T")[0],
+          newStartDate: this.formatDateForAPI(this.selectedStartDate),
+          newEndDate: this.formatDateForAPI(this.selectedEndDate),
         });
 
         await this.fetchCartData();

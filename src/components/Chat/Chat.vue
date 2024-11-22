@@ -347,12 +347,23 @@ export default {
 }
 
 .message.sent {
-  background-color: #7274ff;
+  background-color: #2b3a67;
   align-self: flex-end;
   margin-left: auto;
   text-align: right;
-  color: #fff;
-  width: fit-content; /* Để khung tin nhắn vừa với nội dung */
+  color: #e0e0e0;
+  width: fit-content; 
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1), 
+              0px 1px 3px rgba(0, 0, 0, 0.1);
+
+  /* Hiệu ứng chuyển đổi mượt khi có sự thay đổi */
+  transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+.message.sent:hover {
+  background-color: #3a2b55; /* Màu đậm hơn khi hover */
+  box-shadow: 0px 6px 10px rgba(0, 0, 0, 0.2), 
+              0px 3px 6px rgba(0, 0, 0, 0.15);
 }
 
 .message.received {

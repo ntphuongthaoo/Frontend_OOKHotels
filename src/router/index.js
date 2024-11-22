@@ -32,6 +32,7 @@ import BookingManagement from '../views/Dashboard/BookingManagement.vue'
 import UserManagement from '../views/Dashboard/UserManagement.vue'
 import RevenuesPage from '../views/Dashboard/RevenuesPage.vue'
 import ReviewsManagement from '../views/Dashboard/ReviewsManagement.vue'
+import VoucherManagement from '../views/Dashboard/VoucherManagement.vue'
 import store from "@/store"
  
 
@@ -205,6 +206,15 @@ const routes = [
 		path: "/dashboard/reviews",
 		name: "reviews",
 		component: ReviewsManagement,
+		meta: {
+			layout: AdminLayout,
+		},
+		props: true,
+	},
+	{
+		path: "/dashboard/vouchers",
+		name: "vouchers",
+		component: VoucherManagement,
 		meta: {
 			layout: AdminLayout,
 		},

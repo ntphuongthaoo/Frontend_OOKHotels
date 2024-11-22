@@ -41,6 +41,8 @@ export default {
           return "Quản lý người dùng";
         case "reviews":
           return "Quản lý đánh giá";
+        case "vouchers":
+          return "Quản lý khuyến mãi";
         default:
           return "Dashboard quản lý";
       }

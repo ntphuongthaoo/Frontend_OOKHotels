@@ -1,6 +1,5 @@
 <template>
   <div class="review-management">
-    <h1>Quản lý Đánh giá</h1>
 
     <!-- Bộ lọc Khách sạn, Loại phòng, và Số sao -->
     <div class="filters">

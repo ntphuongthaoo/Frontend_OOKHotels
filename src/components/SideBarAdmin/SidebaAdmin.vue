@@ -55,6 +55,14 @@
           <span>Đánh giá</span>
         </li>
         <li
+          :class="{ active: activePage === 'vouchers' }"
+          @click="navigate('vouchers')"
+        >
+          <i class="fas fa-ticket-alt"></i>
+          <span>Khuyến mãi</span>
+        </li>
+
+        <li
           :class="{ active: activePage === 'chats' }"
           @click="navigate('chats')"
         >

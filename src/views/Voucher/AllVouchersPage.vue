@@ -36,9 +36,20 @@
               </li>
             </ul>
           </div>
+          <div class="voucher-usage">
+            <p v-if="voucher.MAX_USAGE">
+              Lượt sử dụng còn lại:
+              <strong>{{ voucher.MAX_USAGE - voucher.USAGE_COUNT }}</strong>
+            </p>
+            <p v-else>Không giới hạn lượt sử dụng</p>
+          </div>
+
           <p class="voucher-expiration">
             Hạn sử dụng: {{ formatDate(voucher.EXPIRATION_DATE) }}
           </p>
+          <button class="copy-button" @click="copyToClipboard(voucher.CODE)">
+            Sao chép mã
+          </button>
         </div>
       </div>
     </div>
@@ -58,7 +69,7 @@ export default {
     try {
       const response = await axiosClient.get("/vouchers/getAllVouchers");
       // Thêm thuộc tính showHotels vào từng voucher để kiểm soát hiển thị danh sách khách sạn
-      this.vouchers = response.data.map(voucher => ({
+      this.vouchers = response.data.map((voucher) => ({
         ...voucher,
         showHotels: false,
       }));
@@ -70,6 +81,15 @@ export default {
     formatDate(date) {
       const options = { year: "numeric", month: "2-digit", day: "2-digit" };
       return new Date(date).toLocaleDateString("vi-VN", options);
+    },
+    async copyToClipboard(code) {
+      try {
+        await navigator.clipboard.writeText(code);
+        alert(`Đã sao chép mã: ${code}`);
+      } catch (error) {
+        console.error("Lỗi khi sao chép mã:", error);
+        alert("Không thể sao chép mã. Vui lòng thử lại!");
+      }
     },
   },
 };
@@ -222,4 +242,50 @@ export default {
   transform: translateY(-3px);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
 }
+
+.voucher-usage {
+  font-size: 16px;
+  font-weight: bold;
+  color: #6d4c41;
+  margin-top: 10px;
+  text-align: center;
+  background: #f9f9f9;
+  padding: 10px;
+  border: 1px dashed #7274ff;
+  border-radius: 8px;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.voucher-usage strong {
+  color: #ff4d4d;
+  font-size: 18px;
+}
+
+.voucher-usage p {
+  margin-bottom: 0;
+}
+
+.copy-button {
+  background: linear-gradient(to right, #6d4c41, #7274ff);
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 8px 12px;
+  font-size: 14px;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: transform 0.3s, box-shadow 0.3s;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.copy-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+}
+
+.copy-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
 </style>
